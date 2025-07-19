@@ -37,6 +37,7 @@
         <option value="PR">puerto rico</option>
         <option value="SG">singapore resident</option>
         <option value="JP">japan resident</option>
+        <option value="AE">dubai (UAE)</option>
     </select>
 </div>
 
@@ -45,7 +46,7 @@
     <input type="number" id="lt" value="0">
     <span id="ltFmt" class="fmt">$0</span>
     <input type="range" id="ltRange" min="0" max="5000000" step="1000" value="0">
-    <button class="dec" data-target="lt" data-range="ltRange">-10k</button>
+    <button class="dec" data-target="lt"/case  data-range="ltRange">-10k</button>
     <button class="inc" data-target="lt" data-range="ltRange">+10k</button>
 </div>
 
@@ -137,6 +138,8 @@ function locationTax(amount, loc, type){
         case'JP':
             if(type==='long'||type==='short') return amount*jpCapitalRate;
             return taxBracket(amount, jp)+amount*jpLocalRate;
+        case'AE':
+            return 0;
         default: return 0;
     }
 }
@@ -186,7 +189,7 @@ function calc(){
     let fedShort=taxBracket(stTaxable, fedOrd);
     let fedIncome=taxBracket(incTaxable, fedOrd);
     let fedLong=taxBracket(ltTaxable, fedLTCG);
-    if(['PR','SG','JP'].includes(loc)){fedShort=fedIncome=fedLong=0;}
+    if(['PR','SG','JP','AE'].includes(loc)){fedShort=fedIncome=fedLong=0;}
 
     const locShort=locationTax(stTaxable,loc,'short');
     const locLong =locationTax(ltTaxable,loc,'long');
@@ -217,7 +220,7 @@ function calc(){
         <p>work income: ${fmt(inc)} - ${fmt(taxIncome)} (${pctIncome}%) = <strong>${fmt2(netIncome)}</strong></p>
         <p>deductions applied: <strong>${fmt(loss)}</strong></p>`;
 
-    const locLabel = {'SG':'singapore','JP':'japan','PR':'puerto rico'}[loc] || 'state';
+    const locLabel = {'SG':'singapore','JP':'japan','PR':'puerto rico','AE':'dubai'}[loc] || 'state';
     document.getElementById('breakdown').innerHTML=`
         <p>federal tax total: <strong>${fmt(federalTax)}</strong></p>
         <p>${locLabel} tax total: <strong>${fmt(locTaxTotal)}</strong></p>`;
