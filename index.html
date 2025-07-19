@@ -78,6 +78,7 @@
 
 <div id="results"></div>
 <div id="breakdown"></div>
+<div id="earned" style="text-align:center;font-weight:bold;margin-top:.5rem;"></div>
 <div id="total"></div>
 <div id="profit"></div>
 
@@ -194,7 +195,7 @@ function calc(){
     const taxShort=fedShort+locShort;
     const taxLong =fedLong +locLong;
     const taxIncome=fedIncome+locIncome;
-
+    
     const netShort=st-taxShort;
     const netLong =lt-taxLong;
     const netIncome=inc-taxIncome;
@@ -207,6 +208,7 @@ function calc(){
     const federalTax=fedShort+fedLong+fedIncome;
     const locTaxTotal=locShort+locLong+locIncome;
     const totalNet=netShort+netLong+netIncome;
+    const totalEarned = lt + st + inc;
 
     // results display
     document.getElementById('results').innerHTML=`
@@ -219,7 +221,7 @@ function calc(){
     document.getElementById('breakdown').innerHTML=`
         <p>federal tax total: <strong>${fmt(federalTax)}</strong></p>
         <p>${locLabel} tax total: <strong>${fmt(locTaxTotal)}</strong></p>`;
-
+    document.getElementById('earned').textContent = 'total earned: ' + fmt(totalEarned);
     document.getElementById('total').textContent='total owed: '+fmt(totalTax);
     document.getElementById('profit').textContent='total profit: '+fmt2(totalNet);
 
