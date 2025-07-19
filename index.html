@@ -99,7 +99,7 @@ const utRate=0.0465;
 const waLongThreshold=262000, waLongRate=0.07;
 // puerto rico brackets
 const pr=[[0,9000,0],[9000,25000,0.07],[25000,41500,0.14],[41500,61500,0.25],[61500,Infinity,0.33]];
-const prLongRate=0.15;
+const prLongRate = 0;
 // singapore income brackets (SGD assumed == USD for simplicity)
 const sg=[[0,20000,0],[20000,30000,0.02],[30000,40000,0.035],[40000,80000,0.07],[80000,120000,0.115],[120000,160000,0.15],[160000,200000,0.18],[200000,240000,0.19],[240000,280000,0.195],[280000,320000,0.20],[320000,Infinity,0.22]];
 // japan national brackets (USD approximate)
@@ -128,7 +128,7 @@ function locationTax(amount, loc, type){
         case'WA': return type==='long'? (amount>waLongThreshold?(amount-waLongThreshold)*waLongRate:0):0;
         case'TX': case'FL': case'NV': return 0;
         case'PR':
-            if(type==='long') return amount*prLongRate;
+            if(type==='long' || type==='short') return 0;
             return taxBracket(amount, pr);
         case'SG':
             if(type==='long'||type==='short') return 0; // no CGT
