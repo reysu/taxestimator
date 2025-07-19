@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>tax estimator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    body{font-family:Arial,Helvetica,sans-serif;max-width:900px;margin:auto;padding:20px;}
+    h1{font-size:1.6rem;text-align:center;margin-bottom:1rem;}
+    .row{margin:1rem 0;display:grid;grid-template-columns:1fr 120px 120px 1fr 60px 60px;gap:0.5rem;align-items:center;}
+    label{grid-column:1/2;}
+    input[type=number]{width:120px;padding:4px;}
+    input[type=range]{width:100%;}
+    .fmt{font-weight:bold;text-align:right;}
+    button.inc,button.dec{padding:0.2rem;border:none;border-radius:4px;background:#ccc;cursor:pointer;}
+    select{padding:4px;}
+    #results,#breakdown{background:#f5f5f5;padding:1rem;border-radius:6px;margin-top:1rem;font-size:0.95rem;}
+    #total{font-size:2rem;color:#d00;font-weight:bold;text-align:center;margin-top:1rem;}
+    #profit{font-size:1.8rem;color:#090;font-weight:bold;text-align:center;margin-top:0.5rem;}
+    canvas{max-width:100%;margin-top:1rem;}
+</style>
+</head>
+<body>
+<h1>tax estimator</h1>
+
+<div class="row">
+    <label for="state">location</label>
+    <select id="state">
+        <option value="CA">california</option>
+        <option value="NY">new york</option>
+        <option value="UT">utah</option>
+        <option value="TX">texas</option>
+        <option value="FL">florida</option>
+        <option value="WA">washington (seattle)</option>
+        <option value="NV">nevada (las vegas)</option>
+        <option value="PR">puerto rico</option>
+        <option value="SG">singapore resident</option>
+        <option value="JP">japan resident</option>
+    </select>
+</div>
+
+<div class="row">
+    <label for="lt">long term capital gains ($)</label>
+    <input type="number" id="lt" value="0">
+    <span id="ltFmt" class="fmt">$0</span>
+    <input type="range" id="ltRange" min="0" max="5000000" step="1000" value="0">
+    <button class="dec" data-target="lt" data-range="ltRange">-10k</button>
+    <button class="inc" data-target="lt" data-range="ltRange">+10k</button>
+</div>
+
+<div class="row">
+    <label for="st">short term capital gains ($)</label>
+    <input type="number" id="st" value="0">
+    <span id="stFmt" class="fmt">$0</span>
+    <input type="range" id="stRange" min="0" max="5000000" step="1000" value="0">
+    <button class="dec" data-target="st" data-range="stRange">-10k</button>
+    <button class="inc" data-target="st" data-range="stRange">+10k</button>
+</div>
+
+<div class="row">
+    <label for="inc">personal income from work ($)</label>
+    <input type="number" id="inc" value="0">
+    <span id="incFmt" class="fmt">$0</span>
+    <input type="range" id="incRange" min="0" max="5000000" step="1000" value="0">
+    <button class="dec" data-target="inc" data-range="incRange">-10k</button>
+    <button class="inc" data-target="inc" data-range="incRange">+10k</button>
+</div>
+
+<div class="row">
+    <label for="loss">capital losses ($)</label>
+    <input type="number" id="loss" value="0">
+    <span id="lossFmt" class="fmt">$0</span>
+    <input type="range" id="lossRange" min="0" max="3000000" step="1000" value="0">
+    <button class="dec" data-target="loss" data-range="lossRange">-10k</button>
+    <button class="inc" data-target="loss" data-range="lossRange">+10k</button>
+</div>
+
+<div id="results"></div>
+<div id="breakdown"></div>
+<div id="total"></div>
+<div id="profit"></div>
+
+<canvas id="chart" height="100"></canvas>
+
+<script>
+// ---------- FEDERAL (US) ----------
+const fedOrd=[[0,11925,0.10],[11925,48475,0.12],[48475,103350,0.22],[103350,197300,0.24],[197300,250525,0.32],[250525,626350,0.35],[626350,Infinity,0.37]];
+const fedLTCG=[[0,48350,0.00],[48350,533400,0.15],[533400,Infinity,0.20]];
+
+// ---------- STATE / LOCATION TABLES ----------
+// ca marginal
+const ca=[[0,10756,0.01],[10757,25499,0.02],[25500,40245,0.04],[40246,55866,0.06],[55867,70606,0.08],[70607,360659,0.093],[360660,432787,0.103],[432788,721314,0.113],[721315,Infinity,0.123]];
+// ny marginal
+const ny=[[0,8500,0.04],[8500,11700,0.045],[11700,13900,0.0525],[13900,21400,0.059],[21400,80650,0.0633],[80650,215400,0.0685],[215400,1077550,0.0965],[1077550,Infinity,0.103]];
+// ut flat
+const utRate=0.0465;
+// wa long‑term 7% over 262k
+const waLongThreshold=262000, waLongRate=0.07;
+// puerto rico brackets
+const pr=[[0,9000,0],[9000,25000,0.07],[25000,41500,0.14],[41500,61500,0.25],[61500,Infinity,0.33]];
+const prLongRate=0.15;
+// singapore income brackets (SGD assumed == USD for simplicity)
+const sg=[[0,20000,0],[20000,30000,0.02],[30000,40000,0.035],[40000,80000,0.07],[80000,120000,0.115],[120000,160000,0.15],[160000,200000,0.18],[200000,240000,0.19],[240000,280000,0.195],[280000,320000,0.20],[320000,Infinity,0.22]];
+// japan national brackets (USD approximate)
+const jp=[[0,12580,0.05],[12580,21290,0.10],[21290,44840,0.20],[44840,58070,0.23],[58070,116130,0.33],[116130,258070,0.40],[258070,Infinity,0.45]];
+const jpLocalRate=0.10; // inhabitant tax
+const jpCapitalRate=0.20315; // stocks
+
+// ---------- helper ----------
+function taxBracket(amount,brackets){
+    let tax=0;
+    for(const [lower,upper,rate] of brackets){
+        if(amount<=lower) break;
+        const taxable=Math.min(amount,upper)-lower;
+        tax+=taxable*rate;
+        if(amount<=upper) break;
+    }
+    return tax;
+}
+
+// ---------- state tax dispatcher ----------
+function locationTax(amount, loc, type){
+    switch(loc){
+        case'CA': return taxBracket(amount, ca);
+        case'NY': return taxBracket(amount, ny);
+        case'UT': return amount*utRate;
+        case'WA': return type==='long'? (amount>waLongThreshold?(amount-waLongThreshold)*waLongRate:0):0;
+        case'TX': case'FL': case'NV': return 0;
+        case'PR':
+            if(type==='long') return amount*prLongRate;
+            return taxBracket(amount, pr);
+        case'SG':
+            if(type==='long'||type==='short') return 0; // no CGT
+            return taxBracket(amount, sg);
+        case'JP':
+            if(type==='long'||type==='short') return amount*jpCapitalRate;
+            return taxBracket(amount, jp)+amount*jpLocalRate;
+        default: return 0;
+    }
+}
+
+// ---------- format ----------
+const fmt=v=>'$'+Number(v).toLocaleString();
+const fmt2=v=>'$'+Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+
+// ---------- UI sync ----------
+['lt','st','inc','loss'].forEach(id=>{
+    const num=document.getElementById(id), rng=document.getElementById(id+'Range'), lbl=document.getElementById(id+'Fmt');
+    const sync=val=>{ num.value=val; rng.value=val; lbl.textContent=fmt(val); };
+    num.addEventListener('input',()=>{sync(num.value); calc();});
+    rng.addEventListener('input',()=>{sync(rng.value); calc();});
+    sync(0);
+});
+document.querySelectorAll('button.inc,button.dec').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+        const num=document.getElementById(btn.dataset.target), rng=document.getElementById(btn.dataset.range), lbl=document.getElementById(btn.dataset.target+'Fmt');
+        const val=Math.max(0,(+num.value||0)+(btn.classList.contains('inc')?10000:-10000));
+        num.value=val; rng.value=val; lbl.textContent=fmt(val); calc();
+    });
+});
+document.getElementById('state').addEventListener('change',calc);
+
+// ---------- chart ----------
+const ctx=document.getElementById('chart').getContext('2d');
+const chart=new Chart(ctx,{type:'bar',data:{labels:['long','short','income'],datasets:[{data:[0,0,0],backgroundColor:'#0077cc'}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'$'+v.toLocaleString()}}}}});
+
+// ---------- calculation ----------
+function applyLosses(st,lt,inc,loss){
+    let stT=Math.max(0,st-loss); loss=Math.max(0,loss-st);
+    let ltT=Math.max(0,lt-loss); loss=Math.max(0,loss-lt);
+    let incT=Math.max(0,inc-loss);
+    return[stT,ltT,incT];
+}
+function calc(){
+    const lt=+document.getElementById('lt').value||0;
+    const st=+document.getElementById('st').value||0;
+    const inc=+document.getElementById('inc').value||0;
+    const loss=+document.getElementById('loss').value||0;
+    const loc=document.getElementById('state').value;
+
+    const [stTaxable,ltTaxable,incTaxable]=applyLosses(st,lt,inc,loss);
+
+    // federal (US only)
+    let fedShort=taxBracket(stTaxable, fedOrd);
+    let fedIncome=taxBracket(incTaxable, fedOrd);
+    let fedLong=taxBracket(ltTaxable, fedLTCG);
+    if(['PR','SG','JP'].includes(loc)){fedShort=fedIncome=fedLong=0;}
+
+    const locShort=locationTax(stTaxable,loc,'short');
+    const locLong =locationTax(ltTaxable,loc,'long');
+    const locIncome=locationTax(incTaxable,loc,'inc');
+
+    const taxShort=fedShort+locShort;
+    const taxLong =fedLong +locLong;
+    const taxIncome=fedIncome+locIncome;
+
+    const netShort=st-taxShort;
+    const netLong =lt-taxLong;
+    const netIncome=inc-taxIncome;
+
+    const pctShort=st?((taxShort/st)*100).toFixed(1):'0';
+    const pctLong =lt?((taxLong/lt)*100).toFixed(1):'0';
+    const pctIncome=inc?((taxIncome/inc)*100).toFixed(1):'0';
+
+    const totalTax=taxShort+taxLong+taxIncome;
+    const federalTax=fedShort+fedLong+fedIncome;
+    const locTaxTotal=locShort+locLong+locIncome;
+    const totalNet=netShort+netLong+netIncome;
+
+    // results display
+    document.getElementById('results').innerHTML=`
+        <p>long term: ${fmt(lt)} - ${fmt(taxLong)} (${pctLong}%) = <strong>${fmt2(netLong)}</strong></p>
+        <p>short term: ${fmt(st)} - ${fmt(taxShort)} (${pctShort}%) = <strong>${fmt2(netShort)}</strong></p>
+        <p>work income: ${fmt(inc)} - ${fmt(taxIncome)} (${pctIncome}%) = <strong>${fmt2(netIncome)}</strong></p>
+        <p>deductions applied: <strong>${fmt(loss)}</strong></p>`;
+
+    const locLabel = {'SG':'singapore','JP':'japan','PR':'puerto rico'}[loc] || 'state';
+    document.getElementById('breakdown').innerHTML=`
+        <p>federal tax total: <strong>${fmt(federalTax)}</strong></p>
+        <p>${locLabel} tax total: <strong>${fmt(locTaxTotal)}</strong></p>`;
+
+    document.getElementById('total').textContent='total owed: '+fmt(totalTax);
+    document.getElementById('profit').textContent='total profit: '+fmt2(totalNet);
+
+    chart.data.datasets[0].data=[taxLong,taxShort,taxIncome];
+    chart.update();
+}
+calc();
+</script>
+</body>
+</html>
