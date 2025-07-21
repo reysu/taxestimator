@@ -113,6 +113,8 @@
 <div id="profit"></div>
 
 <canvas id="chart" height="100"></canvas>
+<h2 style="text-align:center;font-size:1.1rem;margin-top:2rem;">tax owed by location</h2>
+<canvas id="allLocationsChart" height="120"></canvas>
 
 <script>
 // ---------- FEDERAL (US) ----------
@@ -198,6 +200,32 @@ document.getElementById('state').addEventListener('change',calc);
 const ctx=document.getElementById('chart').getContext('2d');
 const chart=new Chart(ctx,{type:'bar',data:{labels:['long','short','income'],datasets:[{data:[0,0,0],backgroundColor:'#0077cc'}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'$'+v.toLocaleString()}}}}});
 
+// Chart for all locations
+const allLocCtx = document.getElementById('allLocationsChart').getContext('2d');
+const locationCodes = [
+    'CA','NY','UT','TX','FL','WA','NV','PR','SG','JP','AE'
+];
+const locationLabels = [
+    'california','new york','utah','texas','florida','washington','nevada','puerto rico','singapore','japan','dubai'
+];
+const allLocationsChart = new Chart(allLocCtx, {
+    type: 'bar',
+    data: {
+        labels: locationLabels,
+        datasets: [{
+            label: 'Tax Owed',
+            data: Array(locationCodes.length).fill(0),
+            backgroundColor: '#d00',
+        }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, ticks: { callback: v => '$'+v.toLocaleString() } }
+        }
+    }
+});
+
 // ---------- calculation ----------
 function applyLosses(st,lt,inc,loss){
     let stT=Math.max(0,st-loss); loss=Math.max(0,loss-st);
@@ -259,6 +287,21 @@ function calc(){
 
     chart.data.datasets[0].data=[taxLong,taxShort,taxIncome];
     chart.update();
+
+    // --- All locations chart ---
+    // For each location, calculate total tax owed with current inputs
+    const allLocTaxes = locationCodes.map(code => {
+        // For each location, apply losses and calculate taxes as above
+        const [stT,ltT,incT] = applyLosses(st,lt,inc,loss);
+        let fedS=taxBracket(stT, fedOrd), fedI=taxBracket(incT, fedOrd), fedL=taxBracket(ltT, fedLTCG);
+        if(['PR','SG','JP','AE'].includes(code)){fedS=fedI=fedL=0;}
+        const locS=locationTax(stT,code,'short');
+        const locL=locationTax(ltT,code,'long');
+        const locI=locationTax(incT,code,'inc');
+        return fedS+fedL+fedI+locS+locL+locI;
+    });
+    allLocationsChart.data.datasets[0].data = allLocTaxes;
+    allLocationsChart.update();
 }
 calc();
 </script>
