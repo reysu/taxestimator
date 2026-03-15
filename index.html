@@ -106,7 +106,7 @@
         font-family: inherit;
     }
     .select-wrap::after {
-        content: '\u25BE'; position: absolute; right: 12px; top: 50%;
+        content: '\25BE'; position: absolute; right: 12px; top: 50%;
         transform: translateY(-50%); color: var(--text-muted); pointer-events: none;
     }
 
@@ -438,9 +438,9 @@
 <div class="card">
     <div class="card-label"><span class="help" data-tip="Your tax filing status determines your tax brackets, standard deduction, and thresholds. Choose the one that matches your IRS filing.">filing status</span></div>
     <div class="status-pills" id="statusPills">
-        <button class="status-pill active" data-status="single">single</button>
-        <button class="status-pill" data-status="mfj">married filing jointly</button>
-        <button class="status-pill" data-status="hoh" title="For unmarried taxpayers who pay more than half the cost of keeping up a home for a qualifying person">head of household</button>
+        <button class="status-pill active" data-status="single"><span class="help" data-tip="Unmarried, divorced, or legally separated. Uses the narrowest tax brackets and a $15,000 standard deduction for 2025.">single</span></button>
+        <button class="status-pill" data-status="mfj"><span class="help" data-tip="Married couples filing one return together. Gets the widest brackets (roughly 2x single) and a $30,000 standard deduction. Usually the lowest combined tax for married couples.">married filing jointly</span></button>
+        <button class="status-pill" data-status="hoh"><span class="help" data-tip="For unmarried taxpayers who pay more than half the cost of keeping up a home for a qualifying dependent. Wider brackets than single and a $22,500 standard deduction.">head of household</span></button>
     </div>
     <div class="card-label" style="margin-top: 0.5rem;">location</div>
     <div class="select-wrap">
@@ -466,24 +466,34 @@
         <span class="wa-badge">2028</span>
     </div>
     <div class="compare-section">
-        <div class="card-label" style="margin-top: 0.75rem;">compare with</div>
-        <div class="select-wrap">
-            <select id="compareState">
-                <option value="">none</option>
-                <option value="CA">california</option>
-                <option value="NY">new york</option>
-                <option value="UT">utah</option>
-                <option value="TX">texas</option>
-                <option value="FL">florida</option>
-                <option value="WA">washington (seattle)</option>
-                <option value="NV">nevada (las vegas)</option>
-                <option value="PR">puerto rico</option>
-                <option value="SG">singapore resident</option>
-                <option value="JP">japan resident</option>
-                <option value="AE">dubai (UAE)</option>
-                <option value="AU">australia</option>
-                <option value="NZ">new zealand</option>
-            </select>
+        <div class="card-label" style="margin-top: 0.75rem;"><span class="help" data-tip="Compare your tax across different locations or filing statuses to see potential savings.">compare with</span></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <div class="select-wrap">
+                <select id="compareState">
+                    <option value="">location: same</option>
+                    <option value="CA">california</option>
+                    <option value="NY">new york</option>
+                    <option value="UT">utah</option>
+                    <option value="TX">texas</option>
+                    <option value="FL">florida</option>
+                    <option value="WA">washington (seattle)</option>
+                    <option value="NV">nevada (las vegas)</option>
+                    <option value="PR">puerto rico</option>
+                    <option value="SG">singapore resident</option>
+                    <option value="JP">japan resident</option>
+                    <option value="AE">dubai (UAE)</option>
+                    <option value="AU">australia</option>
+                    <option value="NZ">new zealand</option>
+                </select>
+            </div>
+            <div class="select-wrap">
+                <select id="compareStatus">
+                    <option value="">status: same</option>
+                    <option value="single">single</option>
+                    <option value="mfj">married filing jointly</option>
+                    <option value="hoh">head of household</option>
+                </select>
+            </div>
         </div>
     </div>
 </div>
@@ -920,6 +930,7 @@ document.getElementById('state').addEventListener('change', () => {
     calc();
 });
 document.getElementById('compareState').addEventListener('change', calc);
+document.getElementById('compareStatus').addEventListener('change', calc);
 document.getElementById('waMillionaires').addEventListener('change', calc);
 document.getElementById('selfEmployed').addEventListener('change', calc);
 document.getElementById('useItemized').addEventListener('change', () => {
@@ -1140,6 +1151,8 @@ function encodeState() {
     if (!document.getElementById('waMillionaires').checked) params.set('wam', '0');
     const cmp = document.getElementById('compareState').value;
     if (cmp) params.set('cmp', cmp);
+    const cmpSt = document.getElementById('compareStatus').value;
+    if (cmpSt) params.set('cmpst', cmpSt);
     return window.location.origin + window.location.pathname + '?' + params.toString();
 }
 
@@ -1165,6 +1178,7 @@ function decodeState() {
     if (params.has('se')) document.getElementById('selfEmployed').checked = true;
     if (params.has('wam') && params.get('wam') === '0') document.getElementById('waMillionaires').checked = false;
     if (params.has('cmp')) document.getElementById('compareState').value = params.get('cmp');
+    if (params.has('cmpst')) document.getElementById('compareStatus').value = params.get('cmpst');
 }
 
 document.getElementById('copyBtn').addEventListener('click', () => {
@@ -1265,13 +1279,34 @@ function calc() {
     // Bracket table
     buildBracketTable(r, loc);
 
-    // Comparison
+    // Comparison (location, filing status, or both)
     const cmpLoc = document.getElementById('compareState').value;
+    const cmpStatus = document.getElementById('compareStatus').value;
     const compareSection = document.getElementById('compareResults');
-    if (cmpLoc && cmpLoc !== loc) {
-        const cr = calcForLocation(lt, st, inc, loss, cmpLoc, opts);
-        const cmpLabel = locLabelMap[cmpLoc] || cmpLoc;
-        const curLabel = locLabelMap[loc] || loc;
+    const statusLabels = { single: 'single', mfj: 'married jointly', hoh: 'head of household' };
+    const hasCmpLoc = cmpLoc && cmpLoc !== loc;
+    const hasCmpStatus = cmpStatus && cmpStatus !== status;
+
+    if (hasCmpLoc || hasCmpStatus) {
+        const cmpLocCode = hasCmpLoc ? cmpLoc : loc;
+        const cmpStat = hasCmpStatus ? cmpStatus : status;
+        const cmpDed = hasCmpStatus ? (useItemized ? itemizedAmt : stdDeduction[cmpStat]) : deduction;
+        const cmpOpts = { ...opts, status: cmpStat, deduction: cmpDed };
+        const cr = calcForLocation(lt, st, inc, loss, cmpLocCode, cmpOpts);
+
+        const curLocName = locLabelMap[loc] || loc;
+        const cmpLocName = locLabelMap[cmpLocCode] || cmpLocCode;
+        const curStatusName = statusLabels[status];
+        const cmpStatusName = statusLabels[cmpStat];
+
+        // Build labels showing what changed
+        let curLabel = curLocName;
+        let cmpLabel = cmpLocName;
+        if (hasCmpStatus) {
+            curLabel = hasCmpLoc ? `${curLocName} · ${curStatusName}` : curStatusName;
+            cmpLabel = hasCmpLoc ? `${cmpLocName} · ${cmpStatusName}` : cmpStatusName;
+        }
+
         const diff = r.total - cr.total;
         const cmpRate = totalEarned ? ((cr.total / totalEarned) * 100).toFixed(1) : '0.0';
 
