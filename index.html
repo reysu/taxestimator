@@ -1,308 +1,734 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>tax estimator</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-    body{font-family:Arial,Helvetica,sans-serif;max-width:900px;margin:auto;padding:20px;}
-    h1{font-size:1.6rem;text-align:center;margin-bottom:1rem;}
-    .row{margin:1rem 0;display:grid;grid-template-columns:1fr 120px 120px 1fr 60px 60px;gap:0.5rem;align-items:center;}
-    label{grid-column:1/2;}
-    input[type=number]{width:120px;padding:8px;font-size:1rem;}
-    input[type=range]{width:100%;}
-    .fmt{font-weight:bold;text-align:right;}
-    button.inc,button.dec{padding:0.5rem 0.7rem;border:none;border-radius:4px;background:#ccc;cursor:pointer;font-size:1rem;}
-    select{padding:8px;font-size:1rem;}
-    #results,#breakdown{background:#f5f5f5;padding:1rem;border-radius:6px;margin-top:1rem;font-size:0.95rem;}
-    #total{font-size:2rem;color:#d00;font-weight:bold;text-align:center;margin-top:1rem;}
-    #profit{font-size:1.8rem;color:#090;font-weight:bold;text-align:center;margin-top:0.5rem;}
-    canvas{max-width:100%;margin-top:1rem;}
-    @media (max-width: 700px) {
-        body { padding: 8px; }
-        .row {
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem 0.5rem;
-        }
-        label { grid-column: 1/3; }
-        input[type=number], input[type=range], .fmt, select, button.inc, button.dec {
-            grid-column: 1/3;
-            width: 100%;
-            font-size: 1.1rem;
-        }
-        button.inc, button.dec {
-            padding: 0.7rem 0;
-            margin-bottom: 0.3rem;
-        }
+    :root {
+        --bg: #0f1117;
+        --surface: #1a1d27;
+        --surface2: #242836;
+        --border: #2e3347;
+        --text: #e4e6ed;
+        --text-muted: #8b8fa3;
+        --accent: #6c72cb;
+        --accent-light: #8b8fdb;
+        --red: #ef4444;
+        --red-dim: rgba(239,68,68,0.15);
+        --green: #22c55e;
+        --green-dim: rgba(34,197,94,0.15);
+        --blue: #3b82f6;
+        --blue-dim: rgba(59,130,246,0.15);
     }
-    @media (max-width: 500px) {
-        h1 { font-size: 1.2rem; }
-        #results, #breakdown { font-size: 0.9rem; padding: 0.7rem; }
-        #total { font-size: 1.3rem; }
-        #profit { font-size: 1.1rem; }
-        .row { grid-template-columns: 1fr; }
-        label, input, select, .fmt, button.inc, button.dec {
-            grid-column: 1/2;
-            width: 100%;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+        line-height: 1.5;
+    }
+    h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 2rem;
+        letter-spacing: -0.02em;
+        color: var(--text);
+    }
+    h1 span { color: var(--accent-light); }
+    h2 {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Card */
+    .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    .card-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+    }
+
+    /* Location select */
+    .select-wrap {
+        position: relative;
+        margin-bottom: 0.5rem;
+    }
+    select {
+        width: 100%;
+        padding: 0.65rem 0.85rem;
+        background: var(--surface2);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+    .select-wrap::after {
+        content: '▾';
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        pointer-events: none;
+    }
+
+    /* Input rows */
+    .input-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.75rem;
+        align-items: center;
+        padding: 0.85rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .input-row:last-child { border-bottom: none; }
+    .input-label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+    .input-right {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    input[type=number] {
+        width: 130px;
+        padding: 0.5rem 0.65rem;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 0.9rem;
+        font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+        text-align: right;
+    }
+    input[type=number]:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(108,114,203,0.2);
+    }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input[type=number] { -moz-appearance: textfield; }
+
+    .btn-group {
+        display: flex;
+        gap: 2px;
+    }
+    .btn-adj {
+        padding: 0.4rem 0.55rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        background: var(--surface2);
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+        cursor: pointer;
+        transition: all 0.15s;
+        font-family: inherit;
+    }
+    .btn-adj:first-child { border-radius: 6px 0 0 6px; }
+    .btn-adj:last-child { border-radius: 0 6px 6px 0; }
+    .btn-adj:hover { background: var(--border); color: var(--text); }
+    .btn-adj:active { transform: scale(0.96); }
+
+    input[type=range] {
+        width: 100%;
+        height: 4px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: var(--border);
+        border-radius: 2px;
+        outline: none;
+        margin: 0.5rem 0 0;
+        grid-column: 1 / -1;
+    }
+    input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: pointer;
+        border: 2px solid var(--bg);
+    }
+    input[type=range]::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: pointer;
+        border: 2px solid var(--bg);
+    }
+
+    /* Results */
+    .results-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    .result-item {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1rem;
+    }
+    .result-item .label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 0.35rem;
+    }
+    .result-item .value {
+        font-size: 1.15rem;
+        font-weight: 700;
+        font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+    .result-item .sub {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.2rem;
+    }
+
+    /* Breakdown rows */
+    .breakdown-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.65rem 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.85rem;
+    }
+    .breakdown-row:last-child { border-bottom: none; }
+    .breakdown-row .bk-label { color: var(--text-muted); }
+    .breakdown-row .bk-value {
+        font-weight: 600;
+        font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    /* Summary boxes */
+    .summary-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.75rem;
+        margin: 1rem 0;
+    }
+    .summary-box {
+        text-align: center;
+        padding: 1.25rem 1rem;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+    }
+    .summary-box .s-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.4rem;
+    }
+    .summary-box .s-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        font-family: 'SF Mono', 'Fira Code', monospace;
+        letter-spacing: -0.02em;
+    }
+    .box-earned { background: var(--blue-dim); }
+    .box-earned .s-label { color: var(--blue); }
+    .box-earned .s-value { color: var(--blue); }
+    .box-owed { background: var(--red-dim); }
+    .box-owed .s-label { color: var(--red); }
+    .box-owed .s-value { color: var(--red); }
+    .box-profit { background: var(--green-dim); }
+    .box-profit .s-label { color: var(--green); }
+    .box-profit .s-value { color: var(--green); }
+
+    /* Chart */
+    .chart-wrap {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-top: 0.75rem;
+    }
+    canvas { max-width: 100%; }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+        body { padding: 1rem; }
+        .results-grid, .summary-grid { grid-template-columns: 1fr; }
+        .input-row { grid-template-columns: 1fr; gap: 0.4rem; }
+        .input-right { justify-content: flex-end; }
+        .summary-box .s-value { font-size: 1.25rem; }
     }
 </style>
 </head>
 <body>
-<h1>tax estimator</h1>
 
-<div class="row">
-    <label for="state">location</label>
-    <select id="state">
-        <option value="CA">california</option>
-        <option value="NY">new york</option>
-        <option value="UT">utah</option>
-        <option value="TX">texas</option>
-        <option value="FL">florida</option>
-        <option value="WA">washington (seattle)</option>
-        <option value="NV">nevada (las vegas)</option>
-        <option value="PR">puerto rico</option>
-        <option value="SG">singapore resident</option>
-        <option value="JP">japan resident</option>
-        <option value="AE">dubai (UAE)</option>
-    </select>
+<h1>tax <span>estimator</span></h1>
+
+<!-- Location -->
+<div class="card">
+    <div class="card-label">location</div>
+    <div class="select-wrap">
+        <select id="state">
+            <option value="CA">california</option>
+            <option value="NY">new york</option>
+            <option value="UT">utah</option>
+            <option value="TX">texas</option>
+            <option value="FL">florida</option>
+            <option value="WA">washington (seattle)</option>
+            <option value="NV">nevada (las vegas)</option>
+            <option value="PR">puerto rico</option>
+            <option value="SG">singapore resident</option>
+            <option value="JP">japan resident</option>
+            <option value="AE">dubai (UAE)</option>
+        </select>
+    </div>
 </div>
 
-<div class="row">
-    <label for="lt">long term capital gains ($)</label>
-    <input type="number" id="lt" value="0">
-    <span id="ltFmt" class="fmt">$0</span>
-    <input type="range" id="ltRange" min="0" max="5000000" step="1000" value="0">
-    <button class="dec" data-target="lt"/case  data-range="ltRange">-10k</button>
-    <button class="inc" data-target="lt" data-range="ltRange">+10k</button>
+<!-- Inputs -->
+<div class="card">
+    <div class="card-label">income &amp; gains</div>
+
+    <div class="input-row" data-id="lt">
+        <div class="input-label">long term capital gains</div>
+        <div class="input-right">
+            <input type="number" id="lt" value="0" min="0">
+            <div class="btn-group">
+                <button class="btn-adj dec" data-target="lt">-10k</button>
+                <button class="btn-adj inc" data-target="lt">+10k</button>
+            </div>
+        </div>
+        <input type="range" id="ltRange" min="0" max="5000000" step="1000" value="0">
+    </div>
+
+    <div class="input-row" data-id="st">
+        <div class="input-label">short term capital gains</div>
+        <div class="input-right">
+            <input type="number" id="st" value="0" min="0">
+            <div class="btn-group">
+                <button class="btn-adj dec" data-target="st">-10k</button>
+                <button class="btn-adj inc" data-target="st">+10k</button>
+            </div>
+        </div>
+        <input type="range" id="stRange" min="0" max="5000000" step="1000" value="0">
+    </div>
+
+    <div class="input-row" data-id="inc">
+        <div class="input-label">personal income from work</div>
+        <div class="input-right">
+            <input type="number" id="inc" value="0" min="0">
+            <div class="btn-group">
+                <button class="btn-adj dec" data-target="inc">-10k</button>
+                <button class="btn-adj inc" data-target="inc">+10k</button>
+            </div>
+        </div>
+        <input type="range" id="incRange" min="0" max="5000000" step="1000" value="0">
+    </div>
+
+    <div class="input-row" data-id="loss">
+        <div class="input-label">capital losses (deduction)</div>
+        <div class="input-right">
+            <input type="number" id="loss" value="0" min="0">
+            <div class="btn-group">
+                <button class="btn-adj dec" data-target="loss">-10k</button>
+                <button class="btn-adj inc" data-target="loss">+10k</button>
+            </div>
+        </div>
+        <input type="range" id="lossRange" min="0" max="3000000" step="1000" value="0">
+    </div>
 </div>
 
-<div class="row">
-    <label for="st">short term capital gains ($)</label>
-    <input type="number" id="st" value="0">
-    <span id="stFmt" class="fmt">$0</span>
-    <input type="range" id="stRange" min="0" max="5000000" step="1000" value="0">
-    <button class="dec" data-target="st" data-range="stRange">-10k</button>
-    <button class="inc" data-target="st" data-range="stRange">+10k</button>
+<!-- Per-type results -->
+<div class="results-grid" id="resultsGrid">
+    <div class="result-item" id="resLong">
+        <div class="label">long term</div>
+        <div class="value">$0</div>
+        <div class="sub">0% effective</div>
+    </div>
+    <div class="result-item" id="resShort">
+        <div class="label">short term</div>
+        <div class="value">$0</div>
+        <div class="sub">0% effective</div>
+    </div>
+    <div class="result-item" id="resIncome">
+        <div class="label">work income</div>
+        <div class="value">$0</div>
+        <div class="sub">0% effective</div>
+    </div>
 </div>
 
-<div class="row">
-    <label for="inc">personal income from work ($)</label>
-    <input type="number" id="inc" value="0">
-    <span id="incFmt" class="fmt">$0</span>
-    <input type="range" id="incRange" min="0" max="5000000" step="1000" value="0">
-    <button class="dec" data-target="inc" data-range="incRange">-10k</button>
-    <button class="inc" data-target="inc" data-range="incRange">+10k</button>
+<!-- Breakdown -->
+<div class="card" id="breakdownCard">
+    <div class="card-label">tax breakdown</div>
+    <div id="breakdownRows"></div>
 </div>
 
-<div class="row">
-    <label for="loss">capital losses ($)</label>
-    <input type="number" id="loss" value="0">
-    <span id="lossFmt" class="fmt">$0</span>
-    <input type="range" id="lossRange" min="0" max="3000000" step="1000" value="0">
-    <button class="dec" data-target="loss" data-range="lossRange">-10k</button>
-    <button class="inc" data-target="loss" data-range="lossRange">+10k</button>
+<!-- Summary -->
+<div class="summary-grid">
+    <div class="summary-box box-earned">
+        <div class="s-label">total earned</div>
+        <div class="s-value" id="earned">$0</div>
+    </div>
+    <div class="summary-box box-owed">
+        <div class="s-label">total owed</div>
+        <div class="s-value" id="total">$0</div>
+    </div>
+    <div class="summary-box box-profit">
+        <div class="s-label">total profit</div>
+        <div class="s-value" id="profit">$0</div>
+    </div>
 </div>
 
-<div id="results"></div>
-<div id="breakdown"></div>
-<div id="earned" style="text-align:center;font-weight:bold;margin-top:.5rem;"></div>
-<div id="total"></div>
-<div id="profit"></div>
+<!-- Charts -->
+<div class="chart-wrap">
+    <canvas id="chart" height="80"></canvas>
+</div>
 
-<canvas id="chart" height="100"></canvas>
-<h2 style="text-align:center;font-size:1.1rem;margin-top:2rem;">tax owed by location</h2>
-<canvas id="allLocationsChart" height="120"></canvas>
+<h2>tax owed by location</h2>
+<div class="chart-wrap">
+    <canvas id="allLocationsChart" height="120"></canvas>
+</div>
 
 <script>
-// ---------- FEDERAL (US) ----------
-const fedOrd=[[0,11925,0.10],[11925,48475,0.12],[48475,103350,0.22],[103350,197300,0.24],[197300,250525,0.32],[250525,626350,0.35],[626350,Infinity,0.37]];
-const fedLTCG=[[0,48350,0.00],[48350,533400,0.15],[533400,Infinity,0.20]];
+// ========== FEDERAL (US) 2025 ==========
+const fedOrd = [
+    [0, 11925, 0.10],
+    [11925, 48475, 0.12],
+    [48475, 103350, 0.22],
+    [103350, 197300, 0.24],
+    [197300, 250525, 0.32],
+    [250525, 626350, 0.35],
+    [626350, Infinity, 0.37]
+];
+const fedLTCG = [
+    [0, 48350, 0.00],
+    [48350, 533400, 0.15],
+    [533400, Infinity, 0.20]
+];
 
-// ---------- STATE / LOCATION TABLES ----------
-// ca marginal
-const ca=[[0,10756,0.01],[10757,25499,0.02],[25500,40245,0.04],[40246,55866,0.06],[55867,70606,0.08],[70607,360659,0.093],[360660,432787,0.103],[432788,721314,0.113],[721315,Infinity,0.123]];
-// ny marginal
-const ny=[[0,8500,0.04],[8500,11700,0.045],[11700,13900,0.0525],[13900,21400,0.059],[21400,80650,0.0633],[80650,215400,0.0685],[215400,1077550,0.0965],[1077550,Infinity,0.103]];
-// ut flat
-const utRate=0.0465;
-// wa long‑term 7% over 262k
-const waLongThreshold=262000, waLongRate=0.07;
-// puerto rico brackets
-const pr=[[0,9000,0],[9000,25000,0.07],[25000,41500,0.14],[41500,61500,0.25],[61500,Infinity,0.33]];
-const prLongRate = 0;
-// singapore income brackets (SGD assumed == USD for simplicity)
-const sg=[[0,20000,0],[20000,30000,0.02],[30000,40000,0.035],[40000,80000,0.07],[80000,120000,0.115],[120000,160000,0.15],[160000,200000,0.18],[200000,240000,0.19],[240000,280000,0.195],[280000,320000,0.20],[320000,Infinity,0.22]];
-// japan national brackets (USD approximate)
-const jp=[[0,12580,0.05],[12580,21290,0.10],[21290,44840,0.20],[44840,58070,0.23],[58070,116130,0.33],[116130,258070,0.40],[258070,Infinity,0.45]];
-const jpLocalRate=0.10; // inhabitant tax
-const jpCapitalRate=0.20315; // stocks
+// ========== STATE / LOCATION 2025 ==========
+// California (single, 2025)
+const ca = [
+    [0, 10756, 0.01],
+    [10756, 25499, 0.02],
+    [25499, 40245, 0.04],
+    [40245, 55866, 0.06],
+    [55866, 70606, 0.08],
+    [70606, 360659, 0.093],
+    [360659, 432787, 0.103],
+    [432787, 721314, 0.113],
+    [721314, Infinity, 0.123]
+];
+// New York (single, 2025) — corrected brackets
+const ny = [
+    [0, 8500, 0.04],
+    [8500, 11700, 0.045],
+    [11700, 13900, 0.0525],
+    [13900, 80650, 0.055],
+    [80650, 215400, 0.06],
+    [215400, 1077550, 0.0685],
+    [1077550, 5000000, 0.0965],
+    [5000000, 25000000, 0.103],
+    [25000000, Infinity, 0.109]
+];
+// Utah flat — 4.5% for 2025
+const utRate = 0.045;
+// Washington — 2025: $278k threshold, 7% up to $1M, 9.9% over $1M
+const waThreshold = 278000;
+// Puerto Rico brackets (standard)
+const pr = [
+    [0, 9000, 0],
+    [9000, 25000, 0.07],
+    [25000, 41500, 0.14],
+    [41500, 61500, 0.25],
+    [61500, Infinity, 0.33]
+];
+// Singapore (resident, YA2025) — updated top brackets to 24%
+const sg = [
+    [0, 20000, 0],
+    [20000, 30000, 0.02],
+    [30000, 40000, 0.035],
+    [40000, 80000, 0.07],
+    [80000, 120000, 0.115],
+    [120000, 160000, 0.15],
+    [160000, 200000, 0.18],
+    [200000, 240000, 0.19],
+    [240000, 280000, 0.195],
+    [280000, 320000, 0.20],
+    [320000, 500000, 0.22],
+    [500000, 1000000, 0.23],
+    [1000000, Infinity, 0.24]
+];
+// Japan national brackets (approx USD at ~155 JPY/USD)
+const jp = [
+    [0, 12580, 0.05],
+    [12580, 21290, 0.10],
+    [21290, 44840, 0.20],
+    [44840, 58070, 0.23],
+    [58070, 116130, 0.33],
+    [116130, 258070, 0.40],
+    [258070, Infinity, 0.45]
+];
+const jpSurtaxRate = 0.021;    // 2.1% reconstruction surtax on national tax
+const jpLocalRate = 0.10;      // inhabitant tax
+const jpCapitalRate = 0.20315; // 15.315% national + 5% local
 
-// ---------- helper ----------
-function taxBracket(amount,brackets){
-    let tax=0;
-    for(const [lower,upper,rate] of brackets){
-        if(amount<=lower) break;
-        const taxable=Math.min(amount,upper)-lower;
-        tax+=taxable*rate;
-        if(amount<=upper) break;
+// ========== HELPERS ==========
+function taxBracket(amount, brackets) {
+    let tax = 0;
+    for (const [lower, upper, rate] of brackets) {
+        if (amount <= lower) break;
+        tax += (Math.min(amount, upper) - lower) * rate;
+        if (amount <= upper) break;
     }
     return tax;
 }
 
-// ---------- state tax dispatcher ----------
-function locationTax(amount, loc, type){
-    switch(loc){
-        case'CA': return taxBracket(amount, ca);
-        case'NY': return taxBracket(amount, ny);
-        case'UT': return amount*utRate;
-        case'WA': return type==='long'? (amount>waLongThreshold?(amount-waLongThreshold)*waLongRate:0):0;
-        case'TX': case'FL': case'NV': return 0;
-        case'PR':
-            if(type==='long' || type==='short') return 0;
-            return taxBracket(amount, pr);
-        case'SG':
-            if(type==='long'||type==='short') return 0; // no CGT
-            return taxBracket(amount, sg);
-        case'JP':
-            if(type==='long'||type==='short') return amount*jpCapitalRate;
-            return taxBracket(amount, jp)+amount*jpLocalRate;
-        case'AE':
-            return 0;
+// Bracket tax with stacking — amount taxed as if startAt already fills lower brackets
+function taxBracketStacked(amount, brackets, startAt) {
+    if (amount <= 0) return 0;
+    let tax = 0;
+    const end = startAt + amount;
+    for (const [lower, upper, rate] of brackets) {
+        if (end <= lower) break;
+        const effLower = Math.max(lower, startAt);
+        const effUpper = Math.min(end, upper);
+        if (effUpper <= effLower) continue;
+        tax += (effUpper - effLower) * rate;
+    }
+    return tax;
+}
+
+// ========== LOCATION TAX ==========
+function locationTax(amount, loc, type, stackBase) {
+    if (amount <= 0) return 0;
+    switch (loc) {
+        case 'CA': return taxBracketStacked(amount, ca, stackBase);
+        case 'NY': return taxBracketStacked(amount, ny, stackBase);
+        case 'UT': return amount * utRate;
+        case 'WA':
+            if (type !== 'long') return 0;
+            if (amount <= waThreshold) return 0;
+            const taxable = amount - waThreshold;
+            const gainCap = 1000000 - waThreshold;
+            if (taxable <= gainCap) return taxable * 0.07;
+            return gainCap * 0.07 + (taxable - gainCap) * 0.099;
+        case 'TX': case 'FL': case 'NV': return 0;
+        case 'PR':
+            if (type === 'long') return 0;
+            return taxBracketStacked(amount, pr, stackBase);
+        case 'SG':
+            if (type === 'long' || type === 'short') return 0;
+            return taxBracketStacked(amount, sg, stackBase);
+        case 'JP':
+            if (type === 'long' || type === 'short') return amount * jpCapitalRate;
+            const natTax = taxBracketStacked(amount, jp, stackBase);
+            const surtax = natTax * jpSurtaxRate;
+            return natTax + surtax + amount * jpLocalRate;
+        case 'AE': return 0;
         default: return 0;
     }
 }
 
-// ---------- format ----------
-const fmt=v=>'$'+Number(v).toLocaleString();
-const fmt2=v=>'$'+Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+// ========== FORMAT ==========
+const fmt = v => '$' + Number(v).toLocaleString('en-US', { maximumFractionDigits: 0 });
+const fmt2 = v => '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-// ---------- UI sync ----------
-['lt','st','inc','loss'].forEach(id=>{
-    const num=document.getElementById(id), rng=document.getElementById(id+'Range'), lbl=document.getElementById(id+'Fmt');
-    const sync=val=>{ num.value=val; rng.value=val; lbl.textContent=fmt(val); };
-    num.addEventListener('input',()=>{sync(num.value); calc();});
-    rng.addEventListener('input',()=>{sync(rng.value); calc();});
+// ========== UI SYNC ==========
+['lt', 'st', 'inc', 'loss'].forEach(id => {
+    const num = document.getElementById(id);
+    const rng = document.getElementById(id + 'Range');
+    const sync = val => { num.value = val; rng.value = val; };
+    num.addEventListener('input', () => { sync(num.value); calc(); });
+    rng.addEventListener('input', () => { sync(rng.value); calc(); });
     sync(0);
 });
-document.querySelectorAll('button.inc,button.dec').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-        const num=document.getElementById(btn.dataset.target), rng=document.getElementById(btn.dataset.range), lbl=document.getElementById(btn.dataset.target+'Fmt');
-        const val=Math.max(0,(+num.value||0)+(btn.classList.contains('inc')?10000:-10000));
-        num.value=val; rng.value=val; lbl.textContent=fmt(val); calc();
+document.querySelectorAll('.btn-adj').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const num = document.getElementById(btn.dataset.target);
+        const rng = document.getElementById(btn.dataset.target + 'Range');
+        const delta = btn.classList.contains('inc') ? 10000 : -10000;
+        const val = Math.max(0, (+num.value || 0) + delta);
+        num.value = val; rng.value = val; calc();
     });
 });
-document.getElementById('state').addEventListener('change',calc);
+document.getElementById('state').addEventListener('change', calc);
 
-// ---------- chart ----------
-const ctx=document.getElementById('chart').getContext('2d');
-const chart=new Chart(ctx,{type:'bar',data:{labels:['long','short','income'],datasets:[{data:[0,0,0],backgroundColor:'#0077cc'}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'$'+v.toLocaleString()}}}}});
-
-// Chart for all locations
-const allLocCtx = document.getElementById('allLocationsChart').getContext('2d');
-const locationCodes = [
-    'CA','NY','UT','TX','FL','WA','NV','PR','SG','JP','AE'
-];
-const locationLabels = [
-    'california','new york','utah','texas','florida','washington','nevada','puerto rico','singapore','japan','dubai'
-];
-const allLocationsChart = new Chart(allLocCtx, {
+// ========== CHARTS ==========
+const ctx = document.getElementById('chart').getContext('2d');
+const chart = new Chart(ctx, {
     type: 'bar',
     data: {
-        labels: locationLabels,
-        datasets: [{
-            label: 'Tax Owed',
-            data: Array(locationCodes.length).fill(0),
-            backgroundColor: '#d00',
-        }]
+        labels: ['Long Term', 'Short Term', 'Work Income'],
+        datasets: [
+            { label: 'Federal Tax', data: [0, 0, 0], backgroundColor: 'rgba(107,114,203,0.7)', borderRadius: 4 },
+            { label: 'Location Tax', data: [0, 0, 0], backgroundColor: 'rgba(239,68,68,0.5)', borderRadius: 4 }
+        ]
     },
     options: {
-        plugins: { legend: { display: false } },
+        responsive: true,
+        plugins: { legend: { labels: { color: '#8b8fa3', font: { size: 11 } } } },
         scales: {
-            y: { beginAtZero: true, ticks: { callback: v => '$'+v.toLocaleString() } }
+            x: { stacked: true, ticks: { color: '#8b8fa3' }, grid: { color: 'rgba(46,51,71,0.5)' } },
+            y: { stacked: true, beginAtZero: true, ticks: { color: '#8b8fa3', callback: v => '$' + v.toLocaleString() }, grid: { color: 'rgba(46,51,71,0.5)' } }
         }
     }
 });
 
-// ---------- calculation ----------
-function applyLosses(st,lt,inc,loss){
-    let stT=Math.max(0,st-loss); loss=Math.max(0,loss-st);
-    let ltT=Math.max(0,lt-loss); loss=Math.max(0,loss-lt);
-    let incT=Math.max(0,inc-loss);
-    return[stT,ltT,incT];
+const locationCodes = ['CA','NY','UT','TX','FL','WA','NV','PR','SG','JP','AE'];
+const locationLabels = ['CA','NY','UT','TX','FL','WA','NV','PR','SG','JP','AE'];
+const allLocCtx = document.getElementById('allLocationsChart').getContext('2d');
+const allLocationsChart = new Chart(allLocCtx, {
+    type: 'bar',
+    data: {
+        labels: locationLabels,
+        datasets: [{ label: 'Total Tax', data: Array(locationCodes.length).fill(0), backgroundColor: 'rgba(239,68,68,0.6)', borderRadius: 4 }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { color: '#8b8fa3' }, grid: { color: 'rgba(46,51,71,0.5)' } },
+            y: { beginAtZero: true, ticks: { color: '#8b8fa3', callback: v => '$' + v.toLocaleString() }, grid: { color: 'rgba(46,51,71,0.5)' } }
+        }
+    }
+});
+
+// ========== APPLY LOSSES ==========
+function applyLosses(st, lt, inc, loss, loc) {
+    const isUS = !['SG', 'JP', 'AE'].includes(loc);
+    const incomeDeductionCap = isUS ? 3000 : Infinity;
+    let remaining = loss;
+    let stT = Math.max(0, st - remaining);
+    remaining = Math.max(0, remaining - st);
+    let ltT = Math.max(0, lt - remaining);
+    remaining = Math.max(0, remaining - lt);
+    const incDeduction = Math.min(remaining, incomeDeductionCap);
+    let incT = Math.max(0, inc - incDeduction);
+    return [stT, ltT, incT];
 }
-function calc(){
-    const lt=+document.getElementById('lt').value||0;
-    const st=+document.getElementById('st').value||0;
-    const inc=+document.getElementById('inc').value||0;
-    const loss=+document.getElementById('loss').value||0;
-    const loc=document.getElementById('state').value;
 
-    const [stTaxable,ltTaxable,incTaxable]=applyLosses(st,lt,inc,loss);
+// ========== CALCULATE FOR A GIVEN LOCATION ==========
+function calcForLocation(lt, st, inc, loss, loc) {
+    const [stTaxable, ltTaxable, incTaxable] = applyLosses(st, lt, inc, loss, loc);
+    const noFederal = ['PR', 'SG', 'JP', 'AE'].includes(loc);
 
-    // federal (US only)
-    let fedShort=taxBracket(stTaxable, fedOrd);
-    let fedIncome=taxBracket(incTaxable, fedOrd);
-    let fedLong=taxBracket(ltTaxable, fedLTCG);
-    if(['PR','SG','JP','AE'].includes(loc)){fedShort=fedIncome=fedLong=0;}
+    let fedLongTax = 0, fedShortTax = 0, fedIncomeTax = 0;
+    if (!noFederal) {
+        const ordinaryTotal = incTaxable + stTaxable;
+        const fedOrdTotal = taxBracket(ordinaryTotal, fedOrd);
+        if (ordinaryTotal > 0) {
+            fedIncomeTax = fedOrdTotal * (incTaxable / ordinaryTotal);
+            fedShortTax = fedOrdTotal * (stTaxable / ordinaryTotal);
+        }
+        fedLongTax = taxBracketStacked(ltTaxable, fedLTCG, ordinaryTotal);
+    }
 
-    const locShort=locationTax(stTaxable,loc,'short');
-    const locLong =locationTax(ltTaxable,loc,'long');
-    const locIncome=locationTax(incTaxable,loc,'inc');
+    let locStackBase = 0;
+    const locIncomeTax = locationTax(incTaxable, loc, 'inc', locStackBase);
+    if (['CA', 'NY', 'PR', 'SG', 'JP'].includes(loc)) locStackBase += incTaxable;
 
-    const taxShort=fedShort+locShort;
-    const taxLong =fedLong +locLong;
-    const taxIncome=fedIncome+locIncome;
-    
-    const netShort=st-taxShort;
-    const netLong =lt-taxLong;
-    const netIncome=inc-taxIncome;
+    const locShortTax = locationTax(stTaxable, loc, 'short', locStackBase);
+    if (['CA', 'NY', 'PR'].includes(loc)) locStackBase += stTaxable;
 
-    const pctShort=st?((taxShort/st)*100).toFixed(1):'0';
-    const pctLong =lt?((taxLong/lt)*100).toFixed(1):'0';
-    const pctIncome=inc?((taxIncome/inc)*100).toFixed(1):'0';
+    const locLongTax = locationTax(ltTaxable, loc, 'long', locStackBase);
 
-    const totalTax=taxShort+taxLong+taxIncome;
-    const federalTax=fedShort+fedLong+fedIncome;
-    const locTaxTotal=locShort+locLong+locIncome;
-    const totalNet=netShort+netLong+netIncome;
+    return {
+        fedLongTax, fedShortTax, fedIncomeTax,
+        locLongTax, locShortTax, locIncomeTax,
+        total: fedLongTax + fedShortTax + fedIncomeTax + locLongTax + locShortTax + locIncomeTax
+    };
+}
+
+// ========== MAIN CALCULATION ==========
+function calc() {
+    const lt = +document.getElementById('lt').value || 0;
+    const st = +document.getElementById('st').value || 0;
+    const inc = +document.getElementById('inc').value || 0;
+    const loss = +document.getElementById('loss').value || 0;
+    const loc = document.getElementById('state').value;
+
+    const r = calcForLocation(lt, st, inc, loss, loc);
+
+    const taxLong = r.fedLongTax + r.locLongTax;
+    const taxShort = r.fedShortTax + r.locShortTax;
+    const taxIncome = r.fedIncomeTax + r.locIncomeTax;
+
+    const pctLong = lt ? ((taxLong / lt) * 100).toFixed(1) : '0.0';
+    const pctShort = st ? ((taxShort / st) * 100).toFixed(1) : '0.0';
+    const pctIncome = inc ? ((taxIncome / inc) * 100).toFixed(1) : '0.0';
+
+    const totalTax = r.total;
+    const federalTotal = r.fedLongTax + r.fedShortTax + r.fedIncomeTax;
+    const locTotal = r.locLongTax + r.locShortTax + r.locIncomeTax;
     const totalEarned = lt + st + inc;
+    const totalNet = totalEarned - totalTax;
+    const effectiveRate = totalEarned ? ((totalTax / totalEarned) * 100).toFixed(1) : '0.0';
 
-    // results display
-    document.getElementById('results').innerHTML=`
-        <p>long term: ${fmt(lt)} - ${fmt(taxLong)} (${pctLong}%) = <strong>${fmt2(netLong)}</strong></p>
-        <p>short term: ${fmt(st)} - ${fmt(taxShort)} (${pctShort}%) = <strong>${fmt2(netShort)}</strong></p>
-        <p>work income: ${fmt(inc)} - ${fmt(taxIncome)} (${pctIncome}%) = <strong>${fmt2(netIncome)}</strong></p>
-        <p>deductions applied: <strong>${fmt(loss)}</strong></p>`;
+    updateResultItem('resLong', fmt2(lt - taxLong), `${pctLong}% effective · ${fmt(taxLong)} tax`);
+    updateResultItem('resShort', fmt2(st - taxShort), `${pctShort}% effective · ${fmt(taxShort)} tax`);
+    updateResultItem('resIncome', fmt2(inc - taxIncome), `${pctIncome}% effective · ${fmt(taxIncome)} tax`);
 
-    const locLabel = {'SG':'singapore','JP':'japan','PR':'puerto rico','AE':'dubai'}[loc] || 'state';
-    document.getElementById('breakdown').innerHTML=`
-        <p>federal tax total: <strong>${fmt(federalTax)}</strong></p>
-        <p>${locLabel} tax total: <strong>${fmt(locTaxTotal)}</strong></p>`;
-    document.getElementById('earned').textContent = 'total earned: ' + fmt(totalEarned);
-    document.getElementById('total').textContent='total owed: '+fmt(totalTax);
-    document.getElementById('profit').textContent='total profit: '+fmt2(totalNet);
+    const locLabel = { 'SG': 'singapore', 'JP': 'japan', 'PR': 'puerto rico', 'AE': 'dubai' }[loc] || 'state';
+    document.getElementById('breakdownRows').innerHTML =
+        bkRow('federal tax', fmt(federalTotal)) +
+        bkRow(locLabel + ' tax', fmt(locTotal)) +
+        bkRow('losses applied', fmt(loss)) +
+        bkRow('effective rate', effectiveRate + '%');
 
-    chart.data.datasets[0].data=[taxLong,taxShort,taxIncome];
+    document.getElementById('earned').textContent = fmt(totalEarned);
+    document.getElementById('total').textContent = fmt(totalTax);
+    document.getElementById('profit').textContent = fmt2(totalNet);
+
+    chart.data.datasets[0].data = [r.fedLongTax, r.fedShortTax, r.fedIncomeTax];
+    chart.data.datasets[1].data = [r.locLongTax, r.locShortTax, r.locIncomeTax];
     chart.update();
 
-    // --- All locations chart ---
-    // For each location, calculate total tax owed with current inputs
-    const allLocTaxes = locationCodes.map(code => {
-        // For each location, apply losses and calculate taxes as above
-        const [stT,ltT,incT] = applyLosses(st,lt,inc,loss);
-        let fedS=taxBracket(stT, fedOrd), fedI=taxBracket(incT, fedOrd), fedL=taxBracket(ltT, fedLTCG);
-        if(['PR','SG','JP','AE'].includes(code)){fedS=fedI=fedL=0;}
-        const locS=locationTax(stT,code,'short');
-        const locL=locationTax(ltT,code,'long');
-        const locI=locationTax(incT,code,'inc');
-        return fedS+fedL+fedI+locS+locL+locI;
-    });
+    const allLocTaxes = locationCodes.map(code => calcForLocation(lt, st, inc, loss, code).total);
     allLocationsChart.data.datasets[0].data = allLocTaxes;
+    allLocationsChart.data.datasets[0].backgroundColor = locationCodes.map(code =>
+        code === loc ? 'rgba(107,114,203,0.8)' : 'rgba(239,68,68,0.4)'
+    );
     allLocationsChart.update();
 }
+
+function updateResultItem(id, value, sub) {
+    const el = document.getElementById(id);
+    el.querySelector('.value').textContent = value;
+    el.querySelector('.sub').textContent = sub;
+}
+
+function bkRow(label, value) {
+    return `<div class="breakdown-row"><span class="bk-label">${label}</span><span class="bk-value">${value}</span></div>`;
+}
+
 calc();
 </script>
 </body>
