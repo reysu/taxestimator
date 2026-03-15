@@ -305,6 +305,49 @@
     }
     canvas { max-width: 100%; }
 
+    /* Tooltip */
+    .tooltip {
+        display: none;
+        background: var(--accent);
+        color: #fff;
+        font-size: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        text-align: center;
+        margin-top: 0.5rem;
+        line-height: 1.4;
+    }
+    .tooltip.visible { display: block; }
+
+    /* WA toggle */
+    .wa-toggle {
+        display: none;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--border);
+    }
+    .wa-toggle.visible { display: flex; }
+    .wa-toggle input[type=checkbox] {
+        accent-color: var(--accent);
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
+    .wa-toggle label { cursor: pointer; }
+    .wa-toggle .wa-badge {
+        font-size: 0.65rem;
+        font-weight: 600;
+        background: var(--accent);
+        color: #fff;
+        padding: 1px 6px;
+        border-radius: 4px;
+        margin-left: 0.25rem;
+    }
+
     /* Theme toggle */
     .header {
         display: flex;
@@ -394,6 +437,11 @@
             <option value="AE">dubai (UAE)</option>
         </select>
     </div>
+    <div class="wa-toggle" id="waToggle">
+        <input type="checkbox" id="waMillionaires" checked>
+        <label for="waMillionaires">include WA millionaires tax (9.9% on income &gt; $1M)</label>
+        <span class="wa-badge">2028</span>
+    </div>
 </div>
 
 <!-- Inputs -->
@@ -472,6 +520,9 @@
 <div class="card" id="breakdownCard">
     <div class="card-label">tax breakdown</div>
     <div id="breakdownRows"></div>
+    <div class="tooltip" id="waTooltip">
+        WA millionaires tax (SB 6346): 9.9% on income over $1M — signed into law Mar 2026, effective Jan 2028
+    </div>
 </div>
 
 <!-- Summary -->
@@ -544,8 +595,11 @@ const ny = [
 ];
 // Utah flat — 4.5% for 2025
 const utRate = 0.045;
-// Washington — 2025: $278k threshold, 7% up to $1M, 9.9% over $1M
+// Washington — capital gains: $278k threshold, 7% up to $1M, 9.9% over $1M
+// SB 6346 (passed Mar 2026): 9.9% income tax on income over $1M, effective 2028
 const waThreshold = 278000;
+const waIncomeThreshold = 1000000;
+const waIncomeRate = 0.099;
 // Puerto Rico brackets (standard)
 const pr = [
     [0, 9000, 0],
@@ -611,19 +665,30 @@ function taxBracketStacked(amount, brackets, startAt) {
 }
 
 // ========== LOCATION TAX ==========
-function locationTax(amount, loc, type, stackBase) {
+function locationTax(amount, loc, type, stackBase, opts) {
     if (amount <= 0) return 0;
+    const waMillionaires = opts && opts.waMillionaires;
     switch (loc) {
         case 'CA': return taxBracketStacked(amount, ca, stackBase);
         case 'NY': return taxBracketStacked(amount, ny, stackBase);
         case 'UT': return amount * utRate;
         case 'WA':
-            if (type !== 'long') return 0;
-            if (amount <= waThreshold) return 0;
-            const taxable = amount - waThreshold;
-            const gainCap = 1000000 - waThreshold;
-            if (taxable <= gainCap) return taxable * 0.07;
-            return gainCap * 0.07 + (taxable - gainCap) * 0.099;
+            if (type === 'long') {
+                if (amount <= waThreshold) return 0;
+                const taxable = amount - waThreshold;
+                const gainCap = 1000000 - waThreshold;
+                if (taxable <= gainCap) return taxable * 0.07;
+                return gainCap * 0.07 + (taxable - gainCap) * 0.099;
+            }
+            if (!waMillionaires) return 0;
+            // SB 6346: 9.9% on income over $1M (effective 2028)
+            if (type === 'inc' || type === 'short') {
+                const totalInc = stackBase + amount;
+                if (totalInc <= waIncomeThreshold) return 0;
+                const over = Math.min(amount, totalInc - waIncomeThreshold);
+                return over * waIncomeRate;
+            }
+            return 0;
         case 'TX': case 'FL': case 'NV': return 0;
         case 'PR':
             if (type === 'long') return 0;
@@ -663,7 +728,12 @@ document.querySelectorAll('.btn-adj').forEach(btn => {
         num.value = val; rng.value = val; calc();
     });
 });
-document.getElementById('state').addEventListener('change', calc);
+document.getElementById('state').addEventListener('change', () => {
+    const loc = document.getElementById('state').value;
+    document.getElementById('waToggle').classList.toggle('visible', loc === 'WA');
+    calc();
+});
+document.getElementById('waMillionaires').addEventListener('change', calc);
 
 // ========== CHARTS ==========
 const ctx = document.getElementById('chart').getContext('2d');
@@ -720,7 +790,7 @@ function applyLosses(st, lt, inc, loss, loc) {
 }
 
 // ========== CALCULATE FOR A GIVEN LOCATION ==========
-function calcForLocation(lt, st, inc, loss, loc) {
+function calcForLocation(lt, st, inc, loss, loc, opts) {
     const [stTaxable, ltTaxable, incTaxable] = applyLosses(st, lt, inc, loss, loc);
     const noFederal = ['PR', 'SG', 'JP', 'AE'].includes(loc);
 
@@ -736,13 +806,13 @@ function calcForLocation(lt, st, inc, loss, loc) {
     }
 
     let locStackBase = 0;
-    const locIncomeTax = locationTax(incTaxable, loc, 'inc', locStackBase);
-    if (['CA', 'NY', 'PR', 'SG', 'JP'].includes(loc)) locStackBase += incTaxable;
+    const locIncomeTax = locationTax(incTaxable, loc, 'inc', locStackBase, opts);
+    if (['CA', 'NY', 'PR', 'SG', 'JP', 'WA'].includes(loc)) locStackBase += incTaxable;
 
-    const locShortTax = locationTax(stTaxable, loc, 'short', locStackBase);
+    const locShortTax = locationTax(stTaxable, loc, 'short', locStackBase, opts);
     if (['CA', 'NY', 'PR'].includes(loc)) locStackBase += stTaxable;
 
-    const locLongTax = locationTax(ltTaxable, loc, 'long', locStackBase);
+    const locLongTax = locationTax(ltTaxable, loc, 'long', locStackBase, opts);
 
     return {
         fedLongTax, fedShortTax, fedIncomeTax,
@@ -758,8 +828,10 @@ function calc() {
     const inc = +document.getElementById('inc').value || 0;
     const loss = +document.getElementById('loss').value || 0;
     const loc = document.getElementById('state').value;
+    const waMillionaires = document.getElementById('waMillionaires').checked;
+    const opts = { waMillionaires };
 
-    const r = calcForLocation(lt, st, inc, loss, loc);
+    const r = calcForLocation(lt, st, inc, loss, loc, opts);
 
     const taxLong = r.fedLongTax + r.locLongTax;
     const taxShort = r.fedShortTax + r.locShortTax;
@@ -787,6 +859,10 @@ function calc() {
         bkRow('losses applied', fmt(loss)) +
         bkRow('effective rate', effectiveRate + '%');
 
+    // Show WA millionaires tax tooltip when applicable
+    const waTriggered = loc === 'WA' && waMillionaires && (inc + st) > waIncomeThreshold;
+    document.getElementById('waTooltip').classList.toggle('visible', waTriggered);
+
     document.getElementById('earned').textContent = fmt(totalEarned);
     document.getElementById('total').textContent = fmt(totalTax);
     document.getElementById('profit').textContent = fmt2(totalNet);
@@ -795,7 +871,7 @@ function calc() {
     chart.data.datasets[1].data = [r.locLongTax, r.locShortTax, r.locIncomeTax];
     chart.update();
 
-    const allLocTaxes = locationCodes.map(code => calcForLocation(lt, st, inc, loss, code).total);
+    const allLocTaxes = locationCodes.map(code => calcForLocation(lt, st, inc, loss, code, opts).total);
     allLocationsChart.data.datasets[0].data = allLocTaxes;
     const tc = getThemeColors();
     allLocationsChart.data.datasets[0].backgroundColor = locationCodes.map(code =>
