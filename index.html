@@ -387,6 +387,26 @@
     .compare-diff.save { background: var(--green-dim); color: var(--green); }
     .compare-diff.cost { background: var(--red-dim); color: var(--red); }
 
+    /* Help tooltips */
+    .help {
+        position: relative; cursor: help;
+        border-bottom: 1px dotted var(--text-muted);
+    }
+    .help::after {
+        content: attr(data-tip);
+        position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+        background: var(--surface); color: var(--text); border: 1px solid var(--border);
+        border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.75rem;
+        line-height: 1.4; white-space: normal; width: max-content; max-width: 260px;
+        pointer-events: none; opacity: 0; transition: opacity 0.15s;
+        z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        font-weight: 400; text-transform: none; letter-spacing: 0;
+    }
+    .help:hover::after { opacity: 1; }
+    @media (max-width: 600px) {
+        .help::after { left: 0; transform: none; max-width: 200px; }
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
         .status-pills { flex-wrap: wrap; }
@@ -416,11 +436,11 @@
 
 <!-- Filing Status -->
 <div class="card">
-    <div class="card-label">filing status</div>
+    <div class="card-label"><span class="help" data-tip="Your tax filing status determines your tax brackets, standard deduction, and thresholds. Choose the one that matches your IRS filing.">filing status</span></div>
     <div class="status-pills" id="statusPills">
         <button class="status-pill active" data-status="single">single</button>
         <button class="status-pill" data-status="mfj">married filing jointly</button>
-        <button class="status-pill" data-status="hoh">head of household</button>
+        <button class="status-pill" data-status="hoh" title="For unmarried taxpayers who pay more than half the cost of keeping up a home for a qualifying person">head of household</button>
     </div>
     <div class="card-label" style="margin-top: 0.5rem;">location</div>
     <div class="select-wrap">
@@ -474,7 +494,7 @@
 
     <div class="se-toggle">
         <input type="checkbox" id="selfEmployed">
-        <label for="selfEmployed">self-employed (include FICA / SE tax)</label>
+        <label for="selfEmployed"><span class="help" data-tip="FICA is the Federal Insurance Contributions Act tax — it funds Social Security (12.4%) and Medicare (2.9%). Self-employed workers pay both the employee and employer portions.">self-employed (include FICA / SE tax)</span></label>
     </div>
 
     <div class="input-row" data-id="inc">
@@ -490,7 +510,7 @@
     </div>
 
     <div class="input-row" data-id="lt">
-        <div class="input-label">long term capital gains</div>
+        <div class="input-label"><span class="help" data-tip="Profits from selling assets held longer than 1 year. Taxed at lower federal rates (0%, 15%, or 20%) than ordinary income.">long term capital gains</span></div>
         <div class="input-right">
             <input type="number" id="lt" value="0" min="0">
             <div class="btn-group">
@@ -502,7 +522,7 @@
     </div>
 
     <div class="input-row" data-id="st">
-        <div class="input-label">short term capital gains</div>
+        <div class="input-label"><span class="help" data-tip="Profits from selling assets held 1 year or less. Taxed as ordinary income at your regular federal tax rate.">short term capital gains</span></div>
         <div class="input-right">
             <input type="number" id="st" value="0" min="0">
             <div class="btn-group">
@@ -514,7 +534,7 @@
     </div>
 
     <div class="input-row" data-id="loss">
-        <div class="input-label">capital losses (deduction)</div>
+        <div class="input-label"><span class="help" data-tip="Losses from selling assets for less than you paid. Offsets gains first, then up to $3,000 can be deducted from ordinary income (US).">capital losses (deduction)</span></div>
         <div class="input-right">
             <input type="number" id="loss" value="0" min="0">
             <div class="btn-group">
@@ -527,7 +547,7 @@
 
     <div class="deduction-toggle">
         <input type="checkbox" id="useItemized">
-        <label for="useItemized">use itemized deduction instead of standard</label>
+        <label for="useItemized"><span class="help" data-tip="Itemized deductions let you list specific expenses (mortgage interest, state taxes, charity, etc.) instead of taking the flat standard deduction. Use whichever is higher.">use itemized deduction instead of standard</span></label>
     </div>
     <div class="itemized-input" id="itemizedWrap">
         <div class="input-row" data-id="itemized">
@@ -538,7 +558,7 @@
         </div>
     </div>
     <div class="deduction-info">
-        <span class="ded-label" id="dedLabel">standard deduction</span>
+        <span class="ded-label" id="dedLabel"><span class="help" data-tip="A flat amount subtracted from your income before federal tax is calculated. Reduces your taxable income without needing to itemize expenses.">standard deduction</span></span>
         <span class="ded-value" id="dedValue">$15,000</span>
     </div>
 </div>
@@ -615,7 +635,7 @@
     <canvas id="chart" height="80"></canvas>
 </div>
 
-<h2>marginal tax rate</h2>
+<h2><span class="help" data-tip="The tax rate applied to your next dollar of income. This changes as you cross bracket thresholds — it's not the rate on all your income.">marginal tax rate</span></h2>
 <div class="chart-wrap">
     <canvas id="marginalChart" height="100"></canvas>
 </div>
@@ -1177,7 +1197,10 @@ function calc() {
     const noFederal = ['PR', 'SG', 'JP', 'AE', 'AU', 'NZ'].includes(loc);
 
     // Update deduction display
-    document.getElementById('dedLabel').textContent = useItemized ? 'itemized deduction' : 'standard deduction';
+    const dedTip = useItemized
+        ? 'The total of your specific deductible expenses (mortgage interest, state taxes, charity, medical, etc.) that you choose to list instead of the standard deduction.'
+        : 'A flat amount subtracted from your income before federal tax is calculated. Reduces your taxable income without needing to itemize expenses.';
+    document.getElementById('dedLabel').innerHTML = `<span class="help" data-tip="${dedTip}">${useItemized ? 'itemized deduction' : 'standard deduction'}</span>`;
     document.getElementById('dedValue').textContent = noFederal ? 'n/a' : fmt(deduction);
 
     const opts = { waMillionaires, selfEmployed, status, deduction };
@@ -1204,12 +1227,12 @@ function calc() {
 
     const locLabel = locLabelMap[loc] || 'state';
     let breakdownHTML = bkRow('federal tax', fmt(federalTotal));
-    if (r.niitTax > 0) breakdownHTML += bkRow('NIIT (3.8%)', fmt(r.niitTax));
-    if (r.ficaTax > 0) breakdownHTML += bkRow('FICA / SE tax', fmt(r.ficaTax));
+    if (r.niitTax > 0) breakdownHTML += bkRow('<span class="help" data-tip="Net Investment Income Tax — a 3.8% surtax on investment income (capital gains, dividends) when your adjusted gross income exceeds $200k (single) or $250k (married).">NIIT (3.8%)</span>', fmt(r.niitTax));
+    if (r.ficaTax > 0) breakdownHTML += bkRow('<span class="help" data-tip="Self-employment tax covering Social Security (12.4% up to $176,100) and Medicare (2.9% uncapped, plus 0.9% on earnings over $200k/$250k).">FICA / SE tax</span>', fmt(r.ficaTax));
     breakdownHTML += bkRow(locLabel + ' tax', fmt(locTotal));
     if (!noFederal) breakdownHTML += bkRow('deduction applied', fmt(r.deduction));
     breakdownHTML += bkRow('losses applied', fmt(loss));
-    breakdownHTML += bkRow('effective rate', effectiveRate + '%');
+    breakdownHTML += bkRow('<span class="help" data-tip="Your total tax as a percentage of total income. This is the actual rate you pay overall, not your top marginal bracket.">effective rate</span>', effectiveRate + '%');
     document.getElementById('breakdownRows').innerHTML = breakdownHTML;
 
     // WA tooltip
