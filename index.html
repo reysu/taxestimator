@@ -435,6 +435,8 @@
             <option value="SG">singapore resident</option>
             <option value="JP">japan resident</option>
             <option value="AE">dubai (UAE)</option>
+            <option value="AU">australia</option>
+            <option value="NZ">new zealand</option>
         </select>
     </div>
     <div class="wa-toggle" id="waToggle">
@@ -637,6 +639,23 @@ const jp = [
 const jpSurtaxRate = 0.021;    // 2.1% reconstruction surtax on national tax
 const jpLocalRate = 0.10;      // inhabitant tax
 const jpCapitalRate = 0.20315; // 15.315% national + 5% local
+// Australia (2025-26) — brackets + 2% Medicare levy; 50% CGT discount for assets held >12 months
+const au = [
+    [0, 18200, 0],
+    [18200, 45000, 0.16],
+    [45000, 135000, 0.30],
+    [135000, 190000, 0.37],
+    [190000, Infinity, 0.45]
+];
+const auMedicareRate = 0.02;
+// New Zealand (2025-26) — no capital gains tax
+const nz = [
+    [0, 15600, 0.105],
+    [15600, 53500, 0.175],
+    [53500, 78100, 0.30],
+    [78100, 180000, 0.33],
+    [180000, Infinity, 0.39]
+];
 
 // ========== HELPERS ==========
 function taxBracket(amount, brackets) {
@@ -703,6 +722,23 @@ function locationTax(amount, loc, type, stackBase, opts) {
             const surtax = natTax * jpSurtaxRate;
             return natTax + surtax + amount * jpLocalRate;
         case 'AE': return 0;
+        case 'AU': {
+            if (type === 'long') {
+                // 50% CGT discount: only half the gain is added to income
+                const discounted = amount * 0.5;
+                const bracketTax = taxBracketStacked(discounted, au, stackBase);
+                const medicare = discounted * auMedicareRate;
+                return bracketTax + medicare;
+            }
+            // Short-term gains taxed as ordinary income (no discount)
+            const bracketTax = taxBracketStacked(amount, au, stackBase);
+            const medicare = amount * auMedicareRate;
+            return bracketTax + medicare;
+        }
+        case 'NZ':
+            // No capital gains tax in NZ
+            if (type === 'long' || type === 'short') return 0;
+            return taxBracketStacked(amount, nz, stackBase);
         default: return 0;
     }
 }
@@ -757,8 +793,8 @@ const chart = new Chart(ctx, {
     }
 });
 
-const locationCodes = ['CA','NY','UT','TX','FL','WA','NV','PR','SG','JP','AE'];
-const locationLabels = ['CA','NY','UT','TX','FL','WA','NV','PR','SG','JP','AE'];
+const locationCodes = ['CA','NY','UT','TX','FL','WA','NV','PR','SG','JP','AE','AU','NZ'];
+const locationLabels = ['CA','NY','UT','TX','FL','WA','NV','PR','SG','JP','AE','AU','NZ'];
 const allLocCtx = document.getElementById('allLocationsChart').getContext('2d');
 const allLocationsChart = new Chart(allLocCtx, {
     type: 'bar',
@@ -778,7 +814,7 @@ const allLocationsChart = new Chart(allLocCtx, {
 
 // ========== APPLY LOSSES ==========
 function applyLosses(st, lt, inc, loss, loc) {
-    const isUS = !['SG', 'JP', 'AE'].includes(loc);
+    const isUS = !['SG', 'JP', 'AE', 'AU', 'NZ'].includes(loc);
     const incomeDeductionCap = isUS ? 3000 : Infinity;
     let remaining = loss;
     let stT = Math.max(0, st - remaining);
@@ -793,7 +829,7 @@ function applyLosses(st, lt, inc, loss, loc) {
 // ========== CALCULATE FOR A GIVEN LOCATION ==========
 function calcForLocation(lt, st, inc, loss, loc, opts) {
     const [stTaxable, ltTaxable, incTaxable] = applyLosses(st, lt, inc, loss, loc);
-    const noFederal = ['PR', 'SG', 'JP', 'AE'].includes(loc);
+    const noFederal = ['PR', 'SG', 'JP', 'AE', 'AU', 'NZ'].includes(loc);
 
     let fedLongTax = 0, fedShortTax = 0, fedIncomeTax = 0;
     if (!noFederal) {
@@ -808,10 +844,10 @@ function calcForLocation(lt, st, inc, loss, loc, opts) {
 
     let locStackBase = 0;
     const locIncomeTax = locationTax(incTaxable, loc, 'inc', locStackBase, opts);
-    if (['CA', 'NY', 'PR', 'SG', 'JP', 'WA'].includes(loc)) locStackBase += incTaxable;
+    if (['CA', 'NY', 'PR', 'SG', 'JP', 'WA', 'AU', 'NZ'].includes(loc)) locStackBase += incTaxable;
 
     const locShortTax = locationTax(stTaxable, loc, 'short', locStackBase, opts);
-    if (['CA', 'NY', 'PR', 'WA'].includes(loc)) locStackBase += stTaxable;
+    if (['CA', 'NY', 'PR', 'WA', 'AU'].includes(loc)) locStackBase += stTaxable;
 
     const locLongTax = locationTax(ltTaxable, loc, 'long', locStackBase, opts);
 
@@ -853,7 +889,7 @@ function calc() {
     updateResultItem('resShort', fmt2(st - taxShort), `${pctShort}% effective · ${fmt(taxShort)} tax`);
     updateResultItem('resIncome', fmt2(inc - taxIncome), `${pctIncome}% effective · ${fmt(taxIncome)} tax`);
 
-    const locLabel = { 'SG': 'singapore', 'JP': 'japan', 'PR': 'puerto rico', 'AE': 'dubai' }[loc] || 'state';
+    const locLabel = { 'SG': 'singapore', 'JP': 'japan', 'PR': 'puerto rico', 'AE': 'dubai', 'AU': 'australia', 'NZ': 'new zealand' }[loc] || 'state';
     document.getElementById('breakdownRows').innerHTML =
         bkRow('federal tax', fmt(federalTotal)) +
         bkRow(locLabel + ' tax', fmt(locTotal)) +
