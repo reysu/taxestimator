@@ -672,23 +672,24 @@ function locationTax(amount, loc, type, stackBase, opts) {
         case 'CA': return taxBracketStacked(amount, ca, stackBase);
         case 'NY': return taxBracketStacked(amount, ny, stackBase);
         case 'UT': return amount * utRate;
-        case 'WA':
-            if (type === 'long') {
-                if (amount <= waThreshold) return 0;
+        case 'WA': {
+            let waTax = 0;
+            // Capital gains excise tax (always applies to long-term)
+            if (type === 'long' && amount > waThreshold) {
                 const taxable = amount - waThreshold;
                 const gainCap = 1000000 - waThreshold;
-                if (taxable <= gainCap) return taxable * 0.07;
-                return gainCap * 0.07 + (taxable - gainCap) * 0.099;
+                waTax += taxable <= gainCap ? taxable * 0.07 : gainCap * 0.07 + (taxable - gainCap) * 0.099;
             }
-            if (!waMillionaires) return 0;
-            // SB 6346: 9.9% on income over $1M (effective 2028)
-            if (type === 'inc' || type === 'short') {
+            // SB 6346 millionaires tax: 9.9% on total income over $1M (effective 2028)
+            if (waMillionaires) {
                 const totalInc = stackBase + amount;
-                if (totalInc <= waIncomeThreshold) return 0;
-                const over = Math.min(amount, totalInc - waIncomeThreshold);
-                return over * waIncomeRate;
+                if (totalInc > waIncomeThreshold) {
+                    const over = Math.min(amount, totalInc - waIncomeThreshold);
+                    waTax += over * waIncomeRate;
+                }
             }
-            return 0;
+            return waTax;
+        }
         case 'TX': case 'FL': case 'NV': return 0;
         case 'PR':
             if (type === 'long') return 0;
@@ -810,7 +811,7 @@ function calcForLocation(lt, st, inc, loss, loc, opts) {
     if (['CA', 'NY', 'PR', 'SG', 'JP', 'WA'].includes(loc)) locStackBase += incTaxable;
 
     const locShortTax = locationTax(stTaxable, loc, 'short', locStackBase, opts);
-    if (['CA', 'NY', 'PR'].includes(loc)) locStackBase += stTaxable;
+    if (['CA', 'NY', 'PR', 'WA'].includes(loc)) locStackBase += stTaxable;
 
     const locLongTax = locationTax(ltTaxable, loc, 'long', locStackBase, opts);
 
@@ -860,7 +861,7 @@ function calc() {
         bkRow('effective rate', effectiveRate + '%');
 
     // Show WA millionaires tax tooltip when applicable
-    const waTriggered = loc === 'WA' && waMillionaires && (inc + st) > waIncomeThreshold;
+    const waTriggered = loc === 'WA' && waMillionaires && (inc + st + lt) > waIncomeThreshold;
     document.getElementById('waTooltip').classList.toggle('visible', waTriggered);
 
     document.getElementById('earned').textContent = fmt(totalEarned);
