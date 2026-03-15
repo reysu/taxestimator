@@ -21,6 +21,8 @@
         --green-dim: rgba(34,197,94,0.15);
         --blue: #3b82f6;
         --blue-dim: rgba(59,130,246,0.15);
+        --yellow: #eab308;
+        --yellow-dim: rgba(234,179,8,0.15);
         --chart-grid: rgba(46,51,71,0.5);
         --chart-text: #8b8fa3;
         --chart-fed: rgba(107,114,203,0.7);
@@ -43,6 +45,8 @@
         --green-dim: rgba(22,163,74,0.1);
         --blue: #2563eb;
         --blue-dim: rgba(37,99,235,0.1);
+        --yellow: #ca8a04;
+        --yellow-dim: rgba(202,138,4,0.1);
         --chart-grid: rgba(0,0,0,0.08);
         --chart-text: #5f6478;
         --chart-fed: rgba(85,88,200,0.7);
@@ -60,122 +64,80 @@
         padding: 2rem 1.5rem;
         line-height: 1.5;
     }
-    h1 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        text-align: center;
-        letter-spacing: -0.02em;
-        color: var(--text);
-    }
+    h1 { font-size: 1.5rem; font-weight: 600; text-align: center; letter-spacing: -0.02em; color: var(--text); }
     h1 span { color: var(--accent-light); }
     h2 {
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--text-muted);
-        text-align: center;
-        margin-top: 1.5rem;
-        margin-bottom: 0.5rem;
+        font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+        color: var(--text-muted); text-align: center; margin-top: 1.5rem; margin-bottom: 0.5rem;
     }
 
     /* Card */
     .card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;
     }
     .card-label {
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--text-muted);
-        margin-bottom: 1rem;
+        font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+        letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 1rem;
     }
 
-    /* Location select */
-    .select-wrap {
-        position: relative;
-        margin-bottom: 0.5rem;
+    /* Filing status pills */
+    .status-pills {
+        display: flex; gap: 4px; margin-bottom: 1rem;
+        background: var(--surface2); border-radius: 8px; padding: 3px;
     }
+    .status-pill {
+        flex: 1; padding: 0.5rem 0.5rem; text-align: center; font-size: 0.78rem;
+        font-weight: 500; border: none; border-radius: 6px; cursor: pointer;
+        background: transparent; color: var(--text-muted); transition: all 0.2s;
+        font-family: inherit;
+    }
+    .status-pill.active {
+        background: var(--accent); color: #fff; font-weight: 600;
+    }
+    .status-pill:not(.active):hover { color: var(--text); background: var(--border); }
+
+    /* Select */
+    .select-wrap { position: relative; margin-bottom: 0.5rem; }
     select {
-        width: 100%;
-        padding: 0.65rem 0.85rem;
-        background: var(--surface2);
-        color: var(--text);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        font-size: 0.9rem;
-        cursor: pointer;
-        appearance: none;
-        -webkit-appearance: none;
+        width: 100%; padding: 0.65rem 0.85rem; background: var(--surface2);
+        color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+        font-size: 0.9rem; cursor: pointer; appearance: none; -webkit-appearance: none;
+        font-family: inherit;
     }
     .select-wrap::after {
-        content: '▾';
-        position: absolute;
-        right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--text-muted);
-        pointer-events: none;
+        content: '\u25BE'; position: absolute; right: 12px; top: 50%;
+        transform: translateY(-50%); color: var(--text-muted); pointer-events: none;
     }
 
     /* Input rows */
     .input-row {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 0.75rem;
-        align-items: center;
-        padding: 0.85rem 0;
-        border-bottom: 1px solid var(--border);
+        display: grid; grid-template-columns: 1fr auto; gap: 0.75rem;
+        align-items: center; padding: 0.85rem 0; border-bottom: 1px solid var(--border);
     }
     .input-row:last-child { border-bottom: none; }
-    .input-label {
-        font-size: 0.85rem;
-        color: var(--text-muted);
-    }
-    .input-right {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
+    .input-label { font-size: 0.85rem; color: var(--text-muted); }
+    .input-right { display: flex; align-items: center; gap: 0.5rem; }
     input[type=number] {
-        width: 130px;
-        padding: 0.5rem 0.65rem;
-        background: var(--surface2);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        color: var(--text);
-        font-size: 0.9rem;
-        font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+        width: 130px; padding: 0.5rem 0.65rem; background: var(--surface2);
+        border: 1px solid var(--border); border-radius: 8px; color: var(--text);
+        font-size: 0.9rem; font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
         text-align: right;
     }
     input[type=number]:focus {
-        outline: none;
-        border-color: var(--accent);
+        outline: none; border-color: var(--accent);
         box-shadow: 0 0 0 2px rgba(108,114,203,0.2);
     }
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
     input[type=number] { -moz-appearance: textfield; }
 
-    .btn-group {
-        display: flex;
-        gap: 2px;
-    }
+    .btn-group { display: flex; gap: 2px; }
     .btn-adj {
-        padding: 0.4rem 0.55rem;
-        font-size: 0.7rem;
-        font-weight: 600;
-        background: var(--surface2);
-        color: var(--text-muted);
-        border: 1px solid var(--border);
-        cursor: pointer;
-        transition: all 0.15s;
-        font-family: inherit;
+        padding: 0.4rem 0.55rem; font-size: 0.7rem; font-weight: 600;
+        background: var(--surface2); color: var(--text-muted);
+        border: 1px solid var(--border); cursor: pointer;
+        transition: all 0.15s; font-family: inherit;
     }
     .btn-adj:first-child { border-radius: 6px 0 0 6px; }
     .btn-adj:last-child { border-radius: 0 6px 6px 0; }
@@ -183,107 +145,99 @@
     .btn-adj:active { transform: scale(0.96); }
 
     input[type=range] {
-        width: 100%;
-        height: 4px;
-        -webkit-appearance: none;
-        appearance: none;
-        background: var(--border);
-        border-radius: 2px;
-        outline: none;
-        margin: 0.5rem 0 0;
-        grid-column: 1 / -1;
+        width: 100%; height: 4px; -webkit-appearance: none; appearance: none;
+        background: var(--border); border-radius: 2px; outline: none;
+        margin: 0.5rem 0 0; grid-column: 1 / -1;
     }
     input[type=range]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: var(--accent);
-        cursor: pointer;
-        border: 2px solid var(--bg);
+        -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+        background: var(--accent); cursor: pointer; border: 2px solid var(--bg);
     }
     input[type=range]::-moz-range-thumb {
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: var(--accent);
-        cursor: pointer;
-        border: 2px solid var(--bg);
+        width: 16px; height: 16px; border-radius: 50%;
+        background: var(--accent); cursor: pointer; border: 2px solid var(--bg);
     }
+
+    /* Deduction row */
+    .deduction-info {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 0.65rem 0; border-bottom: 1px solid var(--border);
+        font-size: 0.85rem;
+    }
+    .deduction-info .ded-label { color: var(--text-muted); }
+    .deduction-info .ded-value {
+        font-weight: 600; font-family: 'SF Mono', 'Fira Code', monospace;
+        color: var(--accent-light);
+    }
+    .deduction-toggle {
+        display: flex; align-items: center; gap: 0.5rem;
+        padding: 0.65rem 0; border-bottom: 1px solid var(--border);
+        font-size: 0.8rem; color: var(--text-muted);
+    }
+    .deduction-toggle input[type=checkbox] {
+        accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer;
+    }
+    .deduction-toggle label { cursor: pointer; }
+    .itemized-input { display: none; }
+    .itemized-input.visible { display: block; }
+
+    /* SE toggle */
+    .se-toggle {
+        display: flex; align-items: center; gap: 0.5rem;
+        padding: 0.65rem 0; border-bottom: 1px solid var(--border);
+        font-size: 0.8rem; color: var(--text-muted);
+    }
+    .se-toggle input[type=checkbox] {
+        accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer;
+    }
+    .se-toggle label { cursor: pointer; }
 
     /* Results */
     .results-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
+        display: grid; grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.75rem; margin-bottom: 1rem;
     }
     .result-item {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 1rem;
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: 10px; padding: 1rem;
     }
     .result-item .label {
-        font-size: 0.7rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--text-muted);
-        margin-bottom: 0.35rem;
+        font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+        letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.35rem;
     }
     .result-item .value {
-        font-size: 1.15rem;
-        font-weight: 700;
+        font-size: 1.15rem; font-weight: 700;
         font-family: 'SF Mono', 'Fira Code', monospace;
     }
-    .result-item .sub {
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        margin-top: 0.2rem;
-    }
+    .result-item .sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
 
     /* Breakdown rows */
     .breakdown-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.65rem 0;
-        border-bottom: 1px solid var(--border);
-        font-size: 0.85rem;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 0.65rem 0; border-bottom: 1px solid var(--border); font-size: 0.85rem;
     }
     .breakdown-row:last-child { border-bottom: none; }
     .breakdown-row .bk-label { color: var(--text-muted); }
     .breakdown-row .bk-value {
-        font-weight: 600;
-        font-family: 'SF Mono', 'Fira Code', monospace;
+        font-weight: 600; font-family: 'SF Mono', 'Fira Code', monospace;
     }
 
     /* Summary boxes */
     .summary-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 0.75rem;
-        margin: 1rem 0;
+        display: grid; grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.75rem; margin: 1rem 0;
     }
     .summary-box {
-        text-align: center;
-        padding: 1.25rem 1rem;
-        border-radius: 10px;
+        text-align: center; padding: 1.25rem 1rem; border-radius: 10px;
         border: 1px solid var(--border);
     }
     .summary-box .s-label {
-        font-size: 0.7rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 0.4rem;
+        font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+        letter-spacing: 0.05em; margin-bottom: 0.4rem;
     }
     .summary-box .s-value {
-        font-size: 1.5rem;
-        font-weight: 800;
-        font-family: 'SF Mono', 'Fira Code', monospace;
-        letter-spacing: -0.02em;
+        font-size: 1.5rem; font-weight: 800;
+        font-family: 'SF Mono', 'Fira Code', monospace; letter-spacing: -0.02em;
     }
     .box-earned { background: var(--blue-dim); }
     .box-earned .s-label { color: var(--blue); }
@@ -295,116 +249,157 @@
     .box-profit .s-label { color: var(--green); }
     .box-profit .s-value { color: var(--green); }
 
+    /* Copy link */
+    .share-row {
+        display: flex; justify-content: center; margin: 0.75rem 0;
+    }
+    .copy-btn {
+        padding: 0.5rem 1.25rem; font-size: 0.8rem; font-weight: 600;
+        background: var(--surface2); color: var(--text-muted);
+        border: 1px solid var(--border); border-radius: 8px;
+        cursor: pointer; transition: all 0.2s; font-family: inherit;
+    }
+    .copy-btn:hover { background: var(--border); color: var(--text); }
+    .copy-btn.copied { background: var(--green-dim); color: var(--green); border-color: var(--green); }
+
     /* Chart */
     .chart-wrap {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 1.25rem;
-        margin-top: 0.75rem;
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: 12px; padding: 1.25rem; margin-top: 0.75rem;
     }
     canvas { max-width: 100%; }
 
     /* Tooltip */
     .tooltip {
-        display: none;
-        background: var(--accent);
-        color: #fff;
-        font-size: 0.75rem;
-        padding: 0.5rem 0.75rem;
-        border-radius: 8px;
-        text-align: center;
-        margin-top: 0.5rem;
-        line-height: 1.4;
+        display: none; background: var(--accent); color: #fff; font-size: 0.75rem;
+        padding: 0.5rem 0.75rem; border-radius: 8px; text-align: center;
+        margin-top: 0.5rem; line-height: 1.4;
     }
     .tooltip.visible { display: block; }
 
     /* WA toggle */
     .wa-toggle {
-        display: none;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.8rem;
-        color: var(--text-muted);
-        margin-top: 0.75rem;
-        padding-top: 0.75rem;
+        display: none; align-items: center; gap: 0.5rem; font-size: 0.8rem;
+        color: var(--text-muted); margin-top: 0.75rem; padding-top: 0.75rem;
         border-top: 1px solid var(--border);
     }
     .wa-toggle.visible { display: flex; }
     .wa-toggle input[type=checkbox] {
-        accent-color: var(--accent);
-        width: 16px;
-        height: 16px;
-        cursor: pointer;
+        accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer;
     }
     .wa-toggle label { cursor: pointer; }
     .wa-toggle .wa-badge {
-        font-size: 0.65rem;
-        font-weight: 600;
-        background: var(--accent);
-        color: #fff;
-        padding: 1px 6px;
-        border-radius: 4px;
-        margin-left: 0.25rem;
+        font-size: 0.65rem; font-weight: 600; background: var(--accent);
+        color: #fff; padding: 1px 6px; border-radius: 4px; margin-left: 0.25rem;
     }
 
     /* Theme toggle */
     .header {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-        margin-bottom: 2rem;
+        display: flex; justify-content: center; align-items: center;
+        position: relative; margin-bottom: 2rem;
     }
     .header h1 { margin-bottom: 0; }
     .theme-toggle {
-        position: absolute;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 40px;
-        height: 22px;
-        background: var(--surface2);
-        border: 1px solid var(--border);
-        border-radius: 11px;
-        cursor: pointer;
-        padding: 0;
-        transition: background 0.2s;
+        position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+        width: 40px; height: 22px; background: var(--surface2);
+        border: 1px solid var(--border); border-radius: 11px;
+        cursor: pointer; padding: 0; transition: background 0.2s;
     }
     .theme-toggle::after {
-        content: '';
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: var(--accent);
-        transition: transform 0.2s;
+        content: ''; position: absolute; top: 2px; left: 2px;
+        width: 16px; height: 16px; border-radius: 50%;
+        background: var(--accent); transition: transform 0.2s;
     }
-    [data-theme="light"] .theme-toggle::after {
-        transform: translateX(18px);
-    }
+    [data-theme="light"] .theme-toggle::after { transform: translateX(18px); }
     .theme-toggle-icons {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        height: 100%;
-        padding: 0 4px;
-        font-size: 10px;
-        pointer-events: none;
-        position: relative;
-        z-index: 1;
+        display: flex; justify-content: space-between; align-items: center;
+        width: 100%; height: 100%; padding: 0 4px; font-size: 10px;
+        pointer-events: none; position: relative; z-index: 1;
     }
 
+    /* Bracket table */
+    .bracket-toggle {
+        display: flex; justify-content: center; margin: 0.5rem 0;
+    }
+    .bracket-toggle-btn {
+        padding: 0.4rem 1rem; font-size: 0.75rem; font-weight: 600;
+        background: var(--surface2); color: var(--text-muted);
+        border: 1px solid var(--border); border-radius: 8px;
+        cursor: pointer; transition: all 0.2s; font-family: inherit;
+    }
+    .bracket-toggle-btn:hover { background: var(--border); color: var(--text); }
+    .bracket-table-wrap {
+        max-height: 0; overflow: hidden; transition: max-height 0.3s ease;
+    }
+    .bracket-table-wrap.open { max-height: 1200px; }
+    .bracket-table {
+        width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 0.5rem;
+    }
+    .bracket-table th {
+        text-align: left; font-weight: 600; color: var(--text-muted);
+        font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em;
+        padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border);
+    }
+    .bracket-table th:last-child, .bracket-table td:last-child { text-align: right; }
+    .bracket-table td {
+        padding: 0.4rem 0.75rem; border-bottom: 1px solid var(--border);
+        color: var(--text); font-family: 'SF Mono', 'Fira Code', monospace;
+        font-size: 0.78rem;
+    }
+    .bracket-table tr:last-child td { border-bottom: none; }
+    .bracket-table .section-header td {
+        font-weight: 600; color: var(--accent-light); font-family: inherit;
+        font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em;
+        padding-top: 0.75rem; background: transparent;
+    }
+    .bracket-table .active-bracket td { background: var(--accent); color: #fff; border-radius: 0; }
+    .bracket-table .active-bracket td:first-child { border-radius: 4px 0 0 4px; }
+    .bracket-table .active-bracket td:last-child { border-radius: 0 4px 4px 0; }
+
+    /* Comparison */
+    .compare-section { margin-top: 0.5rem; }
+    .compare-row {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.75rem;
+    }
+    .compare-card {
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: 10px; padding: 1rem; text-align: center;
+    }
+    .compare-card .cc-loc {
+        font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+        letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.5rem;
+    }
+    .compare-card .cc-tax {
+        font-size: 1.25rem; font-weight: 800;
+        font-family: 'SF Mono', 'Fira Code', monospace; color: var(--red);
+    }
+    .compare-card .cc-rate {
+        font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;
+    }
+    .compare-card .cc-net {
+        font-size: 0.9rem; font-weight: 600; color: var(--green); margin-top: 0.25rem;
+        font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+    .compare-diff {
+        text-align: center; margin-top: 0.5rem; font-size: 0.85rem;
+        font-weight: 600; padding: 0.5rem; border-radius: 8px;
+    }
+    .compare-diff.save { background: var(--green-dim); color: var(--green); }
+    .compare-diff.cost { background: var(--red-dim); color: var(--red); }
+
     /* Responsive */
+    @media (max-width: 768px) {
+        .status-pills { flex-wrap: wrap; }
+        .status-pill { font-size: 0.72rem; padding: 0.45rem 0.3rem; }
+    }
     @media (max-width: 600px) {
         body { padding: 1rem; }
         .results-grid, .summary-grid { grid-template-columns: 1fr; }
         .input-row { grid-template-columns: 1fr; gap: 0.4rem; }
         .input-right { justify-content: flex-end; }
         .summary-box .s-value { font-size: 1.25rem; }
+        .compare-row { grid-template-columns: 1fr; }
+        .chart-wrap { padding: 0.75rem; overflow-x: auto; }
     }
 </style>
 </head>
@@ -419,9 +414,15 @@
     </button>
 </div>
 
-<!-- Location -->
+<!-- Filing Status -->
 <div class="card">
-    <div class="card-label">location</div>
+    <div class="card-label">filing status</div>
+    <div class="status-pills" id="statusPills">
+        <button class="status-pill active" data-status="single">single</button>
+        <button class="status-pill" data-status="mfj">married filing jointly</button>
+        <button class="status-pill" data-status="hoh">head of household</button>
+    </div>
+    <div class="card-label" style="margin-top: 0.5rem;">location</div>
     <div class="select-wrap">
         <select id="state">
             <option value="CA">california</option>
@@ -444,11 +445,49 @@
         <label for="waMillionaires">include WA millionaires tax (9.9% on income &gt; $1M)</label>
         <span class="wa-badge">2028</span>
     </div>
+    <div class="compare-section">
+        <div class="card-label" style="margin-top: 0.75rem;">compare with</div>
+        <div class="select-wrap">
+            <select id="compareState">
+                <option value="">none</option>
+                <option value="CA">california</option>
+                <option value="NY">new york</option>
+                <option value="UT">utah</option>
+                <option value="TX">texas</option>
+                <option value="FL">florida</option>
+                <option value="WA">washington (seattle)</option>
+                <option value="NV">nevada (las vegas)</option>
+                <option value="PR">puerto rico</option>
+                <option value="SG">singapore resident</option>
+                <option value="JP">japan resident</option>
+                <option value="AE">dubai (UAE)</option>
+                <option value="AU">australia</option>
+                <option value="NZ">new zealand</option>
+            </select>
+        </div>
+    </div>
 </div>
 
 <!-- Inputs -->
 <div class="card">
     <div class="card-label">income &amp; gains</div>
+
+    <div class="se-toggle">
+        <input type="checkbox" id="selfEmployed">
+        <label for="selfEmployed">self-employed (include FICA / SE tax)</label>
+    </div>
+
+    <div class="input-row" data-id="inc">
+        <div class="input-label">personal income from work</div>
+        <div class="input-right">
+            <input type="number" id="inc" value="0" min="0">
+            <div class="btn-group">
+                <button class="btn-adj dec" data-target="inc">-10k</button>
+                <button class="btn-adj inc" data-target="inc">+10k</button>
+            </div>
+        </div>
+        <input type="range" id="incRange" min="0" max="5000000" step="1000" value="0">
+    </div>
 
     <div class="input-row" data-id="lt">
         <div class="input-label">long term capital gains</div>
@@ -474,18 +513,6 @@
         <input type="range" id="stRange" min="0" max="5000000" step="1000" value="0">
     </div>
 
-    <div class="input-row" data-id="inc">
-        <div class="input-label">personal income from work</div>
-        <div class="input-right">
-            <input type="number" id="inc" value="0" min="0">
-            <div class="btn-group">
-                <button class="btn-adj dec" data-target="inc">-10k</button>
-                <button class="btn-adj inc" data-target="inc">+10k</button>
-            </div>
-        </div>
-        <input type="range" id="incRange" min="0" max="5000000" step="1000" value="0">
-    </div>
-
     <div class="input-row" data-id="loss">
         <div class="input-label">capital losses (deduction)</div>
         <div class="input-right">
@@ -497,10 +524,32 @@
         </div>
         <input type="range" id="lossRange" min="0" max="3000000" step="1000" value="0">
     </div>
+
+    <div class="deduction-toggle">
+        <input type="checkbox" id="useItemized">
+        <label for="useItemized">use itemized deduction instead of standard</label>
+    </div>
+    <div class="itemized-input" id="itemizedWrap">
+        <div class="input-row" data-id="itemized">
+            <div class="input-label">itemized deduction amount</div>
+            <div class="input-right">
+                <input type="number" id="itemized" value="0" min="0">
+            </div>
+        </div>
+    </div>
+    <div class="deduction-info">
+        <span class="ded-label" id="dedLabel">standard deduction</span>
+        <span class="ded-value" id="dedValue">$15,000</span>
+    </div>
 </div>
 
 <!-- Per-type results -->
 <div class="results-grid" id="resultsGrid">
+    <div class="result-item" id="resIncome">
+        <div class="label">work income</div>
+        <div class="value">$0</div>
+        <div class="sub">0% effective</div>
+    </div>
     <div class="result-item" id="resLong">
         <div class="label">long term</div>
         <div class="value">$0</div>
@@ -508,11 +557,6 @@
     </div>
     <div class="result-item" id="resShort">
         <div class="label">short term</div>
-        <div class="value">$0</div>
-        <div class="sub">0% effective</div>
-    </div>
-    <div class="result-item" id="resIncome">
-        <div class="label">work income</div>
         <div class="value">$0</div>
         <div class="sub">0% effective</div>
     </div>
@@ -524,6 +568,17 @@
     <div id="breakdownRows"></div>
     <div class="tooltip" id="waTooltip">
         WA millionaires tax (SB 6346): 9.9% on income over $1M — signed into law Mar 2026, effective Jan 2028
+    </div>
+</div>
+
+<!-- Bracket Table -->
+<div class="bracket-toggle">
+    <button class="bracket-toggle-btn" id="bracketToggleBtn">show bracket breakdown</button>
+</div>
+<div class="bracket-table-wrap" id="bracketTableWrap">
+    <div class="card">
+        <div class="card-label">bracket breakdown</div>
+        <table class="bracket-table" id="bracketTable"></table>
     </div>
 </div>
 
@@ -543,9 +598,26 @@
     </div>
 </div>
 
+<!-- Share -->
+<div class="share-row">
+    <button class="copy-btn" id="copyBtn">copy shareable link</button>
+</div>
+
+<!-- Comparison -->
+<div id="compareResults" style="display:none;">
+    <h2>location comparison</h2>
+    <div class="compare-row" id="compareRow"></div>
+    <div class="compare-diff" id="compareDiff"></div>
+</div>
+
 <!-- Charts -->
 <div class="chart-wrap">
     <canvas id="chart" height="80"></canvas>
+</div>
+
+<h2>marginal tax rate</h2>
+<div class="chart-wrap">
+    <canvas id="marginalChart" height="100"></canvas>
 </div>
 
 <h2>tax owed by location</h2>
@@ -555,106 +627,70 @@
 
 <script>
 // ========== FEDERAL (US) 2025 ==========
-const fedOrd = [
-    [0, 11925, 0.10],
-    [11925, 48475, 0.12],
-    [48475, 103350, 0.22],
-    [103350, 197300, 0.24],
-    [197300, 250525, 0.32],
-    [250525, 626350, 0.35],
-    [626350, Infinity, 0.37]
-];
-const fedLTCG = [
-    [0, 48350, 0.00],
-    [48350, 533400, 0.15],
-    [533400, Infinity, 0.20]
-];
+const fedBrackets = {
+    single: [
+        [0, 11925, 0.10], [11925, 48475, 0.12], [48475, 103350, 0.22],
+        [103350, 197300, 0.24], [197300, 250525, 0.32], [250525, 626350, 0.35],
+        [626350, Infinity, 0.37]
+    ],
+    mfj: [
+        [0, 23850, 0.10], [23850, 96950, 0.12], [96950, 206700, 0.22],
+        [206700, 394600, 0.24], [394600, 501050, 0.32], [501050, 751600, 0.35],
+        [751600, Infinity, 0.37]
+    ],
+    hoh: [
+        [0, 17000, 0.10], [17000, 64850, 0.12], [64850, 103350, 0.22],
+        [103350, 197300, 0.24], [197300, 250500, 0.32], [250500, 626350, 0.35],
+        [626350, Infinity, 0.37]
+    ]
+};
+const fedLTCGBrackets = {
+    single: [[0, 48350, 0.00], [48350, 533400, 0.15], [533400, Infinity, 0.20]],
+    mfj: [[0, 96700, 0.00], [96700, 600050, 0.15], [600050, Infinity, 0.20]],
+    hoh: [[0, 64750, 0.00], [64750, 566700, 0.15], [566700, Infinity, 0.20]]
+};
+const stdDeduction = { single: 15000, mfj: 30000, hoh: 22500 };
+const niitThreshold = { single: 200000, mfj: 250000, hoh: 200000 };
+const ficaSSCap = 176100;
+const ficaMedicareExtra = { single: 200000, mfj: 250000, hoh: 200000 };
 
 // ========== STATE / LOCATION 2025 ==========
-// California (single, 2025)
 const ca = [
-    [0, 10756, 0.01],
-    [10756, 25499, 0.02],
-    [25499, 40245, 0.04],
-    [40245, 55866, 0.06],
-    [55866, 70606, 0.08],
-    [70606, 360659, 0.093],
-    [360659, 432787, 0.103],
-    [432787, 721314, 0.113],
-    [721314, Infinity, 0.123]
+    [0,10756,0.01],[10756,25499,0.02],[25499,40245,0.04],[40245,55866,0.06],
+    [55866,70606,0.08],[70606,360659,0.093],[360659,432787,0.103],
+    [432787,721314,0.113],[721314,Infinity,0.123]
 ];
-// New York (single, 2025) — corrected brackets
 const ny = [
-    [0, 8500, 0.04],
-    [8500, 11700, 0.045],
-    [11700, 13900, 0.0525],
-    [13900, 80650, 0.055],
-    [80650, 215400, 0.06],
-    [215400, 1077550, 0.0685],
-    [1077550, 5000000, 0.0965],
-    [5000000, 25000000, 0.103],
-    [25000000, Infinity, 0.109]
+    [0,8500,0.04],[8500,11700,0.045],[11700,13900,0.0525],[13900,80650,0.055],
+    [80650,215400,0.06],[215400,1077550,0.0685],[1077550,5000000,0.0965],
+    [5000000,25000000,0.103],[25000000,Infinity,0.109]
 ];
-// Utah flat — 4.5% for 2025
 const utRate = 0.045;
-// Washington — capital gains: $278k threshold, 7% up to $1M, 9.9% over $1M
-// SB 6346 (passed Mar 2026): 9.9% income tax on income over $1M, effective 2028
 const waThreshold = 278000;
 const waIncomeThreshold = 1000000;
 const waIncomeRate = 0.099;
-// Puerto Rico brackets (standard)
-const pr = [
-    [0, 9000, 0],
-    [9000, 25000, 0.07],
-    [25000, 41500, 0.14],
-    [41500, 61500, 0.25],
-    [61500, Infinity, 0.33]
-];
-// Singapore (resident, YA2025) — updated top brackets to 24%
+const pr = [[0,9000,0],[9000,25000,0.07],[25000,41500,0.14],[41500,61500,0.25],[61500,Infinity,0.33]];
 const sg = [
-    [0, 20000, 0],
-    [20000, 30000, 0.02],
-    [30000, 40000, 0.035],
-    [40000, 80000, 0.07],
-    [80000, 120000, 0.115],
-    [120000, 160000, 0.15],
-    [160000, 200000, 0.18],
-    [200000, 240000, 0.19],
-    [240000, 280000, 0.195],
-    [280000, 320000, 0.20],
-    [320000, 500000, 0.22],
-    [500000, 1000000, 0.23],
-    [1000000, Infinity, 0.24]
+    [0,20000,0],[20000,30000,0.02],[30000,40000,0.035],[40000,80000,0.07],
+    [80000,120000,0.115],[120000,160000,0.15],[160000,200000,0.18],
+    [200000,240000,0.19],[240000,280000,0.195],[280000,320000,0.20],
+    [320000,500000,0.22],[500000,1000000,0.23],[1000000,Infinity,0.24]
 ];
-// Japan national brackets (approx USD at ~155 JPY/USD)
 const jp = [
-    [0, 12580, 0.05],
-    [12580, 21290, 0.10],
-    [21290, 44840, 0.20],
-    [44840, 58070, 0.23],
-    [58070, 116130, 0.33],
-    [116130, 258070, 0.40],
-    [258070, Infinity, 0.45]
+    [0,12580,0.05],[12580,21290,0.10],[21290,44840,0.20],
+    [44840,58070,0.23],[58070,116130,0.33],[116130,258070,0.40],[258070,Infinity,0.45]
 ];
-const jpSurtaxRate = 0.021;    // 2.1% reconstruction surtax on national tax
-const jpLocalRate = 0.10;      // inhabitant tax
-const jpCapitalRate = 0.20315; // 15.315% national + 5% local
-// Australia (2025-26) — brackets + 2% Medicare levy; 50% CGT discount for assets held >12 months
+const jpSurtaxRate = 0.021;
+const jpLocalRate = 0.10;
+const jpCapitalRate = 0.20315;
 const au = [
-    [0, 18200, 0],
-    [18200, 45000, 0.16],
-    [45000, 135000, 0.30],
-    [135000, 190000, 0.37],
-    [190000, Infinity, 0.45]
+    [0,18200,0],[18200,45000,0.16],[45000,135000,0.30],
+    [135000,190000,0.37],[190000,Infinity,0.45]
 ];
 const auMedicareRate = 0.02;
-// New Zealand (2025-26) — no capital gains tax
 const nz = [
-    [0, 15600, 0.105],
-    [15600, 53500, 0.175],
-    [53500, 78100, 0.30],
-    [78100, 180000, 0.33],
-    [180000, Infinity, 0.39]
+    [0,15600,0.105],[15600,53500,0.175],[53500,78100,0.30],
+    [78100,180000,0.33],[180000,Infinity,0.39]
 ];
 
 // ========== HELPERS ==========
@@ -668,7 +704,6 @@ function taxBracket(amount, brackets) {
     return tax;
 }
 
-// Bracket tax with stacking — amount taxed as if startAt already fills lower brackets
 function taxBracketStacked(amount, brackets, startAt) {
     if (amount <= 0) return 0;
     let tax = 0;
@@ -683,6 +718,21 @@ function taxBracketStacked(amount, brackets, startAt) {
     return tax;
 }
 
+function bracketDetail(amount, brackets, startAt) {
+    if (amount <= 0) return [];
+    const rows = [];
+    const end = (startAt || 0) + amount;
+    for (const [lower, upper, rate] of brackets) {
+        if (end <= lower) break;
+        const effLower = Math.max(lower, startAt || 0);
+        const effUpper = Math.min(end, upper);
+        if (effUpper <= effLower) continue;
+        const taxable = effUpper - effLower;
+        rows.push({ lower, upper, rate, taxable, tax: taxable * rate });
+    }
+    return rows;
+}
+
 // ========== LOCATION TAX ==========
 function locationTax(amount, loc, type, stackBase, opts) {
     if (amount <= 0) return 0;
@@ -693,13 +743,11 @@ function locationTax(amount, loc, type, stackBase, opts) {
         case 'UT': return amount * utRate;
         case 'WA': {
             let waTax = 0;
-            // Capital gains excise tax (always applies to long-term)
             if (type === 'long' && amount > waThreshold) {
                 const taxable = amount - waThreshold;
                 const gainCap = 1000000 - waThreshold;
                 waTax += taxable <= gainCap ? taxable * 0.07 : gainCap * 0.07 + (taxable - gainCap) * 0.099;
             }
-            // SB 6346 millionaires tax: 9.9% on total income over $1M (effective 2028)
             if (waMillionaires) {
                 const totalInc = stackBase + amount;
                 if (totalInc > waIncomeThreshold) {
@@ -724,19 +772,16 @@ function locationTax(amount, loc, type, stackBase, opts) {
         case 'AE': return 0;
         case 'AU': {
             if (type === 'long') {
-                // 50% CGT discount: only half the gain is added to income
                 const discounted = amount * 0.5;
                 const bracketTax = taxBracketStacked(discounted, au, stackBase);
                 const medicare = discounted * auMedicareRate;
                 return bracketTax + medicare;
             }
-            // Short-term gains taxed as ordinary income (no discount)
             const bracketTax = taxBracketStacked(amount, au, stackBase);
             const medicare = amount * auMedicareRate;
             return bracketTax + medicare;
         }
         case 'NZ':
-            // No capital gains tax in NZ
             if (type === 'long' || type === 'short') return 0;
             return taxBracketStacked(amount, nz, stackBase);
         default: return 0;
@@ -746,6 +791,89 @@ function locationTax(amount, loc, type, stackBase, opts) {
 // ========== FORMAT ==========
 const fmt = v => '$' + Number(v).toLocaleString('en-US', { maximumFractionDigits: 0 });
 const fmt2 = v => '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtK = v => {
+    const n = Number(v);
+    if (n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000) return '$' + (n / 1000).toFixed(0) + 'k';
+    return '$' + n.toFixed(0);
+};
+
+// ========== APPLY LOSSES ==========
+function applyLosses(st, lt, inc, loss, loc) {
+    const isUS = !['SG', 'JP', 'AE', 'AU', 'NZ'].includes(loc);
+    const incomeDeductionCap = isUS ? 3000 : Infinity;
+    let remaining = loss;
+    let stT = Math.max(0, st - remaining);
+    remaining = Math.max(0, remaining - st);
+    let ltT = Math.max(0, lt - remaining);
+    remaining = Math.max(0, remaining - lt);
+    const incDeduction = Math.min(remaining, incomeDeductionCap);
+    let incT = Math.max(0, inc - incDeduction);
+    return [stT, ltT, incT];
+}
+
+// ========== CALCULATE FOR A GIVEN LOCATION ==========
+function calcForLocation(lt, st, inc, loss, loc, opts) {
+    const [stTaxable, ltTaxable, incTaxable] = applyLosses(st, lt, inc, loss, loc);
+    const noFederal = ['PR', 'SG', 'JP', 'AE', 'AU', 'NZ'].includes(loc);
+    const status = opts.status || 'single';
+    const fedOrd = fedBrackets[status];
+    const fedLTCG = fedLTCGBrackets[status];
+
+    // Apply deduction to federal taxable income
+    const deduction = noFederal ? 0 : (opts.deduction || 0);
+    let dedRemaining = deduction;
+    const fedInc = Math.max(0, incTaxable - dedRemaining);
+    dedRemaining = Math.max(0, dedRemaining - incTaxable);
+    const fedSt = Math.max(0, stTaxable - dedRemaining);
+    dedRemaining = Math.max(0, dedRemaining - stTaxable);
+    const fedLt = Math.max(0, ltTaxable - dedRemaining);
+
+    let fedLongTax = 0, fedShortTax = 0, fedIncomeTax = 0, niitTax = 0, ficaTax = 0;
+    if (!noFederal) {
+        const ordinaryTotal = fedInc + fedSt;
+        const fedOrdTotal = taxBracket(ordinaryTotal, fedOrd);
+        if (ordinaryTotal > 0) {
+            fedIncomeTax = fedOrdTotal * (fedInc / ordinaryTotal);
+            fedShortTax = fedOrdTotal * (fedSt / ordinaryTotal);
+        }
+        fedLongTax = taxBracketStacked(fedLt, fedLTCG, ordinaryTotal);
+
+        // NIIT: 3.8% on lesser of investment income or AGI excess
+        const investmentIncome = stTaxable + ltTaxable;
+        const agi = incTaxable + stTaxable + ltTaxable;
+        const niitExcess = Math.max(0, agi - niitThreshold[status]);
+        niitTax = Math.min(investmentIncome, niitExcess) * 0.038;
+
+        // FICA / SE tax
+        if (opts.selfEmployed && incTaxable > 0) {
+            const seBase = incTaxable * 0.9235;
+            const ssTax = Math.min(seBase, ficaSSCap) * 0.124;
+            const medTax = seBase * 0.029;
+            const extraMed = Math.max(0, seBase - ficaMedicareExtra[status]) * 0.009;
+            ficaTax = ssTax + medTax + extraMed;
+        }
+    }
+
+    let locStackBase = 0;
+    const locIncomeTax = locationTax(incTaxable, loc, 'inc', locStackBase, opts);
+    if (['CA', 'NY', 'PR', 'SG', 'JP', 'WA', 'AU', 'NZ'].includes(loc)) locStackBase += incTaxable;
+
+    const locShortTax = locationTax(stTaxable, loc, 'short', locStackBase, opts);
+    if (['CA', 'NY', 'PR', 'WA', 'AU'].includes(loc)) locStackBase += stTaxable;
+
+    const locLongTax = locationTax(ltTaxable, loc, 'long', locStackBase, opts);
+
+    return {
+        fedLongTax, fedShortTax, fedIncomeTax, niitTax, ficaTax,
+        locLongTax, locShortTax, locIncomeTax,
+        total: fedLongTax + fedShortTax + fedIncomeTax + niitTax + ficaTax + locLongTax + locShortTax + locIncomeTax,
+        deduction,
+        // For bracket detail
+        fedOrd, fedLTCG, fedInc, fedSt, fedLt,
+        incTaxable, stTaxable, ltTaxable
+    };
+}
 
 // ========== UI SYNC ==========
 ['lt', 'st', 'inc', 'loss'].forEach(id => {
@@ -756,6 +884,7 @@ const fmt2 = v => '$' + Number(v).toLocaleString('en-US', { minimumFractionDigit
     rng.addEventListener('input', () => { sync(rng.value); calc(); });
     sync(0);
 });
+document.getElementById('itemized').addEventListener('input', calc);
 document.querySelectorAll('.btn-adj').forEach(btn => {
     btn.addEventListener('click', () => {
         const num = document.getElementById(btn.dataset.target);
@@ -770,14 +899,29 @@ document.getElementById('state').addEventListener('change', () => {
     document.getElementById('waToggle').classList.toggle('visible', loc === 'WA');
     calc();
 });
+document.getElementById('compareState').addEventListener('change', calc);
 document.getElementById('waMillionaires').addEventListener('change', calc);
+document.getElementById('selfEmployed').addEventListener('change', calc);
+document.getElementById('useItemized').addEventListener('change', () => {
+    document.getElementById('itemizedWrap').classList.toggle('visible', document.getElementById('useItemized').checked);
+    calc();
+});
+
+// Filing status pills
+document.querySelectorAll('.status-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+        document.querySelectorAll('.status-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        calc();
+    });
+});
 
 // ========== CHARTS ==========
 const ctx = document.getElementById('chart').getContext('2d');
 const chart = new Chart(ctx, {
     type: 'bar',
     data: {
-        labels: ['Long Term', 'Short Term', 'Work Income'],
+        labels: ['Work Income', 'Long Term', 'Short Term'],
         datasets: [
             { label: 'Federal Tax', data: [0, 0, 0], backgroundColor: 'rgba(107,114,203,0.7)', borderRadius: 4 },
             { label: 'Location Tax', data: [0, 0, 0], backgroundColor: 'rgba(239,68,68,0.5)', borderRadius: 4 }
@@ -812,51 +956,209 @@ const allLocationsChart = new Chart(allLocCtx, {
     }
 });
 
-// ========== APPLY LOSSES ==========
-function applyLosses(st, lt, inc, loss, loc) {
-    const isUS = !['SG', 'JP', 'AE', 'AU', 'NZ'].includes(loc);
-    const incomeDeductionCap = isUS ? 3000 : Infinity;
-    let remaining = loss;
-    let stT = Math.max(0, st - remaining);
-    remaining = Math.max(0, remaining - st);
-    let ltT = Math.max(0, lt - remaining);
-    remaining = Math.max(0, remaining - lt);
-    const incDeduction = Math.min(remaining, incomeDeductionCap);
-    let incT = Math.max(0, inc - incDeduction);
-    return [stT, ltT, incT];
-}
-
-// ========== CALCULATE FOR A GIVEN LOCATION ==========
-function calcForLocation(lt, st, inc, loss, loc, opts) {
-    const [stTaxable, ltTaxable, incTaxable] = applyLosses(st, lt, inc, loss, loc);
-    const noFederal = ['PR', 'SG', 'JP', 'AE', 'AU', 'NZ'].includes(loc);
-
-    let fedLongTax = 0, fedShortTax = 0, fedIncomeTax = 0;
-    if (!noFederal) {
-        const ordinaryTotal = incTaxable + stTaxable;
-        const fedOrdTotal = taxBracket(ordinaryTotal, fedOrd);
-        if (ordinaryTotal > 0) {
-            fedIncomeTax = fedOrdTotal * (incTaxable / ordinaryTotal);
-            fedShortTax = fedOrdTotal * (stTaxable / ordinaryTotal);
+// Marginal rate chart
+const margCtx = document.getElementById('marginalChart').getContext('2d');
+const marginalChart = new Chart(margCtx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [
+            { label: 'Federal Rate', data: [], borderColor: 'rgba(107,114,203,0.9)', backgroundColor: 'rgba(107,114,203,0.15)', fill: true, tension: 0, pointRadius: 0, borderWidth: 2 },
+            { label: 'Location Rate', data: [], borderColor: 'rgba(239,68,68,0.8)', backgroundColor: 'rgba(239,68,68,0.12)', fill: true, tension: 0, pointRadius: 0, borderWidth: 2 }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { labels: { color: '#8b8fa3', font: { size: 11 } } },
+            tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%' } }
+        },
+        scales: {
+            x: { ticks: { color: '#8b8fa3', maxTicksLimit: 10 }, grid: { color: 'rgba(46,51,71,0.5)' } },
+            y: { beginAtZero: true, max: 60, ticks: { color: '#8b8fa3', callback: v => v + '%' }, grid: { color: 'rgba(46,51,71,0.5)' } }
         }
-        fedLongTax = taxBracketStacked(ltTaxable, fedLTCG, ordinaryTotal);
+    }
+});
+
+// ========== BRACKET TABLE ==========
+let bracketTableOpen = false;
+document.getElementById('bracketToggleBtn').addEventListener('click', () => {
+    bracketTableOpen = !bracketTableOpen;
+    document.getElementById('bracketTableWrap').classList.toggle('open', bracketTableOpen);
+    document.getElementById('bracketToggleBtn').textContent = bracketTableOpen ? 'hide bracket breakdown' : 'show bracket breakdown';
+});
+
+function buildBracketTable(r, loc) {
+    const rows = [];
+    const locLabel = locLabelMap[loc] || 'state';
+
+    // Federal ordinary (income + short-term combined)
+    const ordTotal = r.fedInc + r.fedSt;
+    if (ordTotal > 0) {
+        rows.push(`<tr class="section-header"><td colspan="4">federal ordinary income</td></tr>`);
+        const details = bracketDetail(ordTotal, r.fedOrd, 0);
+        details.forEach((d, i) => {
+            const isLast = i === details.length - 1 && d.taxable > 0;
+            rows.push(`<tr${isLast ? ' class="active-bracket"' : ''}><td>${fmtK(d.lower)} - ${d.upper === Infinity ? '+' : fmtK(d.upper)}</td><td>${(d.rate * 100).toFixed(1)}%</td><td>${fmt(d.taxable)}</td><td>${fmt(d.tax)}</td></tr>`);
+        });
     }
 
-    let locStackBase = 0;
-    const locIncomeTax = locationTax(incTaxable, loc, 'inc', locStackBase, opts);
-    if (['CA', 'NY', 'PR', 'SG', 'JP', 'WA', 'AU', 'NZ'].includes(loc)) locStackBase += incTaxable;
+    // Federal LTCG
+    if (r.fedLt > 0) {
+        rows.push(`<tr class="section-header"><td colspan="4">federal long-term capital gains</td></tr>`);
+        const details = bracketDetail(r.fedLt, r.fedLTCG, ordTotal);
+        details.forEach((d, i) => {
+            const isLast = i === details.length - 1 && d.taxable > 0;
+            rows.push(`<tr${isLast ? ' class="active-bracket"' : ''}><td>${fmtK(d.lower)} - ${d.upper === Infinity ? '+' : fmtK(d.upper)}</td><td>${(d.rate * 100).toFixed(1)}%</td><td>${fmt(d.taxable)}</td><td>${fmt(d.tax)}</td></tr>`);
+        });
+    }
 
-    const locShortTax = locationTax(stTaxable, loc, 'short', locStackBase, opts);
-    if (['CA', 'NY', 'PR', 'WA', 'AU'].includes(loc)) locStackBase += stTaxable;
+    // Location brackets
+    const locBrackets = { CA: ca, NY: ny, PR: pr, SG: sg, JP: jp, AU: au, NZ: nz }[loc];
+    if (locBrackets && (r.incTaxable + r.stTaxable + r.ltTaxable) > 0) {
+        rows.push(`<tr class="section-header"><td colspan="4">${locLabel} income tax</td></tr>`);
+        let locAmount = r.incTaxable;
+        if (['CA', 'NY', 'PR', 'AU'].includes(loc)) locAmount += r.stTaxable;
+        if (loc === 'AU') locAmount += r.ltTaxable * 0.5; // CGT discount
+        if (locAmount > 0) {
+            const details = bracketDetail(locAmount, locBrackets, 0);
+            details.forEach((d, i) => {
+                const isLast = i === details.length - 1 && d.taxable > 0;
+                rows.push(`<tr${isLast ? ' class="active-bracket"' : ''}><td>${fmtK(d.lower)} - ${d.upper === Infinity ? '+' : fmtK(d.upper)}</td><td>${(d.rate * 100).toFixed(1)}%</td><td>${fmt(d.taxable)}</td><td>${fmt(d.tax)}</td></tr>`);
+            });
+        }
+    }
 
-    const locLongTax = locationTax(ltTaxable, loc, 'long', locStackBase, opts);
+    if (rows.length === 0) {
+        rows.push('<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">no bracket taxes for this location</td></tr>');
+    }
 
-    return {
-        fedLongTax, fedShortTax, fedIncomeTax,
-        locLongTax, locShortTax, locIncomeTax,
-        total: fedLongTax + fedShortTax + fedIncomeTax + locLongTax + locShortTax + locIncomeTax
-    };
+    document.getElementById('bracketTable').innerHTML =
+        '<thead><tr><th>bracket</th><th>rate</th><th>taxable</th><th>tax</th></tr></thead><tbody>' +
+        rows.join('') + '</tbody>';
 }
+
+// ========== MARGINAL RATE CHART ==========
+function updateMarginalChart(loc, status, opts) {
+    const fedOrd = fedBrackets[status];
+    const noFederal = ['PR', 'SG', 'JP', 'AE', 'AU', 'NZ'].includes(loc);
+    const max = Math.max(1000000, (+document.getElementById('inc').value || 0) + (+document.getElementById('lt').value || 0) + (+document.getElementById('st').value || 0));
+    const step = Math.max(10000, Math.round(max / 50 / 10000) * 10000);
+    const labels = [];
+    const fedRates = [];
+    const locRates = [];
+
+    for (let i = 0; i <= max; i += step) {
+        labels.push(fmtK(i));
+        // Federal marginal rate at this income level (treating as ordinary income)
+        let fedRate = 0;
+        if (!noFederal) {
+            for (const [lower, upper, rate] of fedOrd) {
+                if (i >= lower && i < upper) { fedRate = rate * 100; break; }
+            }
+        }
+        // Location marginal rate
+        let locRate = 0;
+        const locBracketsMap = { CA: ca, NY: ny, PR: pr, SG: sg, JP: jp, AU: au, NZ: nz };
+        const locB = locBracketsMap[loc];
+        if (locB) {
+            for (const [lower, upper, rate] of locB) {
+                if (i >= lower && i < upper) { locRate = rate * 100; break; }
+            }
+        } else if (loc === 'UT') {
+            locRate = 4.5;
+        } else if (loc === 'JP') {
+            // simplified: national + local
+            for (const [lower, upper, rate] of jp) {
+                if (i >= lower && i < upper) { locRate = (rate * (1 + jpSurtaxRate) + jpLocalRate) * 100; break; }
+            }
+        }
+
+        fedRates.push(fedRate);
+        locRates.push(locRate);
+    }
+
+    marginalChart.data.labels = labels;
+    marginalChart.data.datasets[0].data = fedRates;
+    marginalChart.data.datasets[1].data = locRates;
+    marginalChart.update();
+}
+
+// ========== ANIMATED VALUES ==========
+const animationState = {};
+function animateValue(el, target, prefix, suffix) {
+    const key = el.id || el.className;
+    if (animationState[key]) cancelAnimationFrame(animationState[key]);
+    const current = parseFloat((el.textContent || '0').replace(/[^0-9.-]/g, '')) || 0;
+    if (Math.abs(current - target) < 1) { el.textContent = prefix + Number(target).toLocaleString('en-US', { maximumFractionDigits: 0 }) + suffix; return; }
+    const start = performance.now();
+    const duration = 350;
+    const from = current;
+    function step(ts) {
+        const p = Math.min(1, (ts - start) / duration);
+        const ease = 1 - Math.pow(1 - p, 3); // ease-out cubic
+        const val = from + (target - from) * ease;
+        el.textContent = prefix + Number(Math.round(val)).toLocaleString('en-US', { maximumFractionDigits: 0 }) + suffix;
+        if (p < 1) animationState[key] = requestAnimationFrame(step);
+    }
+    animationState[key] = requestAnimationFrame(step);
+}
+
+// ========== URL SHARING ==========
+function encodeState() {
+    const params = new URLSearchParams();
+    params.set('lt', document.getElementById('lt').value);
+    params.set('st', document.getElementById('st').value);
+    params.set('inc', document.getElementById('inc').value);
+    params.set('loss', document.getElementById('loss').value);
+    params.set('loc', document.getElementById('state').value);
+    params.set('status', document.querySelector('.status-pill.active').dataset.status);
+    if (document.getElementById('useItemized').checked) {
+        params.set('itemized', document.getElementById('itemized').value);
+    }
+    if (document.getElementById('selfEmployed').checked) params.set('se', '1');
+    if (!document.getElementById('waMillionaires').checked) params.set('wam', '0');
+    const cmp = document.getElementById('compareState').value;
+    if (cmp) params.set('cmp', cmp);
+    return window.location.origin + window.location.pathname + '?' + params.toString();
+}
+
+function decodeState() {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has('loc') && !params.has('lt') && !params.has('inc')) return;
+
+    if (params.has('lt')) { document.getElementById('lt').value = params.get('lt'); document.getElementById('ltRange').value = params.get('lt'); }
+    if (params.has('st')) { document.getElementById('st').value = params.get('st'); document.getElementById('stRange').value = params.get('st'); }
+    if (params.has('inc')) { document.getElementById('inc').value = params.get('inc'); document.getElementById('incRange').value = params.get('inc'); }
+    if (params.has('loss')) { document.getElementById('loss').value = params.get('loss'); document.getElementById('lossRange').value = params.get('loss'); }
+    if (params.has('loc')) document.getElementById('state').value = params.get('loc');
+    if (params.has('status')) {
+        document.querySelectorAll('.status-pill').forEach(p => {
+            p.classList.toggle('active', p.dataset.status === params.get('status'));
+        });
+    }
+    if (params.has('itemized')) {
+        document.getElementById('useItemized').checked = true;
+        document.getElementById('itemizedWrap').classList.add('visible');
+        document.getElementById('itemized').value = params.get('itemized');
+    }
+    if (params.has('se')) document.getElementById('selfEmployed').checked = true;
+    if (params.has('wam') && params.get('wam') === '0') document.getElementById('waMillionaires').checked = false;
+    if (params.has('cmp')) document.getElementById('compareState').value = params.get('cmp');
+}
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+    const url = encodeState();
+    navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = 'copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'copy shareable link'; btn.classList.remove('copied'); }, 2000);
+    });
+});
+
+// ========== LOC LABEL ==========
+const locLabelMap = { 'SG': 'singapore', 'JP': 'japan', 'PR': 'puerto rico', 'AE': 'dubai', 'AU': 'australia', 'NZ': 'new zealand' };
 
 // ========== MAIN CALCULATION ==========
 function calc() {
@@ -865,9 +1167,20 @@ function calc() {
     const inc = +document.getElementById('inc').value || 0;
     const loss = +document.getElementById('loss').value || 0;
     const loc = document.getElementById('state').value;
+    const status = document.querySelector('.status-pill.active').dataset.status;
     const waMillionaires = document.getElementById('waMillionaires').checked;
-    const opts = { waMillionaires };
+    const selfEmployed = document.getElementById('selfEmployed').checked;
+    const useItemized = document.getElementById('useItemized').checked;
+    const itemizedAmt = +document.getElementById('itemized').value || 0;
 
+    const deduction = useItemized ? itemizedAmt : stdDeduction[status];
+    const noFederal = ['PR', 'SG', 'JP', 'AE', 'AU', 'NZ'].includes(loc);
+
+    // Update deduction display
+    document.getElementById('dedLabel').textContent = useItemized ? 'itemized deduction' : 'standard deduction';
+    document.getElementById('dedValue').textContent = noFederal ? 'n/a' : fmt(deduction);
+
+    const opts = { waMillionaires, selfEmployed, status, deduction };
     const r = calcForLocation(lt, st, inc, loss, loc, opts);
 
     const taxLong = r.fedLongTax + r.locLongTax;
@@ -885,29 +1198,36 @@ function calc() {
     const totalNet = totalEarned - totalTax;
     const effectiveRate = totalEarned ? ((totalTax / totalEarned) * 100).toFixed(1) : '0.0';
 
-    updateResultItem('resLong', fmt2(lt - taxLong), `${pctLong}% effective · ${fmt(taxLong)} tax`);
-    updateResultItem('resShort', fmt2(st - taxShort), `${pctShort}% effective · ${fmt(taxShort)} tax`);
-    updateResultItem('resIncome', fmt2(inc - taxIncome), `${pctIncome}% effective · ${fmt(taxIncome)} tax`);
+    updateResultItem('resLong', fmt2(lt - taxLong), `${pctLong}% effective \u00b7 ${fmt(taxLong)} tax`);
+    updateResultItem('resShort', fmt2(st - taxShort), `${pctShort}% effective \u00b7 ${fmt(taxShort)} tax`);
+    updateResultItem('resIncome', fmt2(inc - taxIncome), `${pctIncome}% effective \u00b7 ${fmt(taxIncome)} tax`);
 
-    const locLabel = { 'SG': 'singapore', 'JP': 'japan', 'PR': 'puerto rico', 'AE': 'dubai', 'AU': 'australia', 'NZ': 'new zealand' }[loc] || 'state';
-    document.getElementById('breakdownRows').innerHTML =
-        bkRow('federal tax', fmt(federalTotal)) +
-        bkRow(locLabel + ' tax', fmt(locTotal)) +
-        bkRow('losses applied', fmt(loss)) +
-        bkRow('effective rate', effectiveRate + '%');
+    const locLabel = locLabelMap[loc] || 'state';
+    let breakdownHTML = bkRow('federal tax', fmt(federalTotal));
+    if (r.niitTax > 0) breakdownHTML += bkRow('NIIT (3.8%)', fmt(r.niitTax));
+    if (r.ficaTax > 0) breakdownHTML += bkRow('FICA / SE tax', fmt(r.ficaTax));
+    breakdownHTML += bkRow(locLabel + ' tax', fmt(locTotal));
+    if (!noFederal) breakdownHTML += bkRow('deduction applied', fmt(r.deduction));
+    breakdownHTML += bkRow('losses applied', fmt(loss));
+    breakdownHTML += bkRow('effective rate', effectiveRate + '%');
+    document.getElementById('breakdownRows').innerHTML = breakdownHTML;
 
-    // Show WA millionaires tax tooltip when applicable
+    // WA tooltip
     const waTriggered = loc === 'WA' && waMillionaires && (inc + st + lt) > waIncomeThreshold;
     document.getElementById('waTooltip').classList.toggle('visible', waTriggered);
 
-    document.getElementById('earned').textContent = fmt(totalEarned);
-    document.getElementById('total').textContent = fmt(totalTax);
-    document.getElementById('profit').textContent = fmt2(totalNet);
+    // Animated summary
+    animateValue(document.getElementById('earned'), totalEarned, '$', '');
+    animateValue(document.getElementById('total'), totalTax, '$', '');
+    const profitEl = document.getElementById('profit');
+    animateValue(profitEl, totalNet, '$', '');
 
-    chart.data.datasets[0].data = [r.fedLongTax, r.fedShortTax, r.fedIncomeTax];
-    chart.data.datasets[1].data = [r.locLongTax, r.locShortTax, r.locIncomeTax];
+    // Main chart
+    chart.data.datasets[0].data = [r.fedIncomeTax, r.fedLongTax, r.fedShortTax];
+    chart.data.datasets[1].data = [r.locIncomeTax, r.locLongTax, r.locShortTax];
     chart.update();
 
+    // All-locations chart
     const allLocTaxes = locationCodes.map(code => calcForLocation(lt, st, inc, loss, code, opts).total);
     allLocationsChart.data.datasets[0].data = allLocTaxes;
     const tc = getThemeColors();
@@ -915,6 +1235,52 @@ function calc() {
         code === loc ? tc.highlight : tc.locAll
     );
     allLocationsChart.update();
+
+    // Marginal rate chart
+    updateMarginalChart(loc, status, opts);
+
+    // Bracket table
+    buildBracketTable(r, loc);
+
+    // Comparison
+    const cmpLoc = document.getElementById('compareState').value;
+    const compareSection = document.getElementById('compareResults');
+    if (cmpLoc && cmpLoc !== loc) {
+        const cr = calcForLocation(lt, st, inc, loss, cmpLoc, opts);
+        const cmpLabel = locLabelMap[cmpLoc] || cmpLoc;
+        const curLabel = locLabelMap[loc] || loc;
+        const diff = r.total - cr.total;
+        const cmpRate = totalEarned ? ((cr.total / totalEarned) * 100).toFixed(1) : '0.0';
+
+        document.getElementById('compareRow').innerHTML =
+            `<div class="compare-card">
+                <div class="cc-loc">${curLabel}</div>
+                <div class="cc-tax">${fmt(r.total)}</div>
+                <div class="cc-rate">${effectiveRate}% effective</div>
+                <div class="cc-net">take-home: ${fmt(totalEarned - r.total)}</div>
+            </div>
+            <div class="compare-card">
+                <div class="cc-loc">${cmpLabel}</div>
+                <div class="cc-tax">${fmt(cr.total)}</div>
+                <div class="cc-rate">${cmpRate}% effective</div>
+                <div class="cc-net">take-home: ${fmt(totalEarned - cr.total)}</div>
+            </div>`;
+
+        const diffEl = document.getElementById('compareDiff');
+        if (Math.abs(diff) < 1) {
+            diffEl.className = 'compare-diff';
+            diffEl.textContent = 'same tax burden';
+        } else if (diff > 0) {
+            diffEl.className = 'compare-diff save';
+            diffEl.textContent = `you save ${fmt(diff)} with ${cmpLabel}`;
+        } else {
+            diffEl.className = 'compare-diff cost';
+            diffEl.textContent = `${cmpLabel} costs ${fmt(-diff)} more`;
+        }
+        compareSection.style.display = '';
+    } else {
+        compareSection.style.display = 'none';
+    }
 }
 
 function updateResultItem(id, value, sub) {
@@ -942,21 +1308,17 @@ function getThemeColors() {
 
 function applyChartTheme() {
     const c = getThemeColors();
-    // Main chart
+    [chart, allLocationsChart, marginalChart].forEach(ch => {
+        ch.options.scales.x.ticks.color = c.text;
+        ch.options.scales.x.grid.color = c.grid;
+        ch.options.scales.y.ticks.color = c.text;
+        ch.options.scales.y.grid.color = c.grid;
+    });
     chart.data.datasets[0].backgroundColor = c.fed;
     chart.data.datasets[1].backgroundColor = c.loc;
     chart.options.plugins.legend.labels.color = c.text;
-    chart.options.scales.x.ticks.color = c.text;
-    chart.options.scales.x.grid.color = c.grid;
-    chart.options.scales.y.ticks.color = c.text;
-    chart.options.scales.y.grid.color = c.grid;
-    chart.update();
-    // All-locations chart
-    allLocationsChart.options.scales.x.ticks.color = c.text;
-    allLocationsChart.options.scales.x.grid.color = c.grid;
-    allLocationsChart.options.scales.y.ticks.color = c.text;
-    allLocationsChart.options.scales.y.grid.color = c.grid;
-    allLocationsChart.update();
+    marginalChart.options.plugins.legend.labels.color = c.text;
+    [chart, allLocationsChart, marginalChart].forEach(ch => ch.update());
 }
 
 const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -971,6 +1333,9 @@ document.getElementById('themeToggle').addEventListener('click', () => {
     calc();
 });
 
+// ========== INIT ==========
+decodeState();
+document.getElementById('waToggle').classList.toggle('visible', document.getElementById('state').value === 'WA');
 calc();
 applyChartTheme();
 </script>
