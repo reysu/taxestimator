@@ -6,7 +6,7 @@
 <title>tax estimator</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-    :root {
+    :root, [data-theme="dark"] {
         --bg: #0f1117;
         --surface: #1a1d27;
         --surface2: #242836;
@@ -21,6 +21,34 @@
         --green-dim: rgba(34,197,94,0.15);
         --blue: #3b82f6;
         --blue-dim: rgba(59,130,246,0.15);
+        --chart-grid: rgba(46,51,71,0.5);
+        --chart-text: #8b8fa3;
+        --chart-fed: rgba(107,114,203,0.7);
+        --chart-loc: rgba(239,68,68,0.5);
+        --chart-loc-all: rgba(239,68,68,0.4);
+        --chart-highlight: rgba(107,114,203,0.8);
+    }
+    [data-theme="light"] {
+        --bg: #f5f6fa;
+        --surface: #ffffff;
+        --surface2: #eef0f5;
+        --border: #d8dbe5;
+        --text: #1a1d27;
+        --text-muted: #5f6478;
+        --accent: #5558c8;
+        --accent-light: #5558c8;
+        --red: #dc2626;
+        --red-dim: rgba(220,38,38,0.1);
+        --green: #16a34a;
+        --green-dim: rgba(22,163,74,0.1);
+        --blue: #2563eb;
+        --blue-dim: rgba(37,99,235,0.1);
+        --chart-grid: rgba(0,0,0,0.08);
+        --chart-text: #5f6478;
+        --chart-fed: rgba(85,88,200,0.7);
+        --chart-loc: rgba(220,38,38,0.5);
+        --chart-loc-all: rgba(220,38,38,0.35);
+        --chart-highlight: rgba(85,88,200,0.8);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -36,7 +64,6 @@
         font-size: 1.5rem;
         font-weight: 600;
         text-align: center;
-        margin-bottom: 2rem;
         letter-spacing: -0.02em;
         color: var(--text);
     }
@@ -278,6 +305,56 @@
     }
     canvas { max-width: 100%; }
 
+    /* Theme toggle */
+    .header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        margin-bottom: 2rem;
+    }
+    .header h1 { margin-bottom: 0; }
+    .theme-toggle {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 22px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 11px;
+        cursor: pointer;
+        padding: 0;
+        transition: background 0.2s;
+    }
+    .theme-toggle::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--accent);
+        transition: transform 0.2s;
+    }
+    [data-theme="light"] .theme-toggle::after {
+        transform: translateX(18px);
+    }
+    .theme-toggle-icons {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        padding: 0 4px;
+        font-size: 10px;
+        pointer-events: none;
+        position: relative;
+        z-index: 1;
+    }
+
     /* Responsive */
     @media (max-width: 600px) {
         body { padding: 1rem; }
@@ -290,7 +367,14 @@
 </head>
 <body>
 
-<h1>tax <span>estimator</span></h1>
+<div class="header">
+    <h1>tax <span>estimator</span></h1>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <span class="theme-toggle-icons">
+            <span>&#9790;</span><span>&#9788;</span>
+        </span>
+    </button>
+</div>
 
 <!-- Location -->
 <div class="card">
@@ -713,8 +797,9 @@ function calc() {
 
     const allLocTaxes = locationCodes.map(code => calcForLocation(lt, st, inc, loss, code).total);
     allLocationsChart.data.datasets[0].data = allLocTaxes;
+    const tc = getThemeColors();
     allLocationsChart.data.datasets[0].backgroundColor = locationCodes.map(code =>
-        code === loc ? 'rgba(107,114,203,0.8)' : 'rgba(239,68,68,0.4)'
+        code === loc ? tc.highlight : tc.locAll
     );
     allLocationsChart.update();
 }
@@ -729,7 +814,52 @@ function bkRow(label, value) {
     return `<div class="breakdown-row"><span class="bk-label">${label}</span><span class="bk-value">${value}</span></div>`;
 }
 
+// ========== THEME ==========
+function getThemeColors() {
+    const s = getComputedStyle(document.documentElement);
+    return {
+        grid: s.getPropertyValue('--chart-grid').trim(),
+        text: s.getPropertyValue('--chart-text').trim(),
+        fed: s.getPropertyValue('--chart-fed').trim(),
+        loc: s.getPropertyValue('--chart-loc').trim(),
+        locAll: s.getPropertyValue('--chart-loc-all').trim(),
+        highlight: s.getPropertyValue('--chart-highlight').trim(),
+    };
+}
+
+function applyChartTheme() {
+    const c = getThemeColors();
+    // Main chart
+    chart.data.datasets[0].backgroundColor = c.fed;
+    chart.data.datasets[1].backgroundColor = c.loc;
+    chart.options.plugins.legend.labels.color = c.text;
+    chart.options.scales.x.ticks.color = c.text;
+    chart.options.scales.x.grid.color = c.grid;
+    chart.options.scales.y.ticks.color = c.text;
+    chart.options.scales.y.grid.color = c.grid;
+    chart.update();
+    // All-locations chart
+    allLocationsChart.options.scales.x.ticks.color = c.text;
+    allLocationsChart.options.scales.x.grid.color = c.grid;
+    allLocationsChart.options.scales.y.ticks.color = c.text;
+    allLocationsChart.options.scales.y.grid.color = c.grid;
+    allLocationsChart.update();
+}
+
+const savedTheme = localStorage.getItem('theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    applyChartTheme();
+    calc();
+});
+
 calc();
+applyChartTheme();
 </script>
 </body>
 </html>
