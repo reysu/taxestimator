@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tax Globe</title>
+<script src="https://unpkg.com/globe.gl@2.35.1/dist/globe.gl.min.js"></script>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        background: #0d0f17; color: #e4e6ed; font-family: 'SF Mono','Fira Code',monospace;
+        overflow: hidden; height: 100vh;
+    }
+    #globe-container { width: 100vw; height: 100vh; position: relative; }
+
+    /* Controls panel */
+    .controls {
+        position: absolute; top: 20px; left: 20px; z-index: 10;
+        background: rgba(26,29,40,0.92); border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px; padding: 20px; max-width: 320px;
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    }
+    .controls h1 {
+        font-size: 1.1rem; font-weight: 700; margin-bottom: 4px;
+        color: #5AC8FA; letter-spacing: -0.02em;
+    }
+    .controls .subtitle { font-size: 0.65rem; color: #8b8fa3; margin-bottom: 14px; }
+    .input-group { margin-bottom: 10px; }
+    .input-group label {
+        display: block; font-size: 0.6rem; color: #8b8fa3;
+        text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;
+    }
+    .input-group input {
+        width: 100%; padding: 8px 10px; border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04);
+        color: #e4e6ed; font-family: inherit; font-size: 0.85rem;
+        outline: none; transition: border-color 0.2s;
+    }
+    .input-group input:focus { border-color: #007AFF; }
+    .btn-update {
+        width: 100%; padding: 8px; border-radius: 8px; border: none;
+        background: #007AFF; color: #fff; font-family: inherit;
+        font-size: 0.75rem; font-weight: 600; cursor: pointer;
+        transition: background 0.2s; margin-top: 6px;
+    }
+    .btn-update:hover { background: #0066d6; }
+
+    /* Legend */
+    .legend {
+        position: absolute; bottom: 20px; left: 20px; z-index: 10;
+        background: rgba(26,29,40,0.92); border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 10px; padding: 12px 16px;
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    }
+    .legend-title { font-size: 0.6rem; color: #8b8fa3; text-transform: uppercase; margin-bottom: 6px; }
+    .legend-bar {
+        width: 200px; height: 10px; border-radius: 5px;
+        background: linear-gradient(to right, #22c55e, #eab308, #ef4444);
+        margin-bottom: 4px;
+    }
+    .legend-labels { display: flex; justify-content: space-between; font-size: 0.55rem; color: #8b8fa3; }
+
+    /* Tooltip */
+    .globe-tooltip {
+        background: rgba(26,29,40,0.95) !important;
+        border: 1px solid rgba(255,255,255,0.12) !important;
+        border-radius: 10px !important; padding: 10px 14px !important;
+        font-family: 'SF Mono','Fira Code',monospace !important;
+        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
+    }
+    .tt-country { font-size: 0.85rem; font-weight: 700; color: #fff; }
+    .tt-rate { font-size: 1.4rem; font-weight: 700; margin: 4px 0; }
+    .tt-tax { font-size: 0.7rem; color: #8b8fa3; }
+    .tt-note { font-size: 0.6rem; color: #5AC8FA; margin-top: 4px; font-style: italic; }
+    .tt-unsupported { font-size: 0.7rem; color: #8b8fa3; }
+
+    /* Active location card */
+    .active-card {
+        position: absolute; top: 20px; right: 20px; z-index: 10;
+        background: rgba(26,29,40,0.92); border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px; padding: 20px; min-width: 240px;
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        display: none;
+    }
+    .active-card.visible { display: block; }
+    .active-card .ac-label { font-size: 0.6rem; color: #8b8fa3; text-transform: uppercase; }
+    .active-card .ac-name { font-size: 1rem; font-weight: 700; margin: 2px 0 8px; }
+    .active-card .ac-rate { font-size: 2rem; font-weight: 700; }
+    .active-card .ac-detail { font-size: 0.7rem; color: #8b8fa3; margin-top: 4px; }
+    .active-card .ac-breakdown { margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px; }
+    .ac-row { display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 4px; }
+    .ac-row .label { color: #8b8fa3; }
+</style>
+</head>
+<body>
+<div id="globe-container"></div>
+
+<!-- Controls -->
+<div class="controls">
+    <h1>tax globe</h1>
+    <div class="subtitle">click a country to see tax breakdown</div>
+    <div class="input-group">
+        <label>work income ($)</label>
+        <input type="number" id="gInc" value="150000">
+    </div>
+    <div class="input-group">
+        <label>long-term capital gains ($)</label>
+        <input type="number" id="gLt" value="50000">
+    </div>
+    <div class="input-group">
+        <label>short-term capital gains ($)</label>
+        <input type="number" id="gSt" value="30000">
+    </div>
+    <button class="btn-update" onclick="updateAll()">recalculate</button>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+    <div class="legend-title">effective tax rate</div>
+    <div class="legend-bar"></div>
+    <div class="legend-labels"><span>0%</span><span>20%</span><span>50%+</span></div>
+</div>
+
+<!-- Active location detail -->
+<div class="active-card" id="activeCard">
+    <div class="ac-label">selected location</div>
+    <div class="ac-name" id="acName">--</div>
+    <div class="ac-rate" id="acRate" style="color: #22c55e;">0%</div>
+    <div class="ac-detail" id="acDetail"></div>
+    <div class="ac-breakdown" id="acBreakdown"></div>
+</div>
+
+<script>
+// ========== TAX ENGINE (simplified from main calculator) ==========
+const fedBrackets = {
+    single: [[0,11925,0.10],[11925,48475,0.12],[48475,103350,0.22],[103350,197300,0.24],[197300,250525,0.32],[250525,626350,0.35],[626350,Infinity,0.37]],
+};
+const fedLTCG = {
+    single: [[0,48350,0],[48350,533400,0.15],[533400,Infinity,0.20]],
+};
+const ca = [[0,10412,0.01],[10412,24684,0.02],[24684,38959,0.04],[38959,54081,0.06],[54081,68350,0.08],[68350,349137,0.093],[349137,418961,0.103],[418961,698271,0.113],[698271,Infinity,0.123]];
+const ny = [[0,8500,0.04],[8500,11700,0.045],[11700,13900,0.0525],[13900,80650,0.0585],[80650,215400,0.0625],[215400,1077550,0.0685],[1077550,Infinity,0.109]];
+const ut = [[0,Infinity,0.0465]];
+const pr = [[0,9000,0],[9000,25000,0.07],[25000,Infinity,0.33]];
+const sg = [[0,20000,0],[20000,30000,0.02],[30000,40000,0.035],[40000,80000,0.07],[80000,120000,0.115],[120000,160000,0.15],[160000,200000,0.18],[200000,240000,0.19],[240000,280000,0.195],[280000,320000,0.20],[320000,500000,0.22],[500000,1000000,0.23],[1000000,Infinity,0.24]];
+const jp = [[0,20270,0.05],[20270,36036,0.10],[36036,71622,0.20],[71622,135135,0.23],[135135,270270,0.33],[270270,540541,0.40],[540541,Infinity,0.45]];
+const au = [[0,13235,0],[13235,30882,0.16],[30882,88235,0.30],[88235,117647,0.37],[117647,Infinity,0.45]];
+const nz = [[0,10280,0.105],[10280,32710,0.175],[32710,51402,0.30],[51402,117757,0.33],[117757,Infinity,0.39]];
+const tw = [[0,18438,0.05],[18438,41563,0.12],[41563,83125,0.20],[83125,155625,0.30],[155625,Infinity,0.40]];
+const hk = [[0,6410,0.02],[6410,12821,0.06],[12821,19231,0.10],[19231,25641,0.14],[25641,Infinity,0.17]];
+const hkStdRate = 0.15;
+
+function taxBracket(amount, brackets) {
+    let tax = 0;
+    for (const [lo, hi, rate] of brackets) {
+        if (amount <= lo) break;
+        tax += (Math.min(amount, hi) - lo) * rate;
+    }
+    return tax;
+}
+function taxBracketStacked(amount, brackets, stackBase) {
+    return taxBracket(stackBase + amount, brackets) - taxBracket(stackBase, brackets);
+}
+
+const locations = {
+    CA: { name: 'California', lat: 36.7, lng: -119.4, iso: 'US', note: 'US Federal + CA State' },
+    NY: { name: 'New York', lat: 40.7, lng: -74.0, iso: 'US', note: 'US Federal + NY State' },
+    UT: { name: 'Utah', lat: 40.8, lng: -111.9, iso: 'US', note: 'US Federal + UT Flat Tax' },
+    TX: { name: 'Texas', lat: 31.0, lng: -100.0, iso: 'US', note: 'US Federal, No State Tax' },
+    FL: { name: 'Florida', lat: 27.6, lng: -81.5, iso: 'US', note: 'US Federal, No State Tax' },
+    WA: { name: 'Washington', lat: 47.4, lng: -120.7, iso: 'US', note: 'US Federal, No State Tax' },
+    NV: { name: 'Nevada', lat: 38.8, lng: -116.4, iso: 'US', note: 'US Federal, No State Tax' },
+    PR: { name: 'Puerto Rico', lat: 18.2, lng: -66.5, iso: 'PR', note: 'Local Tax Only' },
+    SG: { name: 'Singapore', lat: 1.35, lng: 103.8, iso: 'SG', note: 'No Capital Gains Tax' },
+    JP: { name: 'Japan', lat: 36.2, lng: 138.2, iso: 'JP', note: 'Progressive + 20.315% CG' },
+    AE: { name: 'UAE', lat: 23.4, lng: 53.8, iso: 'AE', note: 'No Income or CG Tax' },
+    AU: { name: 'Australia', lat: -25.3, lng: 133.8, iso: 'AU', note: '50% CG Discount (1yr+)' },
+    NZ: { name: 'New Zealand', lat: -40.9, lng: 174.9, iso: 'NZ', note: 'No Capital Gains Tax' },
+    TW: { name: 'Taiwan', lat: 23.7, lng: 121.0, iso: 'TW', note: 'No CG Tax on Securities' },
+    HK: { name: 'Hong Kong', lat: 22.3, lng: 114.2, iso: 'HK', note: '15% Standard Rate Cap' },
+};
+
+function calcTax(loc, inc, lt, st) {
+    const noFed = ['PR','SG','JP','AE','AU','NZ','TW','HK'].includes(loc);
+    const stdDed = noFed ? 0 : 15000;
+
+    let fedTax = 0;
+    if (!noFed) {
+        const fedInc = Math.max(0, inc + st - stdDed);
+        fedTax = taxBracket(fedInc, fedBrackets.single);
+        fedTax += taxBracketStacked(lt, fedLTCG.single, fedInc);
+    }
+
+    let locTax = 0;
+    const brackets = { CA: ca, NY: ny, UT: ut, PR: pr, SG: sg, JP: jp, AU: au, NZ: nz, TW: tw, HK: hk };
+    const b = brackets[loc];
+
+    if (loc === 'AE') { locTax = 0; }
+    else if (['TX','FL','WA','NV'].includes(loc)) { locTax = 0; }
+    else if (loc === 'TW') { locTax = taxBracket(inc, tw); }
+    else if (loc === 'HK') {
+        const prog = taxBracket(inc, hk);
+        const std = inc * hkStdRate;
+        locTax = Math.min(prog, std);
+    } else if (loc === 'JP') {
+        locTax = taxBracket(inc, jp);
+        locTax += (lt + st) * 0.20315;
+    } else if (loc === 'AU') {
+        const base = taxBracket(inc, au);
+        const stTax = taxBracketStacked(st, au, inc);
+        const ltTax = taxBracketStacked(lt, au, inc + st) * 0.5;
+        locTax = base + stTax + ltTax;
+    } else if (loc === 'NZ' || loc === 'SG') {
+        locTax = taxBracket(inc, b);
+    } else if (b) {
+        let stack = 0;
+        locTax = taxBracket(inc, b); stack = inc;
+        locTax += taxBracketStacked(st, b, stack); stack += st;
+        locTax += taxBracketStacked(lt, b, stack);
+    }
+
+    const total = fedTax + locTax;
+    const totalEarned = inc + lt + st;
+    const rate = totalEarned > 0 ? (total / totalEarned * 100) : 0;
+    return { fedTax, locTax, total, rate, totalEarned, net: totalEarned - total };
+}
+
+// ========== COLOR ==========
+function rateColor(pct) {
+    let r, g, b;
+    if (pct <= 20) {
+        const t = pct / 20;
+        r = Math.round(34 + (234 - 34) * t);
+        g = Math.round(197 + (179 - 197) * t);
+        b = Math.round(94 + (8 - 94) * t);
+    } else {
+        const t = Math.min(1, (pct - 20) / 30);
+        r = Math.round(234 + (239 - 234) * t);
+        g = Math.round(179 - 179 * t + 68 * t);
+        b = Math.round(8 + (68 - 8) * t);
+    }
+    return `rgb(${r},${g},${b})`;
+}
+
+function rateHex(pct) {
+    let r, g, b;
+    if (pct <= 20) {
+        const t = pct / 20;
+        r = Math.round(34 + (234 - 34) * t);
+        g = Math.round(197 + (179 - 197) * t);
+        b = Math.round(94 + (8 - 94) * t);
+    } else {
+        const t = Math.min(1, (pct - 20) / 30);
+        r = Math.round(234 + (239 - 234) * t);
+        g = Math.round(179 - 179 * t + 68 * t);
+        b = Math.round(8 + (68 - 8) * t);
+    }
+    return '#' + [r,g,b].map(c => c.toString(16).padStart(2,'0')).join('');
+}
+
+function fmt(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+
+// ========== GLOBE ==========
+let globe;
+let pointsData = [];
+
+function buildPoints() {
+    const inc = +document.getElementById('gInc').value || 0;
+    const lt = +document.getElementById('gLt').value || 0;
+    const st = +document.getElementById('gSt').value || 0;
+
+    pointsData = Object.entries(locations).map(([code, loc]) => {
+        const tax = calcTax(code, inc, lt, st);
+        return {
+            code,
+            lat: loc.lat,
+            lng: loc.lng,
+            name: loc.name,
+            iso: loc.iso,
+            note: loc.note,
+            rate: tax.rate,
+            total: tax.total,
+            fedTax: tax.fedTax,
+            locTax: tax.locTax,
+            net: tax.net,
+            totalEarned: tax.totalEarned,
+            color: rateHex(tax.rate),
+            size: 0.6 + tax.rate / 30,
+        };
+    });
+    return pointsData;
+}
+
+function showCard(d) {
+    const card = document.getElementById('activeCard');
+    document.getElementById('acName').textContent = d.name;
+    const rateEl = document.getElementById('acRate');
+    rateEl.textContent = d.rate.toFixed(1) + '%';
+    rateEl.style.color = rateColor(d.rate);
+    document.getElementById('acDetail').textContent = d.note;
+    document.getElementById('acBreakdown').innerHTML = `
+        <div class="ac-row"><span class="label">total earned</span><span>${fmt(d.totalEarned)}</span></div>
+        ${d.fedTax > 0 ? `<div class="ac-row"><span class="label">federal tax</span><span>${fmt(d.fedTax)}</span></div>` : ''}
+        <div class="ac-row"><span class="label">local tax</span><span>${fmt(d.locTax)}</span></div>
+        <div class="ac-row"><span class="label">total tax</span><span style="color:${rateColor(d.rate)};font-weight:700">${fmt(d.total)}</span></div>
+        <div class="ac-row"><span class="label">take-home</span><span style="color:#22c55e;font-weight:700">${fmt(d.net)}</span></div>
+    `;
+    card.classList.add('visible');
+}
+
+function initGlobe() {
+    buildPoints();
+
+    globe = Globe()
+        .globeImageUrl('https://unpkg.com/three-globe@2.35.1/example/img/earth-dark.jpg')
+        .backgroundColor('#0d0f17')
+        .atmosphereColor('#007AFF')
+        .atmosphereAltitude(0.15)
+        .pointsData(pointsData)
+        .pointLat('lat')
+        .pointLng('lng')
+        .pointAltitude(d => 0.01 + d.rate / 500)
+        .pointRadius(d => d.size)
+        .pointColor('color')
+        .pointLabel(d => `
+            <div class="globe-tooltip">
+                <div class="tt-country">${d.name}</div>
+                <div class="tt-rate" style="color:${rateColor(d.rate)}">${d.rate.toFixed(1)}%</div>
+                <div class="tt-tax">tax: ${fmt(d.total)} / take-home: ${fmt(d.net)}</div>
+                <div class="tt-note">${d.note}</div>
+            </div>
+        `)
+        .onPointClick(d => {
+            showCard(d);
+            globe.pointOfView({ lat: d.lat, lng: d.lng, altitude: 2.2 }, 800);
+        })
+        .labelsData(pointsData)
+        .labelLat('lat')
+        .labelLng('lng')
+        .labelText('code')
+        .labelSize(1.2)
+        .labelDotRadius(0)
+        .labelColor(d => '#ffffff')
+        .labelAltitude(d => 0.02 + d.rate / 500)
+        .labelResolution(2)
+        (document.getElementById('globe-container'));
+
+    // Initial view — tilted to show Americas + Europe
+    globe.pointOfView({ lat: 25, lng: -30, altitude: 2.5 });
+
+    // Auto-rotate
+    globe.controls().autoRotate = true;
+    globe.controls().autoRotateSpeed = 0.4;
+    globe.controls().enableDamping = true;
+
+    // Stop auto-rotate on interaction
+    globe.controls().addEventListener('start', () => {
+        globe.controls().autoRotate = false;
+    });
+}
+
+function updateAll() {
+    buildPoints();
+    globe.pointsData(pointsData);
+    globe.labelsData(pointsData);
+    document.getElementById('activeCard').classList.remove('visible');
+}
+
+// Recalculate on enter key
+document.querySelectorAll('.controls input').forEach(inp => {
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') updateAll(); });
+});
+
+// Resize handler
+window.addEventListener('resize', () => {
+    globe.width(window.innerWidth);
+    globe.height(window.innerHeight);
+});
+
+initGlobe();
+</script>
+</body>
+</html>

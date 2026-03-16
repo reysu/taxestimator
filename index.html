@@ -13,8 +13,8 @@
         --border: #2e3347;
         --text: #e4e6ed;
         --text-muted: #8b8fa3;
-        --accent: #6c72cb;
-        --accent-light: #8b8fdb;
+        --accent: #007AFF;
+        --accent-light: #5AC8FA;
         --red: #ef4444;
         --red-dim: rgba(239,68,68,0.15);
         --green: #22c55e;
@@ -25,10 +25,10 @@
         --yellow-dim: rgba(234,179,8,0.15);
         --chart-grid: rgba(46,51,71,0.5);
         --chart-text: #8b8fa3;
-        --chart-fed: rgba(107,114,203,0.7);
+        --chart-fed: rgba(0,122,255,0.7);
         --chart-loc: rgba(239,68,68,0.5);
         --chart-loc-all: rgba(239,68,68,0.4);
-        --chart-highlight: rgba(107,114,203,0.8);
+        --chart-highlight: rgba(0,122,255,0.8);
     }
     [data-theme="light"] {
         --bg: #f5f6fa;
@@ -37,8 +37,8 @@
         --border: #d8dbe5;
         --text: #1a1d27;
         --text-muted: #5f6478;
-        --accent: #5558c8;
-        --accent-light: #5558c8;
+        --accent: #0071E3;
+        --accent-light: #0071E3;
         --red: #dc2626;
         --red-dim: rgba(220,38,38,0.1);
         --green: #16a34a;
@@ -49,10 +49,10 @@
         --yellow-dim: rgba(202,138,4,0.1);
         --chart-grid: rgba(0,0,0,0.08);
         --chart-text: #5f6478;
-        --chart-fed: rgba(85,88,200,0.7);
+        --chart-fed: rgba(0,113,227,0.7);
         --chart-loc: rgba(220,38,38,0.5);
         --chart-loc-all: rgba(220,38,38,0.35);
-        --chart-highlight: rgba(85,88,200,0.8);
+        --chart-highlight: rgba(0,113,227,0.8);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -126,7 +126,7 @@
     }
     input[type=number]:focus {
         outline: none; border-color: var(--accent);
-        box-shadow: 0 0 0 2px rgba(108,114,203,0.2);
+        box-shadow: 0 0 0 2px rgba(0,122,255,0.2);
     }
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
@@ -407,6 +407,117 @@
         .help::after { left: 0; transform: none; max-width: 200px; }
     }
 
+    /* Sandbox */
+    .sandbox-card {
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: 12px; padding: 1.5rem; margin-top: 0.75rem;
+    }
+    .sandbox-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 1rem;
+    }
+    .sandbox-total {
+        font-size: 1.1rem; font-weight: 700;
+        font-family: 'SF Mono', 'Fira Code', monospace;
+        color: var(--accent-light);
+    }
+    .sandbox-slider-row {
+        display: grid; grid-template-columns: 120px 1fr 70px; gap: 0.75rem;
+        align-items: center; padding: 0.6rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .sandbox-slider-row:last-of-type { border-bottom: none; }
+    .sandbox-slider-label {
+        font-size: 0.82rem; color: var(--text-muted); font-weight: 500;
+    }
+    .sandbox-slider-row input[type=range] {
+        margin: 0; grid-column: auto;
+    }
+    .sandbox-pct {
+        font-size: 0.9rem; font-weight: 700; text-align: right;
+        font-family: 'SF Mono', 'Fira Code', monospace; color: var(--text);
+        min-width: 50px;
+    }
+    .sandbox-results {
+        display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;
+        margin-top: 1rem;
+    }
+    .sandbox-result {
+        text-align: center; padding: 1rem 0.5rem; border-radius: 10px;
+        border: 1px solid var(--border);
+    }
+    .sandbox-result .sr-label {
+        font-size: 0.65rem; font-weight: 600; text-transform: uppercase;
+        letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.3rem;
+    }
+    .sandbox-result .sr-value {
+        font-size: 1.15rem; font-weight: 800;
+        font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+    .sandbox-diff {
+        text-align: center; margin-top: 0.75rem; font-size: 0.85rem;
+        font-weight: 600; padding: 0.5rem; border-radius: 8px;
+        transition: all 0.2s;
+    }
+    .sandbox-diff.save { background: var(--green-dim); color: var(--green); }
+    .sandbox-diff.cost { background: var(--red-dim); color: var(--red); }
+    .sandbox-diff.neutral { background: var(--surface2); color: var(--text-muted); }
+    .sandbox-amounts {
+        display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    .sandbox-amt {
+        text-align: center; font-size: 0.75rem; color: var(--text-muted);
+        font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    /* SVG World Map */
+    .geo-map {
+        display: flex; flex-direction: column; align-items: center;
+        padding: 1rem; background: var(--surface);
+        border: 1px solid var(--border); border-radius: 12px; margin-top: 0.75rem;
+        position: relative;
+    }
+    #worldMap { width: 100%; max-width: 750px; height: auto; }
+    .map-bg { fill: var(--surface2); stroke: var(--border); stroke-width: 0.3; }
+    .map-region {
+        stroke: var(--border); stroke-width: 0.4;
+        cursor: pointer; transition: opacity 0.15s, stroke-width 0.15s;
+    }
+    .map-region:hover { opacity: 0.8; stroke-width: 1.2; stroke: var(--text); }
+    .map-region.active { stroke: var(--accent); stroke-width: 1.8; filter: drop-shadow(0 0 4px var(--accent)); }
+    .map-markers circle { cursor: pointer; transition: r 0.15s; }
+    .map-markers .map-region:hover circle { r: 9; }
+    .map-markers text {
+        font-size: 5px; fill: #fff; text-anchor: middle; dominant-baseline: central;
+        pointer-events: none; font-family: 'SF Mono','Fira Code',monospace; font-weight: 700;
+    }
+    .map-tooltip {
+        pointer-events: none; opacity: 0; transition: opacity 0.15s;
+        position: absolute; background: var(--surface); border: 1px solid var(--border);
+        border-radius: 6px; padding: 4px 8px; font-size: 0.7rem; white-space: nowrap;
+        font-family: 'SF Mono','Fira Code',monospace; color: var(--text);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 10;
+    }
+    .map-tooltip.visible { opacity: 1; }
+    .map-tooltip .tt-name { font-weight: 700; }
+    .map-tooltip .tt-rate { color: var(--text-muted); margin-left: 6px; }
+
+    /* Lang pills */
+    .lang-pills {
+        position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+        display: flex; gap: 2px; background: var(--surface2);
+        border-radius: 6px; padding: 2px;
+    }
+    .lang-pill {
+        padding: 3px 8px; font-size: 0.65rem; font-weight: 600;
+        border: none; border-radius: 4px; cursor: pointer;
+        background: transparent; color: var(--text-muted);
+        font-family: inherit; transition: all 0.2s;
+    }
+    .lang-pill.active { background: var(--accent); color: #fff; }
+    .lang-pill:not(.active):hover { color: var(--text); }
+
     /* Responsive */
     @media (max-width: 768px) {
         .status-pills { flex-wrap: wrap; }
@@ -420,13 +531,23 @@
         .summary-box .s-value { font-size: 1.25rem; }
         .compare-row { grid-template-columns: 1fr; }
         .chart-wrap { padding: 0.75rem; overflow-x: auto; }
+        .sandbox-slider-row { grid-template-columns: 90px 1fr 55px; gap: 0.5rem; }
+        .sandbox-results { grid-template-columns: 1fr; }
+        .map-markers text { font-size: 4px; }
+        .lang-pills { position: static; transform: none; margin-bottom: 0.5rem; }
+        .header { flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
     }
 </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>tax <span>estimator</span></h1>
+    <div class="lang-pills" id="langPills">
+        <button class="lang-pill active" data-lang="en">EN</button>
+        <button class="lang-pill" data-lang="zh">中</button>
+        <button class="lang-pill" data-lang="ja">日</button>
+    </div>
+    <h1 data-i18n="title"><span data-i18n="title1">tax</span> <span data-i18n="title2">estimator</span></h1>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
         <span class="theme-toggle-icons">
             <span>&#9790;</span><span>&#9788;</span>
@@ -436,62 +557,66 @@
 
 <!-- Filing Status -->
 <div class="card">
-    <div class="card-label"><span class="help" data-tip="Your tax filing status determines your tax brackets, standard deduction, and thresholds. Choose the one that matches your IRS filing.">filing status</span></div>
+    <div class="card-label"><span class="help" data-tip-i18n="tip_filing" data-tip="Your tax filing status determines your tax brackets, standard deduction, and thresholds. Choose the one that matches your IRS filing." data-i18n="filing_status">filing status</span></div>
     <div class="status-pills" id="statusPills">
-        <button class="status-pill active" data-status="single"><span class="help" data-tip="Unmarried, divorced, or legally separated. Uses the narrowest tax brackets and a $15,000 standard deduction for 2025.">single</span></button>
-        <button class="status-pill" data-status="mfj"><span class="help" data-tip="Married couples filing one return together. Gets the widest brackets (roughly 2x single) and a $30,000 standard deduction. Usually the lowest combined tax for married couples.">married filing jointly</span></button>
-        <button class="status-pill" data-status="hoh"><span class="help" data-tip="For unmarried taxpayers who pay more than half the cost of keeping up a home for a qualifying dependent. Wider brackets than single and a $22,500 standard deduction.">head of household</span></button>
+        <button class="status-pill active" data-status="single"><span class="help" data-tip-i18n="tip_single" data-tip="Unmarried, divorced, or legally separated. Uses the narrowest tax brackets and a $15,000 standard deduction for 2025." data-i18n="single">single</span></button>
+        <button class="status-pill" data-status="mfj"><span class="help" data-tip-i18n="tip_mfj" data-tip="Married couples filing one return together. Gets the widest brackets (roughly 2x single) and a $30,000 standard deduction. Usually the lowest combined tax for married couples." data-i18n="mfj">married filing jointly</span></button>
+        <button class="status-pill" data-status="hoh"><span class="help" data-tip-i18n="tip_hoh" data-tip="For unmarried taxpayers who pay more than half the cost of keeping up a home for a qualifying dependent. Wider brackets than single and a $22,500 standard deduction." data-i18n="hoh">head of household</span></button>
     </div>
-    <div class="card-label" style="margin-top: 0.5rem;">location</div>
+    <div class="card-label" style="margin-top: 0.5rem;" data-i18n="location">location</div>
     <div class="select-wrap">
         <select id="state">
-            <option value="CA">california</option>
-            <option value="NY">new york</option>
-            <option value="UT">utah</option>
-            <option value="TX">texas</option>
-            <option value="FL">florida</option>
-            <option value="WA">washington (seattle)</option>
-            <option value="NV">nevada (las vegas)</option>
-            <option value="PR">puerto rico</option>
-            <option value="SG">singapore resident</option>
-            <option value="JP">japan resident</option>
-            <option value="AE">dubai (UAE)</option>
-            <option value="AU">australia</option>
-            <option value="NZ">new zealand</option>
+            <option value="CA" data-i18n="l_CA">california</option>
+            <option value="NY" data-i18n="l_NY">new york</option>
+            <option value="UT" data-i18n="l_UT">utah</option>
+            <option value="TX" data-i18n="l_TX">texas</option>
+            <option value="FL" data-i18n="l_FL">florida</option>
+            <option value="WA" data-i18n="l_WA">washington (seattle)</option>
+            <option value="NV" data-i18n="l_NV">nevada (las vegas)</option>
+            <option value="PR" data-i18n="l_PR">puerto rico</option>
+            <option value="SG" data-i18n="l_SG">singapore resident</option>
+            <option value="JP" data-i18n="l_JP">japan resident</option>
+            <option value="AE" data-i18n="l_AE">dubai (UAE)</option>
+            <option value="AU" data-i18n="l_AU">australia</option>
+            <option value="NZ" data-i18n="l_NZ">new zealand</option>
+            <option value="TW" data-i18n="l_TW">taiwan</option>
+            <option value="HK" data-i18n="l_HK">hong kong</option>
         </select>
     </div>
     <div class="wa-toggle" id="waToggle">
         <input type="checkbox" id="waMillionaires" checked>
-        <label for="waMillionaires">include WA millionaires tax (9.9% on income &gt; $1M)</label>
+        <label for="waMillionaires" data-i18n="wa_label">include WA millionaires tax (9.9% on income &gt; $1M)</label>
         <span class="wa-badge">2028</span>
     </div>
     <div class="compare-section">
-        <div class="card-label" style="margin-top: 0.75rem;"><span class="help" data-tip="Compare your tax across different locations or filing statuses to see potential savings.">compare with</span></div>
+        <div class="card-label" style="margin-top: 0.75rem;"><span class="help" data-tip-i18n="tip_compare" data-tip="Compare your tax across different locations or filing statuses to see potential savings." data-i18n="compare_with">compare with</span></div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
             <div class="select-wrap">
                 <select id="compareState">
-                    <option value="">location: same</option>
-                    <option value="CA">california</option>
-                    <option value="NY">new york</option>
-                    <option value="UT">utah</option>
-                    <option value="TX">texas</option>
-                    <option value="FL">florida</option>
-                    <option value="WA">washington (seattle)</option>
-                    <option value="NV">nevada (las vegas)</option>
-                    <option value="PR">puerto rico</option>
-                    <option value="SG">singapore resident</option>
-                    <option value="JP">japan resident</option>
-                    <option value="AE">dubai (UAE)</option>
-                    <option value="AU">australia</option>
-                    <option value="NZ">new zealand</option>
+                    <option value="" data-i18n="loc_same">location: same</option>
+                    <option value="CA" data-i18n="l_CA">california</option>
+                    <option value="NY" data-i18n="l_NY">new york</option>
+                    <option value="UT" data-i18n="l_UT">utah</option>
+                    <option value="TX" data-i18n="l_TX">texas</option>
+                    <option value="FL" data-i18n="l_FL">florida</option>
+                    <option value="WA" data-i18n="l_WA">washington (seattle)</option>
+                    <option value="NV" data-i18n="l_NV">nevada (las vegas)</option>
+                    <option value="PR" data-i18n="l_PR">puerto rico</option>
+                    <option value="SG" data-i18n="l_SG">singapore resident</option>
+                    <option value="JP" data-i18n="l_JP">japan resident</option>
+                    <option value="AE" data-i18n="l_AE">dubai (UAE)</option>
+                    <option value="AU" data-i18n="l_AU">australia</option>
+                    <option value="NZ" data-i18n="l_NZ">new zealand</option>
+                    <option value="TW" data-i18n="l_TW">taiwan</option>
+                    <option value="HK" data-i18n="l_HK">hong kong</option>
                 </select>
             </div>
             <div class="select-wrap">
                 <select id="compareStatus">
-                    <option value="">status: same</option>
-                    <option value="single">single</option>
-                    <option value="mfj">married filing jointly</option>
-                    <option value="hoh">head of household</option>
+                    <option value="" data-i18n="status_same">status: same</option>
+                    <option value="single" data-i18n="single">single</option>
+                    <option value="mfj" data-i18n="mfj">married filing jointly</option>
+                    <option value="hoh" data-i18n="hoh">head of household</option>
                 </select>
             </div>
         </div>
@@ -500,15 +625,15 @@
 
 <!-- Inputs -->
 <div class="card">
-    <div class="card-label">income &amp; gains</div>
+    <div class="card-label" data-i18n="income_gains">income &amp; gains</div>
 
     <div class="se-toggle">
         <input type="checkbox" id="selfEmployed">
-        <label for="selfEmployed"><span class="help" data-tip="FICA is the Federal Insurance Contributions Act tax — it funds Social Security (12.4%) and Medicare (2.9%). Self-employed workers pay both the employee and employer portions.">self-employed (include FICA / SE tax)</span></label>
+        <label for="selfEmployed"><span class="help" data-tip-i18n="tip_se" data-tip="FICA is the Federal Insurance Contributions Act tax — it funds Social Security (12.4%) and Medicare (2.9%). Self-employed workers pay both the employee and employer portions." data-i18n="se_label">self-employed (include FICA / SE tax)</span></label>
     </div>
 
     <div class="input-row" data-id="inc">
-        <div class="input-label">personal income from work</div>
+        <div class="input-label" data-i18n="income_work">personal income from work</div>
         <div class="input-right">
             <input type="number" id="inc" value="0" min="0">
             <div class="btn-group">
@@ -520,7 +645,7 @@
     </div>
 
     <div class="input-row" data-id="lt">
-        <div class="input-label"><span class="help" data-tip="Profits from selling assets held longer than 1 year. Taxed at lower federal rates (0%, 15%, or 20%) than ordinary income.">long term capital gains</span></div>
+        <div class="input-label"><span class="help" data-tip-i18n="tip_ltcg" data-tip="Profits from selling assets held longer than 1 year. Taxed at lower federal rates (0%, 15%, or 20%) than ordinary income." data-i18n="ltcg">long term capital gains</span></div>
         <div class="input-right">
             <input type="number" id="lt" value="0" min="0">
             <div class="btn-group">
@@ -532,7 +657,7 @@
     </div>
 
     <div class="input-row" data-id="st">
-        <div class="input-label"><span class="help" data-tip="Profits from selling assets held 1 year or less. Taxed as ordinary income at your regular federal tax rate.">short term capital gains</span></div>
+        <div class="input-label"><span class="help" data-tip-i18n="tip_stcg" data-tip="Profits from selling assets held 1 year or less. Taxed as ordinary income at your regular federal tax rate." data-i18n="stcg">short term capital gains</span></div>
         <div class="input-right">
             <input type="number" id="st" value="0" min="0">
             <div class="btn-group">
@@ -544,7 +669,7 @@
     </div>
 
     <div class="input-row" data-id="loss">
-        <div class="input-label"><span class="help" data-tip="Losses from selling assets for less than you paid. Offsets gains first, then up to $3,000 can be deducted from ordinary income (US).">capital losses (deduction)</span></div>
+        <div class="input-label"><span class="help" data-tip-i18n="tip_losses" data-tip="Losses from selling assets for less than you paid. Offsets gains first, then up to $3,000 can be deducted from ordinary income (US)." data-i18n="losses">capital losses (deduction)</span></div>
         <div class="input-right">
             <input type="number" id="loss" value="0" min="0">
             <div class="btn-group">
@@ -557,7 +682,7 @@
 
     <div class="deduction-toggle">
         <input type="checkbox" id="useItemized">
-        <label for="useItemized"><span class="help" data-tip="Itemized deductions let you list specific expenses (mortgage interest, state taxes, charity, etc.) instead of taking the flat standard deduction. Use whichever is higher.">use itemized deduction instead of standard</span></label>
+        <label for="useItemized"><span class="help" data-tip-i18n="tip_itemized" data-tip="Itemized deductions let you list specific expenses (mortgage interest, state taxes, charity, etc.) instead of taking the flat standard deduction. Use whichever is higher." data-i18n="use_itemized">use itemized deduction instead of standard</span></label>
     </div>
     <div class="itemized-input" id="itemizedWrap">
         <div class="input-row" data-id="itemized">
@@ -576,17 +701,17 @@
 <!-- Per-type results -->
 <div class="results-grid" id="resultsGrid">
     <div class="result-item" id="resIncome">
-        <div class="label">work income</div>
+        <div class="label" data-i18n="work_income">work income</div>
         <div class="value">$0</div>
         <div class="sub">0% effective</div>
     </div>
     <div class="result-item" id="resLong">
-        <div class="label">long term</div>
+        <div class="label" data-i18n="long_term">long term</div>
         <div class="value">$0</div>
         <div class="sub">0% effective</div>
     </div>
     <div class="result-item" id="resShort">
-        <div class="label">short term</div>
+        <div class="label" data-i18n="short_term">short term</div>
         <div class="value">$0</div>
         <div class="sub">0% effective</div>
     </div>
@@ -594,7 +719,7 @@
 
 <!-- Breakdown -->
 <div class="card" id="breakdownCard">
-    <div class="card-label">tax breakdown</div>
+    <div class="card-label" data-i18n="tax_breakdown">tax breakdown</div>
     <div id="breakdownRows"></div>
     <div class="tooltip" id="waTooltip">
         WA millionaires tax (SB 6346): 9.9% on income over $1M — signed into law Mar 2026, effective Jan 2028
@@ -607,7 +732,7 @@
 </div>
 <div class="bracket-table-wrap" id="bracketTableWrap">
     <div class="card">
-        <div class="card-label">bracket breakdown</div>
+        <div class="card-label" data-i18n="bracket_breakdown">bracket breakdown</div>
         <table class="bracket-table" id="bracketTable"></table>
     </div>
 </div>
@@ -615,27 +740,27 @@
 <!-- Summary -->
 <div class="summary-grid">
     <div class="summary-box box-earned">
-        <div class="s-label">total earned</div>
+        <div class="s-label" data-i18n="total_earned">total earned</div>
         <div class="s-value" id="earned">$0</div>
     </div>
     <div class="summary-box box-owed">
-        <div class="s-label">total owed</div>
+        <div class="s-label" data-i18n="total_owed">total owed</div>
         <div class="s-value" id="total">$0</div>
     </div>
     <div class="summary-box box-profit">
-        <div class="s-label">total profit</div>
+        <div class="s-label" data-i18n="total_profit">total profit</div>
         <div class="s-value" id="profit">$0</div>
     </div>
 </div>
 
 <!-- Share -->
 <div class="share-row">
-    <button class="copy-btn" id="copyBtn">copy shareable link</button>
+    <button class="copy-btn" id="copyBtn" data-i18n="copy_link">copy shareable link</button>
 </div>
 
 <!-- Comparison -->
 <div id="compareResults" style="display:none;">
-    <h2>location comparison</h2>
+    <h2 data-i18n="h_comparison">location comparison</h2>
     <div class="compare-row" id="compareRow"></div>
     <div class="compare-diff" id="compareDiff"></div>
 </div>
@@ -645,14 +770,142 @@
     <canvas id="chart" height="80"></canvas>
 </div>
 
-<h2><span class="help" data-tip="The tax rate applied to your next dollar of income. This changes as you cross bracket thresholds — it's not the rate on all your income.">marginal tax rate</span></h2>
+<h2><span class="help" data-tip-i18n="tip_marginal" data-tip="The tax rate applied to your next dollar of income. This changes as you cross bracket thresholds — it's not the rate on all your income." data-i18n="h_marginal">marginal tax rate</span></h2>
 <div class="chart-wrap">
     <canvas id="marginalChart" height="100"></canvas>
 </div>
 
-<h2>tax owed by location</h2>
+<h2 data-i18n="h_location_tax">tax owed by location</h2>
+<div class="geo-map" id="geoMap">
+<svg id="worldMap" viewBox="60 30 870 380" xmlns="http://www.w3.org/2000/svg">
+<!-- Background landmasses -->
+<g class="map-bg">
+<!-- Canada + Alaska -->
+<path d="M79.3,106 L89,97.9 L103.5,89.7 L125.3,84.3 L127.7,76.1 L137.3,70.7 L151.8,73.4 L156.7,81.6 L139.8,84.3 L166.3,89.7 L176,95.1 L176,100.6 L185.7,106 L185.7,111.4 L195.3,114.1 L200.2,114.1 L214.7,114.1 L229.2,114.1 L243.7,114.1 L260.6,114.1 L265.4,111.4 L277.5,106 L282.3,114.1 L289.6,116.9 L292,122.3 L292,119.6 L287.2,116.9 L279.9,116.9 L279.9,114.1 L284.8,114.1 L289.6,111.4 L301.7,108.7 L301.7,122.3 L311.3,125 L321,119.6 L328.3,116.9 L337.9,119.6 L347.6,122.3 L340.3,127.7 L333.1,122.3 L325.8,119.6 L316.2,125 L366.9,119.6 L362.1,114.1 L359.7,106 L366.9,119.6 L359.7,103.3 L352.4,97.9 L345.2,89.7 L337.9,84.3 L337.9,76.1 L345.2,68 L340.3,59.9 L330.7,51.7 L313.8,46.3 L301.7,49 L292,54.4 L272.7,46.3 L277.5,40.9 L253.3,43.6 L236.4,49 L205,40.9 L180.8,46.3 L180.8,57.1 L163.9,62.6 L151.8,68 L144.6,73.4 L132.5,78.9 L120.4,84.3 L108.3,89.7 L96.3,95.1 L84.2,100.6 L79.3,106Z"/>
+<!-- Mexico + Central America -->
+<path d="M212.3,158.9 L217.1,163 L221.9,168.4 L224.3,173.9 L229.2,179.3 L229.2,184.7 L238.8,184.7 L238.8,192.9 L241.3,195.6 L253.3,201 L263,203.7 L267.8,203.7 L270.3,206.4 L272.7,206.4 L275.1,198.3 L279.9,198.3 L279.9,201 L279.9,203.7 L279.9,206.4 L277.5,209.1 L282.3,209.1 L284.8,211.9 L287.2,214.6 L289.6,217.3 L292,220 L294.4,222.7 L301.7,225.4 L304.1,222.7 L308.9,225.4 L311.3,220 L313.8,217.3 L321,214.6 L296.8,214.6 L292,206.4 L282.3,201 L282.3,198.3 L282.3,195.6 L284.8,190.1 L278.7,188.8 L263,195.6 L260.6,192.9 L260.6,187.4 L259.4,182 L259.9,176.6 L255.8,176.6 L250.9,171.1 L243.7,168.4 L238.8,163 L234,160.3 L226.8,162.2 L217.8,158.9 L212.3,158.9Z"/>
+<!-- South America -->
+<path d="M321,214.6 L313.8,217.3 L311.3,220 L308.9,225.4 L306.5,233.6 L301.7,241.7 L301.7,247.1 L299.3,252.6 L299.3,260.7 L301.7,263.4 L304.1,271.6 L311.3,285.1 L323.4,296 L325.8,309.6 L323.4,320.4 L321,328.6 L321,336.7 L316.2,347.6 L318.6,358.4 L321,366.6 L316.2,374.7 L313.8,382.9 L323.4,391 L328.3,396.4 L335.5,396.4 L337.9,393.7 L330.7,388.3 L335.5,377.4 L335.5,372 L342.8,361.1 L345.2,353 L357.3,350.3 L362.1,342.1 L366.9,336.7 L374.2,328.6 L376.6,323.1 L379,315 L388.7,309.6 L398.3,301.4 L400.8,290.6 L403.2,282.4 L408,274.3 L410.4,266.1 L410.4,260.7 L393.5,255.3 L388.7,252.6 L379,249.9 L374.2,247.1 L369.3,241.7 L364.5,233.6 L354.8,230.9 L350,225.4 L345.2,220 L321,217.3 L321,214.6Z"/>
+<!-- Europe -->
+<path d="M473.3,146.7 L480.5,146.7 L480.5,149.4 L490.2,149.4 L495,146.7 L495,144 L490.2,130.4 L473.3,130.4 L492.6,127.7 L490.2,119.6 L490.2,114.1 L499.8,108.7 L504.7,106 L514.3,100.6 L519.2,97.9 L519.2,95.1 L516.8,95.1 L519.2,92.4 L524,95.1 L524,89.7 L521.6,87 L507.1,78.9 L519.2,73.4 L528.8,65.3 L540.9,57.1 L557.8,54.4 L567.5,57.1 L562.7,62.6 L557.8,70.7 L562.7,81.6 L555.4,84.3 L553,89.7 L545.8,95.1 L538.5,97.9 L528.8,100.6 L531.3,100.6 L528.8,106 L531.3,108.7 L536.1,116.9 L533.7,119.6 L528.8,122.3 L526.4,122.3 L524,127.7 L521.6,130.4 L524,133.1 L528.8,135.9 L533.7,138.6 L533.7,141.3 L533.7,144 L526.4,144 L531.3,146.7 L543.3,141.3 L543.3,135.9 L540.9,133.1 L543.3,138.6 L548.2,141.3 L553,144 L550.6,146.7 L553,144 L560.3,141.3 L565.1,135.9 L565.1,135.9 L562.7,133.1 L557.8,133.1 L562.7,127.7 L555.4,122.3 L548.2,122.3 L548.2,127.7 L540.9,119.6 L536.1,116.9 L514.3,127.7 L509.5,130.4 L502.3,130.4 L502.3,133.1 L495,138.6 L495,144 L495,146.7 L482.9,146.7 L473.3,146.7Z"/>
+<path d="M482.9,111.4 L492.6,108.7 L499.8,106 L495,103.3 L492.6,100.6 L490.2,97.9 L487.8,95.1 L490.2,92.4 L487.8,89.7 L482.9,89.7 L480.5,92.4 L482.9,95.1 L482.9,97.9 L482.9,100.6 L487.8,103.3 L485.3,106 L482.9,108.7 L482.9,111.4Z"/>
+<path d="M480.5,106 L480.5,103.3 L475.7,100.6 L470.8,100.6 L470.8,103.3 L470.8,106 L470.8,108.7 L475.7,108.7 L480.5,106Z"/>
+<!-- Africa -->
+<path d="M480.5,149.4 L490.2,149.4 L495,146.7 L519.2,146.7 L519.2,146.7 L524,154.9 L524,160.3 L519.2,163 L524,163 L553,160.3 L555.4,163 L572.3,163 L574.8,165.7 L574.8,171.1 L579.6,179.3 L584.4,187.4 L591.7,198.3 L598.9,206.4 L601.3,214.6 L611,214.6 L615.8,220 L611,225.4 L606.2,233.6 L601.3,241.7 L596.5,247.1 L594.1,252.6 L591.7,260.7 L591.7,268.9 L591.7,274.3 L594.1,287.9 L582,301.4 L579.6,315 L574.8,323.1 L567.5,331.3 L560.3,339.4 L543.3,342.1 L538.5,339.4 L538.5,336.7 L536.1,331.3 L531.3,323.1 L528.8,306.9 L524,293.3 L528.8,279.7 L524,260.7 L519.2,247.1 L497.4,233.6 L485.3,233.6 L497.4,230.9 L497.4,228.1 L485.3,233.6 L475.7,233.6 L463.6,228.1 L458.8,220 L453.9,214.6 L453.9,209.1 L453.9,206.4 L456.3,198.3 L453.9,190.1 L458.8,182 L463.6,173.9 L470.8,168.4 L475.7,160.3 L482.9,157.6 L492.6,152.1 L480.5,149.4Z"/>
+<!-- Russia -->
+<path d="M567.5,57.1 L596.5,51.7 L601.3,62.6 L611,68 L630.3,62.6 L652.1,57.1 L676.3,51.7 L700.4,49 L724.6,51.7 L748.8,51.7 L772.9,54.4 L797.1,57.1 L814,62.6 L828.5,68 L835.8,70.7 L857.5,78.9 L881.7,84.3 L893.8,78.9 L905.8,70.7 L930,70.7 L905.8,84.3 L888.9,89.7 L869.6,95.1 L840.6,100.6 L838.2,106 L826.1,111.4 L823.7,116.9 L821.3,122.3 L814,127.7 L804.3,133.1 L785,127.7 L782.6,122.3 L780.2,116.9 L765.7,111.4 L712.5,111.4 L693.2,106 L669,111.4 L659.3,116.9 L647.3,122.3 L630.3,127.7 L620.7,133.1 L601.3,133.1 L591.7,127.7 L572.3,133.1 L567.5,122.3 L567.5,111.4 L567.5,97.9 L567.5,84.3 L567.5,70.7 L567.5,57.1Z"/>
+<!-- China, Mongolia, Korea -->
+<path d="M712.5,111.4 L717.3,116.9 L724.6,122.3 L736.7,127.7 L748.8,133.1 L760.8,127.7 L765.7,122.3 L780.2,116.9 L765.7,111.4 L780.2,116.9 L782.6,122.3 L785,127.7 L804.3,133.1 L801.9,138.6 L799.5,144 L801.9,146.7 L806.8,152.1 L804.3,154.9 L799.5,152.1 L789.8,160.3 L789.8,165.7 L787.4,171.1 L787.4,173.9 L785,179.3 L777.8,184.7 L770.5,187.4 L760.8,187.4 L756,190.1 L751.2,187.4 L743.9,187.4 L736.7,184.7 L734.3,182 L729.4,171.1 L712.5,165.7 L698,171.1 L690.8,171.1 L688.3,165.7 L685.9,160.3 L683.5,152.1 L678.7,149.4 L673.8,144 L678.7,138.6 L688.3,133.1 L700.4,127.7 L707.7,122.3 L712.5,111.4Z"/>
+<!-- India + Sri Lanka -->
+<path d="M678.7,149.4 L683.5,152.1 L685.9,160.3 L688.3,165.7 L690.8,171.1 L698,171.1 L702.8,173.9 L707.7,171.1 L712.5,176.6 L710.1,182 L710.1,187.4 L717.3,187.4 L707.7,192.9 L698,198.3 L690.8,203.7 L688.3,209.1 L688.3,217.3 L683.5,225.4 L681.1,225.4 L678.7,220 L676.3,214.6 L673.8,206.4 L671.4,201 L671.4,195.6 L669,190.1 L659.3,182 L647.3,179.3 L647.3,173.9 L656.9,171.1 L659.3,165.7 L673.8,160.3 L673.8,154.9 L678.7,149.4Z"/>
+<path d="M688.3,220 L688.3,222.7 L688.3,228.1 L690.8,230.9 L693.2,228.1 L690.8,222.7 L688.3,220Z"/>
+<!-- Middle East -->
+<path d="M582,146.7 L594.1,146.7 L601.3,152.1 L601.3,157.6 L603.8,160.3 L611,165.7 L611,171.1 L615.8,173.9 L618.3,176.6 L630.3,173.9 L632.8,182 L640,187.4 L635.2,192.9 L632.8,198.3 L627.9,201 L620.7,206.4 L603.8,211.9 L601.3,211.9 L598.9,206.4 L591.7,192.9 L584.4,187.4 L584.4,179.3 L579.6,171.1 L574.8,165.7 L579.6,163 L582,160.3 L582,152.1 L582,146.7Z"/>
+<!-- SE Asia mainland -->
+<path d="M729.4,171.1 L734.3,182 L729.4,187.4 L719.8,192.9 L724.6,198.3 L729.4,203.7 L731.8,209.1 L731.8,220 L736.7,228.1 L739.1,236.3 L743.9,241.7 L746.3,244.4 L743.9,244.4 L743.9,239 L739.1,230.9 L743.9,225.4 L751.2,220 L758.4,214.6 L758.4,209.1 L756,203.7 L753.6,198.3 L751.2,192.9 L756,190.1 L751.2,187.4 L743.9,187.4 L748.8,184.7 L753.6,187.4 L751.2,192.9 L751.2,187.4 L743.9,187.4 L736.7,184.7 L734.3,182 L729.4,171.1Z"/>
+<!-- Indonesia -->
+<path d="M724.6,230.9 L729.4,236.3 L734.3,241.7 L739.1,247.1 L743.9,252.6 L746.3,258 L748.8,263.4 L751.2,260.7 L748.8,255.3 L743.9,249.9 L736.7,244.4 L731.8,239 L727,233.6 L724.6,230.9Z"/>
+<path d="M751.2,263.4 L753.6,266.1 L760.8,266.1 L765.7,268.9 L770.5,268.9 L770.5,266.1 L765.7,266.1 L760.8,263.4 L756,263.4 L751.2,263.4Z"/>
+<path d="M777.8,228.1 L780.2,233.6 L780.2,239 L775.3,244.4 L768.1,247.1 L760.8,247.1 L758.4,244.4 L763.3,239 L772.9,233.6 L777.8,228.1Z"/>
+<path d="M785,244.4 L789.8,247.1 L789.8,249.9 L787.4,252.6 L789.8,255.3 L792.3,252.6 L792.3,249.9 L787.4,247.1 L787.4,244.4 L785,244.4Z"/>
+<path d="M811.6,247.1 L816.4,252.6 L826.1,258 L835.8,263.4 L840.6,268.9 L850.3,268.9 L852.7,263.4 L845.4,258 L835.8,252.6 L823.7,247.1 L811.6,247.1Z"/>
+</g>
+<!-- US background (non-interactive states) -->
+<path class="map-bg" d="M193.6,115.5 L197.8,114.1 L200.2,114.1 L212.3,114.1 L214.7,114.1 L226.8,114.1 L243.7,114.1 L260.6,114.1 L265.4,114.1 L279.9,116.9 L289.6,119.6 L292,122.3 L296.8,127.7 L296.8,130.4 L294.4,133.1 L299.3,133.1 L304.1,130.4 L304.1,131.8 L301.7,133.1 L304.1,133.1 L308.9,133.1 L311.3,130.4 L311.3,127.7 L313.8,125 L323.4,125 L330.7,127.7 L325.8,130.4 L323.4,133.1 L321,135.9 L325.8,135.9 L325.8,133.1 L323.4,133.1 L317.4,135.9 L316.2,135.9 L316.2,137.2 L315,139.9 L313.8,141.3 L312.5,142.6 L311.3,144 L311.3,146.7 L311.3,148.1 L311.3,149.4 L311.3,152.1 L306.5,154.9 L304.1,157.6 L299.3,160.3 L299.3,163 L296.8,164.4 L296.8,165.7 L299.3,168.4 L301.7,173.9 L300.5,179.3 L296.8,180.6 L295.6,176.6 L294.4,171.1 L290.8,165.7 L284.8,165.7 L282.3,165.7 L279.9,165.7 L278.7,167.1 L277.5,168.4 L275.1,168.4 L269,165.7 L267.8,167.1 L265.4,168.4 L261.8,171.1 L260.6,173.9 L259.4,176.6 L255.8,176.6 L250.9,171.1 L246.1,165.7 L243.7,163 L237.6,160.3 L231.6,160.3 L226.8,160.3 L217.8,160.3 L212.3,157.6 L209.8,156.2 L207.4,154.9 L203.8,153.5 L202.6,150.8 L199,146.7 L197.8,144 L196.5,141.3 L195.3,138.6 L194.1,133.1 L194.1,127.7 L195.3,122.3 L194.1,119.6 L193.6,115.5Z"/>
+<!-- Interactive US states -->
+<g class="map-regions">
+<path class="map-region" data-loc="WA" d="M193.6,114.1 L194.1,115.5 L196.5,116.9 L197.8,118.2 L194.8,119.6 L195.3,121.5 L196.5,122.3 L200.2,122.3 L205,122.3 L212.3,122.3 L212.3,119.6 L212.3,116.9 L212.3,114.1 L209.8,114.1 L205,114.1 L200.2,114.1 L197.8,114.1 L193.6,114.1Z"/>
+<path class="map-region" data-loc="CA" d="M194.8,133.1 L194.8,135.9 L195.3,138.6 L196.5,141.3 L197.8,144 L199,144.5 L199,146.7 L200.2,148.1 L201.4,149.4 L202.6,150.8 L203.8,152.1 L203.8,153.5 L205,154.9 L207.4,154.9 L208.6,156.2 L211,157.6 L212.3,158.9 L217.1,158.4 L217.8,157.6 L218.1,153.5 L218.1,152.1 L211,149.4 L205,141.3 L205,133.1 L200.2,133.1 L194.8,133.1Z"/>
+<path class="map-region" data-loc="NV" d="M205,133.1 L212.3,133.1 L212.3,135.9 L212.3,138.6 L212.3,141.3 L212.3,144 L212.3,146.7 L217.1,149.4 L218.1,152.1 L218.1,152.1 L211,149.4 L205,141.3 L205,133.1Z"/>
+<path class="map-region" data-loc="UT" d="M219.5,133.1 L226.8,133.1 L226.8,135.9 L226.8,138.6 L226.8,141.3 L226.8,144 L226.8,146.7 L231.6,146.7 L230.4,146.7 L229.2,146.7 L226.8,146.7 L224.3,146.7 L219.5,146.7 L219.5,144 L219.5,141.3 L219.5,138.6 L219.5,135.9 L219.5,133.1Z"/>
+<path class="map-region" data-loc="TX" d="M246.1,148.1 L253.3,148.1 L253.3,153.5 L255.8,154.9 L260.6,155.4 L263,155.7 L267.8,156.2 L267.8,160.3 L267.8,163 L267.8,165.7 L266.6,167.1 L265.4,168.4 L263,169.8 L260.6,172.5 L259.4,173.9 L259.4,176.6 L255.8,176.6 L254.5,173.9 L250.9,171.1 L248.5,168.4 L246.1,165.7 L243.7,164.4 L242.5,163 L237.6,160.3 L246.1,160.3 L246.1,154.9 L246.1,148.1Z"/>
+<path class="map-region" data-loc="FL" d="M283.5,164.4 L287.2,164.4 L289.6,164.4 L292,164.4 L296.8,164.4 L298,165.7 L299.3,167.1 L300.5,169.8 L301.7,172.5 L301.7,175.2 L301.2,177.9 L299.3,179.3 L297.3,180.6 L296.8,177.9 L295.6,175.2 L294.9,172.5 L294.4,169.8 L293.2,168.4 L290.8,165.7 L289.6,164.4 L283.5,164.4Z"/>
+<path class="map-region" data-loc="NY" d="M302.9,127.7 L304.1,129.1 L304.1,130.4 L306.5,130.4 L302.9,131.8 L302.1,133.1 L308.9,133.1 L313.8,133.1 L316.2,135.9 L316.9,135.9 L316.2,137.2 L316.9,136.7 L321,135.9 L319.8,135.3 L316.9,135 L317.4,133.1 L317.9,131.2 L317.9,130.4 L317.9,126.4 L316.2,125 L313.8,126.4 L311.3,127.7 L302.9,127.7Z"/>
+</g>
+<!-- International countries -->
+<g class="map-regions">
+<path class="map-region" data-loc="JP" d="M835.8,129.1 L840.6,127.7 L845.4,126.4 L838.2,125 L837,127.7 L835.8,130.4 L833.3,131.8 L834.5,133.1 L835.8,131.8 L834.5,130.4 L835.8,129.1Z M833.3,135.9 L833.3,138.6 L833.3,139.9 L832.1,142.6 L830.9,144 L826.1,146.7 L826.1,149.4 L823.7,150.8 L821.3,152.1 L820,153.5 L821.3,154.9 L823.7,154.9 L826.1,153.5 L828.5,152.1 L832.1,150.8 L833.3,149.4 L835.8,146.7 L833.3,142.6 L833.3,141.3 L833.3,138.6 L833.3,135.9Z M816.4,154.9 L816.4,156.2 L816.4,157.6 L818.8,157.6 L820,156.2 L818.8,154.9 L816.4,154.9Z M811.6,154.9 L812.8,156.2 L811.6,157.6 L811.6,158.9 L811.6,160.3 L810.4,158.9 L809.2,157.6 L810.4,156.2 L811.6,154.9Z"/>
+<path class="map-region" data-loc="TW" d="M787.4,178.5 L789.4,179.3 L788.6,182 L787.4,184.7 L787.4,187.4 L786.2,186.1 L785.7,183.4 L786.2,180.6 L787.4,178.5Z"/>
+<path class="map-region" data-loc="AU" d="M809.2,279.7 L814,279.7 L814,277 L823.7,279.7 L823.7,285.1 L830.9,287.9 L835.8,293.3 L835.8,290.6 L835.8,285.1 L838.2,282.4 L847.8,290.6 L850.3,298.7 L855.1,304.1 L862.3,312.3 L864.8,320.4 L866,323.1 L864.8,328.6 L862.3,336.7 L859.9,342.1 L857.5,347.6 L850.3,353 L845.4,350.3 L838.2,347.6 L833.3,344.9 L826.1,342.1 L823.7,339.4 L818.8,336.7 L814,334 L809.2,336.7 L804.3,339.4 L797.1,336.7 L787.4,336.7 L780.2,339.4 L777.8,342.1 L775.3,339.4 L772.9,331.3 L770.5,323.1 L768.1,315 L770.5,306.9 L777.8,301.4 L789.8,296 L794.7,290.6 L804.3,285.1 L809.2,282.4 L809.2,279.7Z"/>
+<path class="map-region" data-loc="NZ" d="M913.1,342.1 L917.9,344.9 L920.3,347.6 L922.8,350.3 L922.8,353 L919.1,358.4 L916.7,358.4 L915.5,355.7 L916.7,353 L917.9,350.3 L917.9,347.6 L916.7,344.9 L915.5,342.1 L913.1,342.1Z M914.3,358.4 L910.7,361.1 L905.8,365.2 L901,367.9 L898.6,372 L901,373.4 L905.8,372 L910.7,367.9 L913.1,363.9 L915.5,361.1 L915.5,358.4 L914.3,358.4Z"/>
+<path class="map-region" data-loc="AE" d="M619.5,176.6 L625.5,176.6 L627.9,177.9 L630.3,179.3 L630.3,180.6 L629.1,182 L627.9,183.4 L629.1,184.7 L629.1,186.1 L620.7,184.7 L620.7,182 L620.7,179.3 L619.5,176.6Z"/>
+</g>
+<!-- Small locations as markers -->
+<g class="map-markers">
+<g class="map-region" data-loc="SG" transform="translate(745.9,243.5)">
+<circle r="7" /><text>SG</text>
+</g>
+<g class="map-region" data-loc="HK" transform="translate(771,186.6)">
+<circle r="7" /><text>HK</text>
+</g>
+<g class="map-region" data-loc="PR" transform="translate(334.3,197.7)">
+<circle r="7" /><text>PR</text>
+</g>
+</g>
+<!-- Labels for larger regions -->
+<g class="map-labels" fill="var(--text)" font-family="'SF Mono','Fira Code',monospace" font-size="5" font-weight="700" text-anchor="middle" pointer-events="none" opacity="0.9">
+<text x="204.6" y="147.4" fill="#fff" font-size="5">CA</text>
+<text x="211.8" y="142.3" fill="#fff" font-size="4">NV</text>
+<text x="224.4" y="141.4" fill="#fff" font-size="4">UT</text>
+<text x="201.6" y="117.6" fill="#fff" font-size="4">WA</text>
+<text x="255.4" y="162.8" fill="#fff" font-size="5">TX</text>
+<text x="294.6" y="169.9" fill="#fff" font-size="4">FL</text>
+<text x="312.4" y="131.7" fill="#fff" font-size="4">NY</text>
+<text x="828.5" y="146.7" fill="#fff" font-size="4">JP</text>
+<text x="787.4" y="183.4" fill="#fff" font-size="4">TW</text>
+<text x="625.5" y="182" fill="#fff" font-size="4">AE</text>
+<text x="818.8" y="315" fill="#fff" font-size="5">AU</text>
+<text x="910.7" y="361.1" fill="#fff" font-size="4">NZ</text>
+</g>
+</svg>
+<div class="map-tooltip" id="mapTooltip"><span class="tt-name"></span><span class="tt-rate"></span></div>
+</div>
 <div class="chart-wrap">
     <canvas id="allLocationsChart" height="120"></canvas>
+</div>
+
+<!-- Income Restructuring Sandbox -->
+<h2><span class="help" data-tip-i18n="tip_sandbox" data-tip="Drag the sliders to shift your total income between ordinary income, short-term gains, and long-term gains. Watch how restructuring changes your total tax in real time." data-i18n="h_sandbox">income restructuring sandbox</span></h2>
+<div class="sandbox-card" id="sandboxCard">
+    <div class="sandbox-header">
+        <div class="card-label" style="margin:0"><span class="help" data-tip-i18n="tip_sandbox_total" data-tip="Your total income stays fixed. Only the allocation between income types changes." data-i18n="sb_total">total income</span></div>
+        <div class="sandbox-total" id="sandboxTotal">$0</div>
+    </div>
+    <div class="sandbox-slider-row">
+        <div class="sandbox-slider-label" data-i18n="sb_ordinary">ordinary income</div>
+        <input type="range" id="sbInc" min="0" max="100" step="1" value="33">
+        <div class="sandbox-pct" id="sbIncPct">33%</div>
+    </div>
+    <div class="sandbox-slider-row">
+        <div class="sandbox-slider-label" data-i18n="sb_st">short-term gains</div>
+        <input type="range" id="sbSt" min="0" max="100" step="1" value="33">
+        <div class="sandbox-pct" id="sbStPct">33%</div>
+    </div>
+    <div class="sandbox-slider-row">
+        <div class="sandbox-slider-label" data-i18n="sb_lt">long-term gains</div>
+        <input type="range" id="sbLt" min="0" max="100" step="1" value="34">
+        <div class="sandbox-pct" id="sbLtPct">34%</div>
+    </div>
+    <div class="sandbox-amounts" id="sandboxAmounts">
+        <div class="sandbox-amt" id="sbIncAmt">$0</div>
+        <div class="sandbox-amt" id="sbStAmt">$0</div>
+        <div class="sandbox-amt" id="sbLtAmt">$0</div>
+    </div>
+    <div class="sandbox-results">
+        <div class="sandbox-result">
+            <div class="sr-label" data-i18n="sb_tax">total tax</div>
+            <div class="sr-value" id="sbTax" style="color:var(--red);">$0</div>
+        </div>
+        <div class="sandbox-result">
+            <div class="sr-label" data-i18n="sb_rate">effective rate</div>
+            <div class="sr-value" id="sbRate" style="color:var(--accent-light);">0%</div>
+        </div>
+        <div class="sandbox-result">
+            <div class="sr-label" data-i18n="sb_net">take-home</div>
+            <div class="sr-value" id="sbNet" style="color:var(--green);">$0</div>
+        </div>
+    </div>
+    <div class="sandbox-diff neutral" id="sbDiff">drag sliders to explore</div>
 </div>
 
 <script>
@@ -722,6 +975,15 @@ const nz = [
     [0,15600,0.105],[15600,53500,0.175],[53500,78100,0.30],
     [78100,180000,0.33],[180000,Infinity,0.39]
 ];
+const tw = [
+    [0,18438,0.05],[18438,41563,0.12],[41563,83125,0.20],
+    [83125,155625,0.30],[155625,Infinity,0.40]
+];
+const hk = [
+    [0,6410,0.02],[6410,12821,0.06],[12821,19231,0.10],
+    [19231,25641,0.14],[25641,Infinity,0.17]
+];
+const hkStandardRate = 0.15;
 
 // ========== HELPERS ==========
 function taxBracket(amount, brackets) {
@@ -814,6 +1076,15 @@ function locationTax(amount, loc, type, stackBase, opts) {
         case 'NZ':
             if (type === 'long' || type === 'short') return 0;
             return taxBracketStacked(amount, nz, stackBase);
+        case 'TW':
+            if (type === 'long' || type === 'short') return 0;
+            return taxBracketStacked(amount, tw, stackBase);
+        case 'HK': {
+            if (type === 'long' || type === 'short') return 0;
+            const progressiveHK = taxBracketStacked(amount, hk, stackBase);
+            const standardHK = (stackBase + amount) * hkStandardRate - stackBase * hkStandardRate;
+            return Math.min(progressiveHK, standardHK);
+        }
         default: return 0;
     }
 }
@@ -830,7 +1101,7 @@ const fmtK = v => {
 
 // ========== APPLY LOSSES ==========
 function applyLosses(st, lt, inc, loss, loc) {
-    const isUS = !['SG', 'JP', 'AE', 'AU', 'NZ'].includes(loc);
+    const isUS = !['SG', 'JP', 'AE', 'AU', 'NZ', 'TW', 'HK'].includes(loc);
     const incomeDeductionCap = isUS ? 3000 : Infinity;
     let remaining = loss;
     let stT = Math.max(0, st - remaining);
@@ -845,7 +1116,7 @@ function applyLosses(st, lt, inc, loss, loc) {
 // ========== CALCULATE FOR A GIVEN LOCATION ==========
 function calcForLocation(lt, st, inc, loss, loc, opts) {
     const [stTaxable, ltTaxable, incTaxable] = applyLosses(st, lt, inc, loss, loc);
-    const noFederal = ['PR', 'SG', 'JP', 'AE', 'AU', 'NZ'].includes(loc);
+    const noFederal = ['PR', 'SG', 'JP', 'AE', 'AU', 'NZ', 'TW', 'HK'].includes(loc);
     const status = opts.status || 'single';
     const fedOrd = fedBrackets[status];
     const fedLTCG = fedLTCGBrackets[status];
@@ -887,7 +1158,7 @@ function calcForLocation(lt, st, inc, loss, loc, opts) {
 
     let locStackBase = 0;
     const locIncomeTax = locationTax(incTaxable, loc, 'inc', locStackBase, opts);
-    if (['CA', 'NY', 'PR', 'SG', 'JP', 'WA', 'AU', 'NZ'].includes(loc)) locStackBase += incTaxable;
+    if (['CA', 'NY', 'PR', 'SG', 'JP', 'WA', 'AU', 'NZ', 'TW', 'HK'].includes(loc)) locStackBase += incTaxable;
 
     const locShortTax = locationTax(stTaxable, loc, 'short', locStackBase, opts);
     if (['CA', 'NY', 'PR', 'WA', 'AU'].includes(loc)) locStackBase += stTaxable;
@@ -968,8 +1239,8 @@ const chart = new Chart(ctx, {
     }
 });
 
-const locationCodes = ['CA','NY','UT','TX','FL','WA','NV','PR','SG','JP','AE','AU','NZ'];
-const locationLabels = ['CA','NY','UT','TX','FL','WA','NV','PR','SG','JP','AE','AU','NZ'];
+const locationCodes = ['CA','NY','UT','TX','FL','WA','NV','PR','SG','JP','AE','AU','NZ','TW','HK'];
+const locationLabels = ['CA','NY','UT','TX','FL','WA','NV','PR','SG','JP','AE','AU','NZ','TW','HK'];
 const allLocCtx = document.getElementById('allLocationsChart').getContext('2d');
 const allLocationsChart = new Chart(allLocCtx, {
     type: 'bar',
@@ -1016,7 +1287,7 @@ let bracketTableOpen = false;
 document.getElementById('bracketToggleBtn').addEventListener('click', () => {
     bracketTableOpen = !bracketTableOpen;
     document.getElementById('bracketTableWrap').classList.toggle('open', bracketTableOpen);
-    document.getElementById('bracketToggleBtn').textContent = bracketTableOpen ? 'hide bracket breakdown' : 'show bracket breakdown';
+    document.getElementById('bracketToggleBtn').textContent = bracketTableOpen ? T[currentLang].hide_brackets : T[currentLang].show_brackets;
 });
 
 function buildBracketTable(r, loc) {
@@ -1045,7 +1316,7 @@ function buildBracketTable(r, loc) {
     }
 
     // Location brackets
-    const locBrackets = { CA: ca, NY: ny, PR: pr, SG: sg, JP: jp, AU: au, NZ: nz }[loc];
+    const locBrackets = { CA: ca, NY: ny, PR: pr, SG: sg, JP: jp, AU: au, NZ: nz, TW: tw, HK: hk }[loc];
     if (locBrackets && (r.incTaxable + r.stTaxable + r.ltTaxable) > 0) {
         rows.push(`<tr class="section-header"><td colspan="4">${locLabel} income tax</td></tr>`);
         let locAmount = r.incTaxable;
@@ -1072,7 +1343,7 @@ function buildBracketTable(r, loc) {
 // ========== MARGINAL RATE CHART ==========
 function updateMarginalChart(loc, status, opts) {
     const fedOrd = fedBrackets[status];
-    const noFederal = ['PR', 'SG', 'JP', 'AE', 'AU', 'NZ'].includes(loc);
+    const noFederal = ['PR', 'SG', 'JP', 'AE', 'AU', 'NZ', 'TW', 'HK'].includes(loc);
     const max = Math.max(1000000, (+document.getElementById('inc').value || 0) + (+document.getElementById('lt').value || 0) + (+document.getElementById('st').value || 0));
     const step = Math.max(10000, Math.round(max / 50 / 10000) * 10000);
     const labels = [];
@@ -1090,7 +1361,7 @@ function updateMarginalChart(loc, status, opts) {
         }
         // Location marginal rate
         let locRate = 0;
-        const locBracketsMap = { CA: ca, NY: ny, PR: pr, SG: sg, JP: jp, AU: au, NZ: nz };
+        const locBracketsMap = { CA: ca, NY: ny, PR: pr, SG: sg, JP: jp, AU: au, NZ: nz, TW: tw, HK: hk };
         const locB = locBracketsMap[loc];
         if (locB) {
             for (const [lower, upper, rate] of locB) {
@@ -1102,6 +1373,11 @@ function updateMarginalChart(loc, status, opts) {
             // simplified: national + local
             for (const [lower, upper, rate] of jp) {
                 if (i >= lower && i < upper) { locRate = (rate * (1 + jpSurtaxRate) + jpLocalRate) * 100; break; }
+            }
+        } else if (loc === 'HK') {
+            // HK: min of progressive rate vs 15% standard rate
+            for (const [lower, upper, rate] of hk) {
+                if (i >= lower && i < upper) { locRate = Math.min(rate, hkStandardRate) * 100; break; }
             }
         }
 
@@ -1185,14 +1461,14 @@ document.getElementById('copyBtn').addEventListener('click', () => {
     const url = encodeState();
     navigator.clipboard.writeText(url).then(() => {
         const btn = document.getElementById('copyBtn');
-        btn.textContent = 'copied!';
+        btn.textContent = T[currentLang].copied;
         btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = 'copy shareable link'; btn.classList.remove('copied'); }, 2000);
+        setTimeout(() => { btn.textContent = T[currentLang].copy_link; btn.classList.remove('copied'); }, 2000);
     });
 });
 
 // ========== LOC LABEL ==========
-const locLabelMap = { 'SG': 'singapore', 'JP': 'japan', 'PR': 'puerto rico', 'AE': 'dubai', 'AU': 'australia', 'NZ': 'new zealand' };
+const locLabelMap = { 'SG': 'singapore', 'JP': 'japan', 'PR': 'puerto rico', 'AE': 'dubai', 'AU': 'australia', 'NZ': 'new zealand', 'TW': 'taiwan', 'HK': 'hong kong' };
 
 // ========== MAIN CALCULATION ==========
 function calc() {
@@ -1208,13 +1484,12 @@ function calc() {
     const itemizedAmt = +document.getElementById('itemized').value || 0;
 
     const deduction = useItemized ? itemizedAmt : stdDeduction[status];
-    const noFederal = ['PR', 'SG', 'JP', 'AE', 'AU', 'NZ'].includes(loc);
+    const noFederal = ['PR', 'SG', 'JP', 'AE', 'AU', 'NZ', 'TW', 'HK'].includes(loc);
 
     // Update deduction display
-    const dedTip = useItemized
-        ? 'The total of your specific deductible expenses (mortgage interest, state taxes, charity, medical, etc.) that you choose to list instead of the standard deduction.'
-        : 'A flat amount subtracted from your income before federal tax is calculated. Reduces your taxable income without needing to itemize expenses.';
-    document.getElementById('dedLabel').innerHTML = `<span class="help" data-tip="${dedTip}">${useItemized ? 'itemized deduction' : 'standard deduction'}</span>`;
+    const dedTip = useItemized ? T[currentLang].tip_item_ded : T[currentLang].tip_std_ded;
+    const dedText = useItemized ? T[currentLang].itemized_ded : T[currentLang].std_ded;
+    document.getElementById('dedLabel').innerHTML = `<span class="help" data-tip="${dedTip}">${dedText}</span>`;
     document.getElementById('dedValue').textContent = noFederal ? 'n/a' : fmt(deduction);
 
     const opts = { waMillionaires, selfEmployed, status, deduction };
@@ -1240,13 +1515,14 @@ function calc() {
     updateResultItem('resIncome', fmt2(inc - taxIncome), `${pctIncome}% effective \u00b7 ${fmt(taxIncome)} tax`);
 
     const locLabel = locLabelMap[loc] || 'state';
-    let breakdownHTML = bkRow('federal tax', fmt(federalTotal));
-    if (r.niitTax > 0) breakdownHTML += bkRow('<span class="help" data-tip="Net Investment Income Tax — a 3.8% surtax on investment income (capital gains, dividends) when your adjusted gross income exceeds $200k (single) or $250k (married).">NIIT (3.8%)</span>', fmt(r.niitTax));
-    if (r.ficaTax > 0) breakdownHTML += bkRow('<span class="help" data-tip="Self-employment tax covering Social Security (12.4% up to $176,100) and Medicare (2.9% uncapped, plus 0.9% on earnings over $200k/$250k).">FICA / SE tax</span>', fmt(r.ficaTax));
-    breakdownHTML += bkRow(locLabel + ' tax', fmt(locTotal));
-    if (!noFederal) breakdownHTML += bkRow('deduction applied', fmt(r.deduction));
-    breakdownHTML += bkRow('losses applied', fmt(loss));
-    breakdownHTML += bkRow('<span class="help" data-tip="Your total tax as a percentage of total income. This is the actual rate you pay overall, not your top marginal bracket.">effective rate</span>', effectiveRate + '%');
+    const t = T[currentLang];
+    let breakdownHTML = bkRow(t.federal_tax, fmt(federalTotal));
+    if (r.niitTax > 0) breakdownHTML += bkRow(`<span class="help" data-tip="${t.tip_niit}">NIIT (3.8%)</span>`, fmt(r.niitTax));
+    if (r.ficaTax > 0) breakdownHTML += bkRow(`<span class="help" data-tip="${t.tip_fica}">FICA / SE</span>`, fmt(r.ficaTax));
+    breakdownHTML += bkRow(locLabel + t.loc_tax, fmt(locTotal));
+    if (!noFederal) breakdownHTML += bkRow(t.ded_applied, fmt(r.deduction));
+    breakdownHTML += bkRow(t.loss_applied, fmt(loss));
+    breakdownHTML += bkRow(`<span class="help" data-tip="${t.tip_effective}">${t.effective_rate}</span>`, effectiveRate + '%');
     document.getElementById('breakdownRows').innerHTML = breakdownHTML;
 
     // WA tooltip
@@ -1327,18 +1603,24 @@ function calc() {
         const diffEl = document.getElementById('compareDiff');
         if (Math.abs(diff) < 1) {
             diffEl.className = 'compare-diff';
-            diffEl.textContent = 'same tax burden';
+            diffEl.textContent = t.same_burden;
         } else if (diff > 0) {
             diffEl.className = 'compare-diff save';
-            diffEl.textContent = `you save ${fmt(diff)} with ${cmpLabel}`;
+            diffEl.textContent = t.save_with.replace('{amt}', fmt(diff)).replace('{loc}', cmpLabel);
         } else {
             diffEl.className = 'compare-diff cost';
-            diffEl.textContent = `${cmpLabel} costs ${fmt(-diff)} more`;
+            diffEl.textContent = t.costs_more.replace('{loc}', cmpLabel).replace('{amt}', fmt(-diff));
         }
         compareSection.style.display = '';
     } else {
         compareSection.style.display = 'none';
     }
+
+    // Update geo map
+    updateGeoMap(loc, opts, lt, st, inc, loss);
+
+    // Update sandbox
+    sandboxInit();
 }
 
 function updateResultItem(id, value, sub) {
@@ -1391,9 +1673,404 @@ document.getElementById('themeToggle').addEventListener('click', () => {
     calc();
 });
 
+// ========== GEO TILE MAP ==========
+function rateColor(pct) {
+    let r, g, b;
+    if (pct <= 20) {
+        const t = pct / 20;
+        r = Math.round(34 + (234 - 34) * t);
+        g = Math.round(197 + (179 - 197) * t);
+        b = Math.round(94 + (8 - 94) * t);
+    } else {
+        const t = Math.min(1, (pct - 20) / 30);
+        r = Math.round(234 + (239 - 234) * t);
+        g = Math.round(179 - 179 * t + 68 * t);
+        b = Math.round(8 + (68 - 8) * t);
+    }
+    return `rgb(${r},${g},${b})`;
+}
+
+function updateGeoMap(loc, opts, lt, st, inc, loss) {
+    const totalEarned = lt + st + inc;
+    document.querySelectorAll('.map-region').forEach(el => {
+        const code = el.dataset.loc;
+        const tax = calcForLocation(lt, st, inc, loss, code, opts).total;
+        const rate = totalEarned > 0 ? (tax / totalEarned * 100) : 0;
+        const bg = rateColor(rate);
+        if (el.tagName === 'path') {
+            el.setAttribute('fill', bg);
+        } else {
+            el.querySelector('circle').setAttribute('fill', bg);
+        }
+        el.dataset.rate = rate.toFixed(1);
+        el.classList.toggle('active', code === loc);
+    });
+}
+
+// Clickable map regions
+document.querySelectorAll('.map-region').forEach(el => {
+    el.addEventListener('click', () => {
+        const code = el.dataset.loc;
+        document.getElementById('state').value = code;
+        document.getElementById('waToggle').classList.toggle('visible', code === 'WA');
+        calc();
+    });
+});
+
+// Map tooltip
+const mapTooltip = document.getElementById('mapTooltip');
+const ttName = mapTooltip.querySelector('.tt-name');
+const ttRate = mapTooltip.querySelector('.tt-rate');
+const locNames = {};
+document.querySelectorAll('#state option').forEach(o => { locNames[o.value] = o.textContent; });
+
+document.querySelectorAll('.map-region').forEach(el => {
+    el.addEventListener('mouseenter', (e) => {
+        const code = el.dataset.loc;
+        ttName.textContent = locNames[code] || code;
+        ttRate.textContent = ' ' + (el.dataset.rate || '--') + '%';
+        mapTooltip.classList.add('visible');
+    });
+    el.addEventListener('mousemove', (e) => {
+        const container = document.getElementById('geoMap');
+        const rect = container.getBoundingClientRect();
+        mapTooltip.style.left = (e.clientX - rect.left + 12) + 'px';
+        mapTooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+    });
+    el.addEventListener('mouseleave', () => {
+        mapTooltip.classList.remove('visible');
+    });
+});
+
+// ========== LANGUAGE / i18n ==========
+let currentLang = localStorage.getItem('lang') || 'en';
+const T = {
+    en: {
+        title1: 'tax', title2: 'estimator',
+        filing_status: 'filing status', location: 'location',
+        single: 'single', mfj: 'married filing jointly', hoh: 'head of household',
+        compare_with: 'compare with',
+        income_gains: 'income & gains',
+        se_label: 'self-employed (include FICA / SE tax)',
+        income_work: 'personal income from work',
+        ltcg: 'long term capital gains', stcg: 'short term capital gains',
+        losses: 'capital losses (deduction)',
+        use_itemized: 'use itemized deduction instead of standard',
+        itemized_amt: 'itemized deduction amount',
+        std_ded: 'standard deduction', itemized_ded: 'itemized deduction',
+        work_income: 'work income', long_term: 'long term', short_term: 'short term',
+        tax_breakdown: 'tax breakdown',
+        show_brackets: 'show bracket breakdown', hide_brackets: 'hide bracket breakdown',
+        bracket_breakdown: 'bracket breakdown',
+        total_earned: 'total earned', total_owed: 'total owed', total_profit: 'total profit',
+        copy_link: 'copy shareable link', copied: 'copied!',
+        h_comparison: 'location comparison',
+        h_marginal: 'marginal tax rate', h_location_tax: 'tax owed by location',
+        h_sandbox: 'income restructuring sandbox',
+        sb_total: 'total income', sb_ordinary: 'ordinary income',
+        sb_st: 'short-term gains', sb_lt: 'long-term gains',
+        sb_tax: 'total tax', sb_rate: 'effective rate', sb_net: 'take-home',
+        sb_drag: 'drag sliders to explore', sb_same: 'same as current allocation',
+        sb_less: 'less tax than current mix', sb_more: 'more tax than current mix',
+        federal_tax: 'federal tax', loc_tax: ' tax',
+        ded_applied: 'deduction applied', loss_applied: 'losses applied',
+        effective_rate: 'effective rate',
+        save_with: 'you save {amt} with {loc}', costs_more: '{loc} costs {amt} more',
+        same_burden: 'same tax burden',
+        loc_same: 'location: same', status_same: 'status: same',
+        wa_label: 'include WA millionaires tax (9.9% on income > $1M)',
+        geo_us: 'US', geo_asia: 'ASIA & MIDDLE EAST', geo_oceania: 'OCEANIA',
+        // Locations
+        l_CA: 'california', l_NY: 'new york', l_UT: 'utah', l_TX: 'texas',
+        l_FL: 'florida', l_WA: 'washington (seattle)', l_NV: 'nevada (las vegas)',
+        l_PR: 'puerto rico', l_SG: 'singapore resident', l_JP: 'japan resident',
+        l_AE: 'dubai (UAE)', l_AU: 'australia', l_NZ: 'new zealand',
+        l_TW: 'taiwan', l_HK: 'hong kong',
+        // Tooltips
+        tip_filing: 'Your tax filing status determines your tax brackets, standard deduction, and thresholds. Choose the one that matches your IRS filing.',
+        tip_single: 'Unmarried, divorced, or legally separated. Uses the narrowest tax brackets and a $15,000 standard deduction for 2025.',
+        tip_mfj: 'Married couples filing one return together. Gets the widest brackets (roughly 2x single) and a $30,000 standard deduction. Usually the lowest combined tax for married couples.',
+        tip_hoh: 'For unmarried taxpayers who pay more than half the cost of keeping up a home for a qualifying dependent. Wider brackets than single and a $22,500 standard deduction.',
+        tip_compare: 'Compare your tax across different locations or filing statuses to see potential savings.',
+        tip_se: 'FICA is the Federal Insurance Contributions Act tax — it funds Social Security (12.4%) and Medicare (2.9%). Self-employed workers pay both the employee and employer portions.',
+        tip_ltcg: 'Profits from selling assets held longer than 1 year. Taxed at lower federal rates (0%, 15%, or 20%) than ordinary income.',
+        tip_stcg: 'Profits from selling assets held 1 year or less. Taxed as ordinary income at your regular federal tax rate.',
+        tip_losses: 'Losses from selling assets for less than you paid. Offsets gains first, then up to $3,000 can be deducted from ordinary income (US).',
+        tip_itemized: 'Itemized deductions let you list specific expenses (mortgage interest, state taxes, charity, etc.) instead of taking the flat standard deduction. Use whichever is higher.',
+        tip_std_ded: 'A flat amount subtracted from your income before federal tax is calculated. Reduces your taxable income without needing to itemize expenses.',
+        tip_item_ded: 'The total of your specific deductible expenses (mortgage interest, state taxes, charity, medical, etc.) that you choose to list instead of the standard deduction.',
+        tip_marginal: 'The tax rate applied to your next dollar of income. This changes as you cross bracket thresholds — it\'s not the rate on all your income.',
+        tip_sandbox: 'Drag the sliders to shift your total income between ordinary income, short-term gains, and long-term gains. Watch how restructuring changes your total tax in real time.',
+        tip_sandbox_total: 'Your total income stays fixed. Only the allocation between income types changes.',
+        tip_niit: 'Net Investment Income Tax — a 3.8% surtax on investment income (capital gains, dividends) when your adjusted gross income exceeds $200k (single) or $250k (married).',
+        tip_fica: 'Self-employment tax covering Social Security (12.4% up to $176,100) and Medicare (2.9% uncapped, plus 0.9% on earnings over $200k/$250k).',
+        tip_effective: 'Your total tax as a percentage of total income. This is the actual rate you pay overall, not your top marginal bracket.',
+    },
+    zh: {
+        title1: '稅務', title2: '估算器',
+        filing_status: '報稅身份', location: '地點',
+        single: '單身', mfj: '夫妻合併申報', hoh: '戶主',
+        compare_with: '比較對象',
+        income_gains: '收入與利得',
+        se_label: '自僱（含 FICA / 自僱稅）',
+        income_work: '工作所得',
+        ltcg: '長期資本利得', stcg: '短期資本利得',
+        losses: '資本損失（扣除）',
+        use_itemized: '使用列舉扣除（取代標準扣除）',
+        itemized_amt: '列舉扣除金額',
+        std_ded: '標準扣除額', itemized_ded: '列舉扣除額',
+        work_income: '工作所得', long_term: '長期', short_term: '短期',
+        tax_breakdown: '稅額明細',
+        show_brackets: '顯示稅率級距', hide_brackets: '隱藏稅率級距',
+        bracket_breakdown: '稅率級距明細',
+        total_earned: '總收入', total_owed: '應繳稅額', total_profit: '稅後所得',
+        copy_link: '複製分享連結', copied: '已複製！',
+        h_comparison: '地區比較',
+        h_marginal: '邊際稅率', h_location_tax: '各地區稅額',
+        h_sandbox: '收入結構模擬器',
+        sb_total: '總收入', sb_ordinary: '一般所得',
+        sb_st: '短期利得', sb_lt: '長期利得',
+        sb_tax: '總稅額', sb_rate: '實際稅率', sb_net: '實收',
+        sb_drag: '拖動滑桿探索', sb_same: '與目前配置相同',
+        sb_less: '比目前少繳', sb_more: '比目前多繳',
+        federal_tax: '聯邦稅', loc_tax: '稅',
+        ded_applied: '已扣除額', loss_applied: '已抵損失',
+        effective_rate: '實際稅率',
+        save_with: '選擇{loc}可省 {amt}', costs_more: '{loc}多繳 {amt}',
+        same_burden: '稅負相同',
+        loc_same: '地點：相同', status_same: '身份：相同',
+        wa_label: '含華州百萬富翁稅（收入逾 $1M 課 9.9%）',
+        geo_us: '美國', geo_asia: '亞洲與中東', geo_oceania: '大洋洲',
+        l_CA: '加州', l_NY: '紐約', l_UT: '猶他', l_TX: '德州',
+        l_FL: '佛州', l_WA: '華盛頓（西雅圖）', l_NV: '內華達（拉斯維加斯）',
+        l_PR: '波多黎各', l_SG: '新加坡', l_JP: '日本',
+        l_AE: '杜拜（阿聯酋）', l_AU: '澳洲', l_NZ: '紐西蘭',
+        l_TW: '台灣', l_HK: '香港',
+        tip_filing: '報稅身份決定你的稅率級距、標準扣除額和各項門檻。請選擇符合你 IRS 申報的身份。',
+        tip_single: '未婚、離婚或合法分居。使用最窄的稅率級距，2025 年標準扣除額為 $15,000。',
+        tip_mfj: '夫妻共同申報一份稅表。享有最寬的級距（約為單身的兩倍）和 $30,000 標準扣除額。通常是已婚夫妻稅負最低的方式。',
+        tip_hoh: '適用於未婚且負擔超過一半家庭費用、撫養合格被扶養人的納稅人。級距比單身寬，標準扣除額為 $22,500。',
+        tip_compare: '比較不同地區或報稅身份的稅負差異，找出潛在節省空間。',
+        tip_se: 'FICA 是聯邦保險貢獻法稅——用於社會安全（12.4%）和醫療保險（2.9%）。自僱者需同時繳納雇主和員工部分。',
+        tip_ltcg: '持有超過一年的資產出售獲利。聯邦稅率（0%、15% 或 20%）低於一般所得。',
+        tip_stcg: '持有一年以內的資產出售獲利。按一般所得稅率課稅。',
+        tip_losses: '以低於購入價格出售資產的損失。先抵銷利得，剩餘最多可從一般所得扣除 $3,000（美國）。',
+        tip_itemized: '列舉扣除讓你列出特定費用（房貸利息、州稅、捐款等），取代固定的標準扣除額。選擇金額較高的方式。',
+        tip_std_ded: '在計算聯邦稅前從收入中減去的固定金額，無需逐項列舉費用即可降低應稅所得。',
+        tip_item_ded: '你選擇逐項列舉的特定可扣除費用總額（房貸利息、州稅、捐款、醫療費等），取代標準扣除額。',
+        tip_marginal: '你下一塊錢收入適用的稅率。隨著跨越級距門檻而變化——不是所有收入的稅率。',
+        tip_sandbox: '拖動滑桿在一般所得、短期利得和長期利得之間重新分配總收入，即時觀察稅額變化。',
+        tip_sandbox_total: '總收入保持不變，只改變各類所得的配置比例。',
+        tip_niit: '淨投資所得稅——當調整後總所得超過 $200k（單身）或 $250k（已婚）時，對投資所得課徵 3.8% 附加稅。',
+        tip_fica: '自僱稅涵蓋社會安全（12.4%，上限 $176,100）和醫療保險（2.9% 無上限，收入超過 $200k/$250k 再加 0.9%）。',
+        tip_effective: '你的總稅額佔總收入的百分比。這是你實際繳納的整體稅率，不是最高邊際稅率。',
+    },
+    ja: {
+        title1: '税金', title2: '計算ツール',
+        filing_status: '申告区分', location: '地域',
+        single: '独身', mfj: '夫婦合算申告', hoh: '世帯主',
+        compare_with: '比較対象',
+        income_gains: '所得・利益',
+        se_label: '自営業（FICA / 自営業税を含む）',
+        income_work: '給与所得',
+        ltcg: '長期キャピタルゲイン', stcg: '短期キャピタルゲイン',
+        losses: 'キャピタルロス（控除）',
+        use_itemized: '項目別控除を使用（標準控除の代わり）',
+        itemized_amt: '項目別控除額',
+        std_ded: '標準控除', itemized_ded: '項目別控除',
+        work_income: '給与所得', long_term: '長期', short_term: '短期',
+        tax_breakdown: '税額内訳',
+        show_brackets: '税率区分を表示', hide_brackets: '税率区分を非表示',
+        bracket_breakdown: '税率区分の内訳',
+        total_earned: '総収入', total_owed: '納税額', total_profit: '手取り',
+        copy_link: '共有リンクをコピー', copied: 'コピー済み！',
+        h_comparison: '地域比較',
+        h_marginal: '限界税率', h_location_tax: '地域別税額',
+        h_sandbox: '収入構成シミュレーター',
+        sb_total: '総収入', sb_ordinary: '給与所得',
+        sb_st: '短期利益', sb_lt: '長期利益',
+        sb_tax: '総税額', sb_rate: '実効税率', sb_net: '手取り',
+        sb_drag: 'スライダーを動かして探索', sb_same: '現在の配分と同じ',
+        sb_less: '現在より節税', sb_more: '現在より増税',
+        federal_tax: '連邦税', loc_tax: '税',
+        ded_applied: '控除適用額', loss_applied: '損失適用額',
+        effective_rate: '実効税率',
+        save_with: '{loc}で{amt}の節税', costs_more: '{loc}は{amt}多く課税',
+        same_burden: '税負担は同じ',
+        loc_same: '地域：同じ', status_same: '区分：同じ',
+        wa_label: 'WA州富裕層税を含む（所得 $1M超に 9.9%）',
+        geo_us: 'アメリカ', geo_asia: 'アジア・中東', geo_oceania: 'オセアニア',
+        l_CA: 'カリフォルニア', l_NY: 'ニューヨーク', l_UT: 'ユタ', l_TX: 'テキサス',
+        l_FL: 'フロリダ', l_WA: 'ワシントン（シアトル）', l_NV: 'ネバダ（ラスベガス）',
+        l_PR: 'プエルトリコ', l_SG: 'シンガポール', l_JP: '日本',
+        l_AE: 'ドバイ（UAE）', l_AU: 'オーストラリア', l_NZ: 'ニュージーランド',
+        l_TW: '台湾', l_HK: '香港',
+        tip_filing: '申告区分は税率区分、標準控除額、各種しきい値を決定します。IRSへの申告に合った区分を選んでください。',
+        tip_single: '未婚、離婚、または法的別居。最も狭い税率区分を使用し、2025年の標準控除は$15,000です。',
+        tip_mfj: '夫婦で一つの確定申告書を提出。最も広い税率区分（独身の約2倍）と$30,000の標準控除。通常、夫婦の税負担が最も軽い方法です。',
+        tip_hoh: '未婚で、扶養家族のために住居費の半分以上を負担している納税者向け。独身より広い税率区分と$22,500の標準控除。',
+        tip_compare: '異なる地域や申告区分の税負担を比較し、節約の可能性を確認。',
+        tip_se: 'FICAは連邦保険拠出法の税金で、社会保障（12.4%）とメディケア（2.9%）に充てられます。自営業者は雇用主・従業員の両方の負担分を支払います。',
+        tip_ltcg: '1年超保有した資産の売却益。連邦税率（0%、15%、20%）は通常所得より低くなります。',
+        tip_stcg: '1年以内に保有した資産の売却益。通常の所得税率で課税されます。',
+        tip_losses: '購入価格より低く売却した場合の損失。まず利益と相殺し、残りは最大$3,000まで通常所得から控除可能（米国）。',
+        tip_itemized: '項目別控除では、定額の標準控除の代わりに特定の経費（住宅ローン利息、州税、寄付金など）を個別に申告できます。金額の大きい方を選択。',
+        tip_std_ded: '連邦税の計算前に所得から差し引かれる定額。経費を項目別に申告せずに課税所得を減らせます。',
+        tip_item_ded: '標準控除の代わりに項目別に申告する控除対象経費の合計額（住宅ローン利息、州税、寄付金、医療費など）。',
+        tip_marginal: '次の1ドルの所得に適用される税率。税率区分のしきい値を超えると変わります。全所得の税率ではありません。',
+        tip_sandbox: 'スライダーを動かして総所得を給与所得・短期利益・長期利益の間で再配分し、税額の変化をリアルタイムで確認。',
+        tip_sandbox_total: '総収入は固定のまま。所得の種類の配分だけが変わります。',
+        tip_niit: '純投資所得税 — 調整後総所得が$200k（独身）/$250k（夫婦）を超える場合、投資所得に3.8%の付加税。',
+        tip_fica: '自営業税。社会保障（12.4%、上限$176,100）とメディケア（2.9%上限なし、$200k/$250k超の所得に追加0.9%）をカバー。',
+        tip_effective: '総税額の総所得に対する割合。最高限界税率ではなく、実際に支払う全体の税率です。',
+    }
+};
+
+function setLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    document.querySelectorAll('.lang-pill').forEach(p => p.classList.toggle('active', p.dataset.lang === lang));
+
+    // Update static i18n text
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (T[lang][key]) el.textContent = T[lang][key];
+    });
+
+    // Update tooltips
+    document.querySelectorAll('[data-tip-i18n]').forEach(el => {
+        const key = el.dataset.tipI18n;
+        if (T[lang][key]) el.setAttribute('data-tip', T[lang][key]);
+    });
+
+    // Update select options
+    document.querySelectorAll('option[data-i18n]').forEach(opt => {
+        const key = opt.dataset.i18n;
+        if (T[lang][key]) opt.textContent = T[lang][key];
+    });
+
+    // Update bracket toggle btn
+    const bBtn = document.getElementById('bracketToggleBtn');
+    bBtn.textContent = bracketTableOpen ? T[lang].hide_brackets : T[lang].show_brackets;
+
+    calc();
+}
+
+document.querySelectorAll('.lang-pill').forEach(pill => {
+    pill.addEventListener('click', () => setLang(pill.dataset.lang));
+});
+
+// ========== INCOME RESTRUCTURING SANDBOX ==========
+const sbSliders = { inc: document.getElementById('sbInc'), st: document.getElementById('sbSt'), lt: document.getElementById('sbLt') };
+const sbPcts = { inc: document.getElementById('sbIncPct'), st: document.getElementById('sbStPct'), lt: document.getElementById('sbLtPct') };
+const sbAmts = { inc: document.getElementById('sbIncAmt'), st: document.getElementById('sbStAmt'), lt: document.getElementById('sbLtAmt') };
+let sbLocked = null; // which slider is being dragged
+
+function sandboxSync(changed) {
+    const vals = { inc: +sbSliders.inc.value, st: +sbSliders.st.value, lt: +sbSliders.lt.value };
+    const others = ['inc', 'st', 'lt'].filter(k => k !== changed);
+    const remaining = 100 - vals[changed];
+
+    const otherSum = vals[others[0]] + vals[others[1]];
+    if (otherSum > 0) {
+        vals[others[0]] = Math.round(remaining * vals[others[0]] / otherSum);
+        vals[others[1]] = remaining - vals[others[0]];
+    } else {
+        vals[others[0]] = Math.round(remaining / 2);
+        vals[others[1]] = remaining - vals[others[0]];
+    }
+
+    // Clamp
+    for (const k of others) vals[k] = Math.max(0, Math.min(100, vals[k]));
+
+    // Update sliders and labels
+    for (const k of ['inc', 'st', 'lt']) {
+        sbSliders[k].value = vals[k];
+        sbPcts[k].textContent = vals[k] + '%';
+    }
+
+    sandboxCalc(vals);
+}
+
+function sandboxCalc(pcts) {
+    const lt = +document.getElementById('lt').value || 0;
+    const st = +document.getElementById('st').value || 0;
+    const inc = +document.getElementById('inc').value || 0;
+    const loss = +document.getElementById('loss').value || 0;
+    const loc = document.getElementById('state').value;
+    const status = document.querySelector('.status-pill.active').dataset.status;
+    const waMillionaires = document.getElementById('waMillionaires').checked;
+    const selfEmployed = document.getElementById('selfEmployed').checked;
+    const useItemized = document.getElementById('useItemized').checked;
+    const itemizedAmt = +document.getElementById('itemized').value || 0;
+    const deduction = useItemized ? itemizedAmt : stdDeduction[status];
+    const total = lt + st + inc;
+
+    // Sandbox allocation
+    const sbInc = Math.round(total * pcts.inc / 100);
+    const sbSt = Math.round(total * pcts.st / 100);
+    const sbLt = total - sbInc - sbSt; // remainder to avoid rounding drift
+
+    sbAmts.inc.textContent = fmtK(sbInc);
+    sbAmts.st.textContent = fmtK(sbSt);
+    sbAmts.lt.textContent = fmtK(sbLt);
+
+    const opts = { waMillionaires, selfEmployed, status, deduction };
+    const sbResult = calcForLocation(sbLt, sbSt, sbInc, loss, loc, opts);
+    const origResult = calcForLocation(lt, st, inc, loss, loc, opts);
+
+    document.getElementById('sbTax').textContent = fmt(sbResult.total);
+    const sbEffRate = total ? ((sbResult.total / total) * 100).toFixed(1) : '0.0';
+    document.getElementById('sbRate').textContent = sbEffRate + '%';
+    document.getElementById('sbNet').textContent = fmt(total - sbResult.total);
+
+    const diff = origResult.total - sbResult.total;
+    const diffEl = document.getElementById('sbDiff');
+    const st2 = T[currentLang];
+    if (Math.abs(diff) < 1) {
+        diffEl.className = 'sandbox-diff neutral';
+        diffEl.textContent = st2.sb_same;
+    } else if (diff > 0) {
+        diffEl.className = 'sandbox-diff save';
+        diffEl.textContent = `${fmt(diff)} ${st2.sb_less}`;
+    } else {
+        diffEl.className = 'sandbox-diff cost';
+        diffEl.textContent = `${fmt(-diff)} ${st2.sb_more}`;
+    }
+}
+
+function sandboxInit() {
+    const lt = +document.getElementById('lt').value || 0;
+    const st = +document.getElementById('st').value || 0;
+    const inc = +document.getElementById('inc').value || 0;
+    const total = lt + st + inc;
+
+    document.getElementById('sandboxTotal').textContent = fmt(total);
+
+    if (total > 0) {
+        const pInc = Math.round(inc / total * 100);
+        const pSt = Math.round(st / total * 100);
+        const pLt = 100 - pInc - pSt;
+        sbSliders.inc.value = pInc; sbSliders.st.value = pSt; sbSliders.lt.value = pLt;
+        sbPcts.inc.textContent = pInc + '%'; sbPcts.st.textContent = pSt + '%'; sbPcts.lt.textContent = pLt + '%';
+        sandboxCalc({ inc: pInc, st: pSt, lt: pLt });
+    } else {
+        for (const k of ['inc', 'st', 'lt']) {
+            sbSliders[k].value = k === 'lt' ? 34 : 33;
+            sbPcts[k].textContent = (k === 'lt' ? 34 : 33) + '%';
+        }
+        sandboxCalc({ inc: 33, st: 33, lt: 34 });
+    }
+}
+
+['inc', 'st', 'lt'].forEach(k => {
+    sbSliders[k].addEventListener('input', () => sandboxSync(k));
+});
+
 // ========== INIT ==========
 decodeState();
 document.getElementById('waToggle').classList.toggle('visible', document.getElementById('state').value === 'WA');
+if (currentLang !== 'en') setLang(currentLang);
 calc();
 applyChartTheme();
 </script>
