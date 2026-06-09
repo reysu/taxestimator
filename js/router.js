@@ -1,5 +1,5 @@
-// Hash-based tab router. Tabs: #estimator (default) #ledger #optimize #col
-const TABS = ['estimator', 'ledger', 'optimize', 'col'];
+// Hash-based tab router. Tabs: #estimator (default) #ledger #calculate #col
+const TABS = ['estimator', 'ledger', 'calculate', 'col'];
 const DEFAULT_TAB = 'estimator';
 
 function tabFromHash() {

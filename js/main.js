@@ -1,7 +1,7 @@
 // Entry point — wires up the router and every tab module.
 
 // Visible error box — surfaces any uncaught error/rejection so we can diagnose without the console.
-const BUILD = 'ledger-2026-06-08c';
+const BUILD = 'calc-2026-06-09a';
 console.log('taxestimator build', BUILD);
 function showFatal(msg) {
     let el = document.getElementById('__fatal');
@@ -19,10 +19,10 @@ window.addEventListener('unhandledrejection', e => showFatal(`[${BUILD}] PROMISE
 import { initRouter } from './router.js';
 import './tab-estimator.js'; // self-initializing (runs the original estimator on import)
 import { initLedger } from './tab-ledger.js';
-import { initOptimize } from './tab-optimize.js';
+import { initCalculate } from './tab-calculate.js';
 import { initCol } from './tab-col.js';
 
 initLedger();
-initOptimize();
+initCalculate();
 initCol();
 initRouter();

@@ -60,7 +60,7 @@
         font-variant-numeric: tabular-nums lining-nums;
     }
     /* Keep the original layout centered at 860px; only the wide data tabs use the full width. */
-    .header, .tab-bar, .tab-panel[data-tab="estimator"], .tab-panel[data-tab="optimize"] {
+    .header, .tab-bar, .tab-panel[data-tab="estimator"], .tab-panel[data-tab="calculate"] {
         max-width: 860px; margin-left: auto; margin-right: auto;
     }
     ::selection { background: var(--accent); color: var(--bg); }
@@ -620,6 +620,7 @@
         letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.3rem;
     }
     .led-stat-v { font-size: 1.05rem; font-weight: 700; }
+    .led-stat-side { font-size: 0.62rem; font-weight: 500; color: var(--text-muted); white-space: nowrap; }
     .led-stat.owed { border-left: 3px solid var(--red); }
     .led-stat.profit { border-left: 3px solid var(--green); }
     .led-stat.profit .led-stat-v { color: var(--green); }
@@ -661,6 +662,9 @@
     .led-collapse-head { cursor: pointer; margin-bottom: 0; }
     .led-collapse-head:hover .card-label { color: var(--text); }
     .led-total { font-size: 0.95rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .led-loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .led-cmp { font-size: 0.8rem; font-weight: 600; color: var(--blue); margin-top: 0.2rem; }
+    .led-cmp-loc { font-size: 0.62rem; color: var(--text-muted); font-weight: 500; }
     .led-table-wrap { overflow-x: auto; }
     .led-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; table-layout: fixed; }
     /* trades: fixed pixel column widths (sum = 940px) so columns never stretch or squeeze —
@@ -671,7 +675,7 @@
         font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em;
         padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border); white-space: nowrap;
     }
-    .led-table th.r { text-align: right; }
+    .led-table th.r, .led-table td.r { text-align: right; }
     tr[data-ticker] { cursor: pointer; }
     tr[data-ticker]:hover td { background: var(--surface2); }
     .led-caret { color: var(--text-muted); font-size: 0.7rem; display: inline-block; width: 0.9em; }
@@ -757,4 +761,77 @@
     @media (max-width: 600px) {
         .led-settings { grid-template-columns: 1fr; }
         .led-summary { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ========== COST OF LIVING (tab 4) ========== */
+    .col-baseline { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; font-size: 0.78rem; color: var(--text-muted); }
+    .col-flavor { font-size: 0.82rem; color: var(--accent); font-style: italic; margin: 0.6rem 0 0.25rem; min-height: 1.2em; }
+    .col-row { padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+    .col-row:last-child { border-bottom: none; }
+    .col-row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .col-label { font-size: 0.85rem; color: var(--text-muted); }
+    .col-amt { font-size: 0.85rem; color: var(--text); }
+    .col-row input.col-num {
+        width: 92px; padding: 0.3rem 0.45rem; background: var(--surface2); border: 1px solid var(--border);
+        color: var(--text); font-family: inherit; font-size: 0.82rem; text-align: right;
+    }
+    .col-row input.col-num:focus { outline: none; border-color: var(--accent); }
+    .col-range { width: 100%; margin: 0; }
+    .col-target-row {
+        display: flex; justify-content: space-between; align-items: baseline;
+        margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border);
+    }
+    .col-target-l { color: var(--text-muted); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; font-weight: 600; }
+    .col-target-v { font-size: 1.35rem; color: var(--accent); }
+    .col-muted { color: var(--text-muted); font-size: 0.8rem; }
+    .col-best td { background: var(--green-dim); }
+    .col-tag {
+        font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+        color: var(--green); border: 1px solid var(--green); padding: 0 5px; margin-left: 6px; border-radius: 2px;
+    }
+
+    /* COL intro + banner + growth assumptions */
+    .col-intro {
+        font-size: 0.84rem; color: var(--text-muted); line-height: 1.55;
+        margin-bottom: 1rem; padding: 0.85rem 1rem; background: var(--surface); border: 1px solid var(--border);
+    }
+    .col-intro strong { color: var(--text); }
+    .col-banner {
+        background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent);
+        padding: 1.5rem; margin-bottom: 1rem; text-align: center;
+    }
+    .col-banner-l { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+    .col-auto {
+        font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.04em; background: transparent;
+        border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; padding: 0 5px;
+        margin-left: 6px; font-family: inherit; border-radius: 2px;
+    }
+    .col-auto:hover { border-color: var(--accent); color: var(--accent); }
+    .col-banner-v { font-size: 2rem; font-weight: 800; color: var(--accent); margin: 0.4rem 0; letter-spacing: -0.02em; }
+    .col-banner .col-banner-input {
+        field-sizing: content; min-width: 3ch; max-width: 88vw; width: auto;
+        background: transparent; border: none; border-bottom: 1px dashed var(--border);
+        color: var(--accent); font-family: inherit; font-size: 2rem; font-weight: 800; text-align: center; letter-spacing: -0.02em;
+    }
+    .col-banner .col-banner-input:focus { outline: none; border-bottom-color: var(--accent); }
+    .col-banner-sub { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+    .col-banner-sub strong { color: var(--text); }
+    .col-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem 1.25rem; }
+    .col-field { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: var(--text-muted); }
+    input.col-num { width: 92px; }
+    input.col-num-sm { width: 64px; }
+    .col-select { margin: 0; flex: 0 0 auto; }
+    .col-select select { padding: 0.3rem 1.5rem 0.3rem 0.5rem; font-size: 0.8rem; }
+    .col-pctile { font-size: 0.66rem; color: var(--text-muted); margin-top: 1px; }
+    .col-tier { font-size: 0.72rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+    .col-tier .col-select { display: inline-block; }
+    .col-tier .col-select select { padding: 0.25rem 1.4rem 0.25rem 0.5rem; font-size: 0.75rem; }
+    .col-chart-box { position: relative; height: 380px; margin-top: 0.75rem; }
+    .col-chart-box canvas { position: absolute; left: 0; top: 0; }
+    @media (max-width: 600px) { .col-grid { grid-template-columns: 1fr; } }
+
+    /* ledger: "no tax owed" placeholder when there's income but $0 tax */
+    .led-chart-none {
+        height: 260px; display: flex; align-items: center; justify-content: center;
+        text-align: center; color: var(--green); font-size: 0.9rem; font-weight: 600;
     }

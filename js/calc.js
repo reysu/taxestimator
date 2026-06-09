@@ -123,8 +123,11 @@ export const fmtK = v => {
 
 // ========== APPLY LOSSES ==========
 export function applyLosses(st, lt, inc, loss, loc) {
+    // Capital losses offset capital gains everywhere. Against ORDINARY income, only the US
+    // allows it ($3,000/yr); most other jurisdictions don't let stock losses reduce salary
+    // at all (they carry forward against future gains instead).
     const isUS = !['SG', 'JP', 'AE', 'AU', 'NZ', 'TW', 'HK'].includes(loc);
-    const incomeDeductionCap = isUS ? 3000 : Infinity;
+    const incomeDeductionCap = isUS ? 3000 : 0;
     let remaining = loss;
     let stT = Math.max(0, st - remaining);
     remaining = Math.max(0, remaining - st);

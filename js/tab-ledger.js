@@ -10,7 +10,7 @@ const CUR_YEAR = new Date().getFullYear();
 const INCOME_CATS = ['salary', 'bonus', 'adsense', 'sponsorships', 'affiliates', 'sales', 'dividend', 'interest', 'other'];
 const EXPENSE_CATS = ['rent', 'payroll', 'taxes/fees', 'professional services', 'subscriptions', 'software', 'food', 'transport', 'utilities', 'equipment', 'travel', 'marketing', 'healthcare', 'other'];
 
-const DEFAULT = { homeLoc: 'CA', status: 'single', selfEmployed: false, income: [], expenses: [], trades: [] };
+const DEFAULT = { homeLoc: 'CA', compareLoc: '', status: 'single', selfEmployed: false, income: [], expenses: [], trades: [] };
 let state = load(KEY, DEFAULT);
 state.expenses ||= []; // migrate older saved ledgers
 // migrate trades to an explicit `type` (older rows derived it from acquired→sold dates)
@@ -93,8 +93,8 @@ function tradeCalc(t) {
     return { cost, end, gain, pct, isLT, open, closed, ytd, type };
 }
 
-// ---- aggregate the whole ledger ----
-function aggregate() {
+// ---- aggregate the whole ledger ---- (loc defaults to home; pass another for comparison)
+function aggregate(loc = state.homeLoc) {
     let incomeYTD = 0, incomeAll = 0;
     for (const r of state.income) {
         const amt = num(r.amount);
@@ -126,14 +126,14 @@ function aggregate() {
         deduction: stdDeduction[state.status],
         waMillionaires: true,
     };
-    const r = calcForLocation(ltGains, stGains, taxableInc, losses, state.homeLoc, opts);
+    const r = calcForLocation(ltGains, stGains, taxableInc, losses, loc, opts);
     const taxableEarned = taxableInc + stGains + ltGains;
     const effRate = taxableEarned > 0 ? (r.total / taxableEarned * 100) : 0;
-    // Cash left over: everything earned/realized this year minus spending and tax.
-    const realizedNetYTD = stGains + ltGains - losses;
-    const savings = incomeYTD + realizedNetYTD - expensesYTD - r.total;
+    // What you keep from your earnings: income minus spending and tax. (Investment P/L is
+    // tracked separately in the realized/unrealized stats — not folded into "savings".)
+    const savings = incomeYTD - expensesYTD - r.total;
     // Clean, location-aware tax breakdown (e.g. "california tax", "japan tax").
-    const locRaw = (LOCATIONS.find(l => l.code === state.homeLoc) || {}).name || 'location';
+    const locRaw = (LOCATIONS.find(l => l.code === loc) || {}).name || 'location';
     const locName = locRaw.replace(/resident/i, '').replace(/\([^)]*\)/g, '').trim();
     const taxBreakdown = {
         fedInc: r.fedIncomeTax,
@@ -301,18 +301,23 @@ function summaryHTML() {
     const cell = (key, label, val, cls = '') => `
         <div class="led-stat ${cls}" data-stat="${key}" role="button" tabindex="0" title="click for breakdown">
             <div class="led-stat-l">${label}</div><div class="led-stat-v">${val}</div></div>`;
-    const expVal = a.deductibleYTD > 0
-        ? `${fmt(a.expensesYTD)}<div class="led-sub">${fmt(a.deductibleYTD)} deductible</div>`
+    // show deductible inline (smaller) only when it differs from the total; keeps the box one line tall
+    const partlyDeductible = a.deductibleYTD > 0 && Math.round(a.deductibleYTD) !== Math.round(a.expensesYTD);
+    const expVal = partlyDeductible
+        ? `${fmt(a.expensesYTD)} <span class="led-stat-side">${fmt(a.deductibleYTD)} ded.</span>`
         : fmt(a.expensesYTD);
+    // optional comparison location — second blue line in the tax / rate / savings boxes
+    const c = state.compareLoc ? aggregate(state.compareLoc) : null;
+    const cmp = val => c ? `<div class="led-cmp">${val} <span class="led-cmp-loc">${state.compareLoc}</span></div>` : '';
     return `
         ${cell('income', `income (${CUR_YEAR})`, fmt(a.incomeYTD))}
         ${cell('expenses', `expenses (${CUR_YEAR})`, expVal)}
         ${cell('st', 'realized short-term', fmt(a.stGains))}
         ${cell('lt', 'realized long-term', fmt(a.ltGains))}
         ${cell('losses', 'realized losses', fmt(a.losses))}
-        ${cell('tax', 'est. tax', fmt(a.tax), 'owed')}
-        ${cell('effrate', 'effective rate', a.effRate.toFixed(1) + '%')}
-        ${cell('savings', 'net savings', fmt(a.savings), 'profit')}`;
+        ${cell('tax', 'est. tax', fmt(a.tax) + cmp(fmt(c?.tax)), 'owed')}
+        ${cell('effrate', 'effective rate', a.effRate.toFixed(1) + '%' + cmp(c ? c.effRate.toFixed(1) + '%' : ''))}
+        ${cell('savings', 'net savings', fmt(a.savings) + cmp(fmt(c?.savings)), 'profit')}`;
 }
 
 // ---- breakdown modal content ----
@@ -373,7 +378,7 @@ function statContent(key) {
             return { title: 'effective tax rate', body: `<p class="led-bd-note">the share of everything you earned this year that goes to tax — not your top bracket.</p><p class="led-bd-formula">${fmt(a.tax)} tax ÷ ${fmt(base)} earned = <strong>${a.effRate.toFixed(1)}%</strong></p><p class="led-bd-note">“earned” = income + realized short-term + realized long-term gains.</p>` };
         }
         case 'savings':
-            return { title: 'net savings', body: `<p class="led-bd-note">what you actually keep this year after spending and taxes.</p><p class="led-bd-formula">income ${fmt(a.incomeYTD)}<br>+ realized gains ${fmt(a.stGains + a.ltGains - a.losses)}<br>− expenses ${fmt(a.expensesYTD)}<br>− tax ${fmt(a.tax)}<br>= <strong>${fmt(a.savings)}</strong></p>` };
+            return { title: 'net savings', body: `<p class="led-bd-note">what you keep from your earnings this year after spending and taxes. (investment gains/losses are tracked separately above.)</p><p class="led-bd-formula">income ${fmt(a.incomeYTD)}<br>− expenses ${fmt(a.expensesYTD)}<br>− tax ${fmt(a.tax)}<br>= <strong>${fmt(a.savings)}</strong></p>` };
         default:
             return { title: 'breakdown', body: '' };
     }
@@ -431,7 +436,26 @@ export function ledgerSummary() {
     };
 }
 
+// US filing status + FICA only apply to US locations; hide them elsewhere.
+const usesUSFederal = loc => !['PR', 'SG', 'JP', 'AE', 'AU', 'NZ', 'TW', 'HK'].includes(loc);
+function syncTaxProfile() {
+    const us = usesUSFederal(state.homeLoc);
+    const statusEl = document.getElementById('ledStatus');
+    const seEl = document.getElementById('ledSEWrap');
+    const note = document.getElementById('ledTaxNote');
+    if (statusEl) statusEl.style.display = us ? '' : 'none';
+    if (seEl) seEl.style.display = us ? '' : 'none';
+    if (note) {
+        note.style.display = us ? 'none' : '';
+        if (!us) {
+            const name = (LOCATIONS.find(l => l.code === state.homeLoc) || {}).name || 'this location';
+            note.textContent = `${name} uses its own tax rules — US filing status and self-employment (FICA) tax don't apply here.`;
+        }
+    }
+}
+
 function render() {
+    syncTaxProfile();
     document.getElementById('ledIncomeBody').innerHTML = incomeRows();
     document.getElementById('ledExpenseBody').innerHTML = expenseRows();
     document.getElementById('ledTradeBody').innerHTML = tradeRows();
@@ -624,12 +648,19 @@ function updateLedgerCharts() {
     ]);
 
     // show each chart only when it has data; hide the whole card when there's nothing
-    const hasIncome = incomeEntries.length > 0, hasExpense = expenseEntries.length > 0, hasTax = a.tax > 0.5;
+    const hasIncome = incomeEntries.length > 0, hasExpense = expenseEntries.length > 0;
+    const hasTax = a.tax > 0.5;
+    const taxable = (a.incomeYTD + a.stGains + a.ltGains) > 0; // something that *could* be taxed
     toggleWrap('ledIncomeChartWrap', hasIncome);
     toggleWrap('ledExpenseChartWrap', hasExpense);
-    toggleWrap('ledTaxChartWrap', hasTax);
+    toggleWrap('ledTaxChartWrap', taxable);
+    // when there's income/gains but $0 tax (e.g. wiped by deductions), show a note instead of a blank pie
+    const taxBox = document.querySelector('#ledTaxChartWrap .led-chart-box');
+    const taxNone = document.getElementById('ledTaxNone');
+    if (taxBox) taxBox.style.display = hasTax ? '' : 'none';
+    if (taxNone) taxNone.style.display = (taxable && !hasTax) ? '' : 'none';
     const card = document.getElementById('ledBreakdownCard');
-    if (card) card.style.display = (hasIncome || hasExpense || hasTax) ? '' : 'none';
+    if (card) card.style.display = (hasIncome || hasExpense || taxable) ? '' : 'none';
     resizeLedgerCharts(); // widths change when wraps toggle
 }
 
@@ -675,15 +706,17 @@ export function initLedger() {
         </div>
         <div class="card">
             <div class="card-label">ledger settings</div>
-            <div class="led-settings">
+            <div class="led-loc-grid">
                 <div class="select-wrap"><select id="ledLoc">${locOptions(state.homeLoc)}</select></div>
-                <div class="status-pills" id="ledStatus">
-                    <button class="status-pill${state.status === 'single' ? ' active' : ''}" data-s="single">single</button>
-                    <button class="status-pill${state.status === 'mfj' ? ' active' : ''}" data-s="mfj">married jointly</button>
-                    <button class="status-pill${state.status === 'hoh' ? ' active' : ''}" data-s="hoh">head of household</button>
-                </div>
+                <div class="select-wrap"><select id="ledCompare"><option value="">compare with… (none)</option>${LOCATIONS.map(l => `<option value="${l.code}"${state.compareLoc === l.code ? ' selected' : ''}>vs ${l.name}</option>`).join('')}</select></div>
             </div>
-            <label class="led-check"><input type="checkbox" id="ledSE"${state.selfEmployed ? ' checked' : ''}> <span class="help" data-tip="Turn on if your income is self-employment / 1099 / business income (freelancing, creator income, sole-prop). You then owe FICA — the self-employment tax: 12.4% Social Security on net earnings up to $176,100, plus 2.9% Medicare (no cap), plus 0.9% extra Medicare above $200k single / $250k married. Self-employed people pay BOTH the employee and employer halves. W-2 employees leave this off (their employer withholds it).">self-employed (include FICA / SE tax)</span></label>
+            <div class="status-pills" id="ledStatus">
+                <button class="status-pill${state.status === 'single' ? ' active' : ''}" data-s="single">single</button>
+                <button class="status-pill${state.status === 'mfj' ? ' active' : ''}" data-s="mfj">married jointly</button>
+                <button class="status-pill${state.status === 'hoh' ? ' active' : ''}" data-s="hoh">head of household</button>
+            </div>
+            <label class="led-check" id="ledSEWrap"><input type="checkbox" id="ledSE"${state.selfEmployed ? ' checked' : ''}> <span class="help" data-tip="Turn on if your income is self-employment / 1099 / business income (freelancing, creator income, sole-prop). You then owe FICA — the self-employment tax: 12.4% Social Security on net earnings up to $176,100, plus 2.9% Medicare (no cap), plus 0.9% extra Medicare above $200k single / $250k married. Self-employed people pay BOTH the employee and employer halves. W-2 employees leave this off (their employer withholds it).">self-employed (include FICA / SE tax)</span></label>
+            <p class="led-note" id="ledTaxNote" style="display:none"></p>
         </div>
 
         <div class="led-summary" id="ledSummary"></div>
@@ -702,6 +735,7 @@ export function initLedger() {
                 <div class="led-chart" id="ledTaxChartWrap">
                     <div class="led-chart-t" data-chart="tax">estimated tax</div>
                     <div class="led-chart-box"><canvas id="ledTaxChart"></canvas></div>
+                    <div class="led-chart-none" id="ledTaxNone" style="display:none">$0 — no tax owed 🎉</div>
                 </div>
             </div>
         </div>
@@ -809,6 +843,7 @@ export function initLedger() {
 
     // settings
     document.getElementById('ledLoc').addEventListener('change', e => { state.homeLoc = e.target.value; persist(); render(); });
+    document.getElementById('ledCompare').addEventListener('change', e => { state.compareLoc = e.target.value; persist(); render(); });
     document.getElementById('ledSE').addEventListener('change', e => { state.selfEmployed = e.target.checked; persist(); render(); });
     document.getElementById('ledStatus').addEventListener('click', e => {
         const b = e.target.closest('.status-pill'); if (!b) return;
