@@ -110,7 +110,7 @@ export function initCalculate() {
     if (!panel) return;
 
     panel.innerHTML = `
-        <div class="col-intro">a compound-interest calculator: see how a starting amount plus monthly contributions grow over time,
+        <div class="callout-blue">a compound-interest calculator: see how a starting amount plus monthly contributions grow over time,
         and how long it takes to hit a net-worth goal.</div>
 
         <div class="col-banner">

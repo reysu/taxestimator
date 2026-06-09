@@ -796,6 +796,12 @@
         margin-bottom: 1rem; padding: 0.85rem 1rem; background: var(--surface); border: 1px solid var(--border);
     }
     .col-intro strong { color: var(--text); }
+    /* light-blue callout (same shape as the ledger's yellow privacy notice) */
+    .callout-blue {
+        background: var(--blue-dim); border: 1px solid var(--blue); color: var(--text);
+        padding: 0.85rem 1rem; margin-bottom: 1rem; font-size: 0.84rem; line-height: 1.55;
+    }
+    .callout-blue strong { color: var(--blue); font-weight: 700; }
     .col-banner {
         background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent);
         padding: 1.5rem; margin-bottom: 1rem; text-align: center;
