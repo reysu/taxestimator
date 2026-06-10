@@ -216,16 +216,16 @@ function updateMarginalChart(loc, status, opts) {
                 if (i >= lower && i < upper) { fedRate = rate * 100; break; }
             }
         }
-        // Location marginal rate
+        // Location marginal rate (JP/HK handled below — they need combined/capped rates)
         let locRate = 0;
-        const locBracketsMap = { CA: ca, NY: ny, PR: pr, SG: sg, JP: jp, AU: au, NZ: nz, TW: tw, HK: hk };
+        const locBracketsMap = { CA: ca, NY: ny, PR: pr, SG: sg, AU: au, NZ: nz, TW: tw };
         const locB = locBracketsMap[loc];
         if (locB) {
             for (const [lower, upper, rate] of locB) {
                 if (i >= lower && i < upper) { locRate = rate * 100; break; }
             }
         } else if (loc === 'UT') {
-            locRate = 4.5;
+            locRate = utRate * 100;
         } else if (loc === 'JP') {
             // simplified: national + local
             for (const [lower, upper, rate] of jp) {
@@ -281,7 +281,7 @@ function encodeState() {
         params.set('itemized', document.getElementById('itemized').value);
     }
     if (document.getElementById('selfEmployed').checked) params.set('se', '1');
-    if (!document.getElementById('waMillionaires').checked) params.set('wam', '0');
+    if (document.getElementById('waMillionaires').checked) params.set('wam', '1');
     const cmp = document.getElementById('compareState').value;
     if (cmp) params.set('cmp', cmp);
     const cmpSt = document.getElementById('compareStatus').value;
@@ -309,7 +309,7 @@ function decodeState() {
         document.getElementById('itemized').value = params.get('itemized');
     }
     if (params.has('se')) document.getElementById('selfEmployed').checked = true;
-    if (params.has('wam') && params.get('wam') === '0') document.getElementById('waMillionaires').checked = false;
+    if (params.get('wam') === '1') document.getElementById('waMillionaires').checked = true;
     if (params.has('cmp')) document.getElementById('compareState').value = params.get('cmp');
     if (params.has('cmpst')) document.getElementById('compareStatus').value = params.get('cmpst');
 }
@@ -325,7 +325,7 @@ document.getElementById('copyBtn').addEventListener('click', () => {
 });
 
 // ========== LOC LABEL ==========
-const locLabelMap = { 'SG': 'singapore', 'JP': 'japan', 'PR': 'puerto rico', 'AE': 'dubai', 'AU': 'australia', 'NZ': 'new zealand', 'TW': 'taiwan', 'HK': 'hong kong' };
+const locLabelMap = { 'SG': 'singapore', 'JP': 'japan', 'PR': 'puerto rico (act 60)', 'AE': 'dubai', 'AU': 'australia', 'NZ': 'new zealand', 'TW': 'taiwan', 'HK': 'hong kong' };
 
 // ========== MAIN CALCULATION ==========
 function calc() {
@@ -640,14 +640,14 @@ const T = {
         // Locations
         l_CA: 'california', l_NY: 'new york', l_UT: 'utah', l_TX: 'texas',
         l_FL: 'florida', l_WA: 'washington (seattle)', l_NV: 'nevada (las vegas)',
-        l_PR: 'puerto rico', l_SG: 'singapore resident', l_JP: 'japan resident',
+        l_PR: 'puerto rico (act 60)', l_SG: 'singapore resident', l_JP: 'japan resident',
         l_AE: 'dubai (UAE)', l_AU: 'australia', l_NZ: 'new zealand',
         l_TW: 'taiwan', l_HK: 'hong kong',
         // Tooltips
         tip_filing: 'Your tax filing status determines your tax brackets, standard deduction, and thresholds. Choose the one that matches your IRS filing.',
-        tip_single: 'Unmarried, divorced, or legally separated. Uses the narrowest tax brackets and a $15,000 standard deduction for 2025.',
-        tip_mfj: 'Married couples filing one return together. Gets the widest brackets (roughly 2x single) and a $30,000 standard deduction. Usually the lowest combined tax for married couples.',
-        tip_hoh: 'For unmarried taxpayers who pay more than half the cost of keeping up a home for a qualifying dependent. Wider brackets than single and a $22,500 standard deduction.',
+        tip_single: 'Unmarried, divorced, or legally separated. Uses the narrowest tax brackets and a $16,100 standard deduction for 2026.',
+        tip_mfj: 'Married couples filing one return together. Gets the widest brackets (roughly 2x single) and a $32,200 standard deduction. Usually the lowest combined tax for married couples.',
+        tip_hoh: 'For unmarried taxpayers who pay more than half the cost of keeping up a home for a qualifying dependent. Wider brackets than single and a $24,150 standard deduction.',
         tip_compare: 'Compare your tax across different locations or filing statuses to see potential savings.',
         tip_se: 'FICA is the Federal Insurance Contributions Act tax — it funds Social Security (12.4%) and Medicare (2.9%). Self-employed workers pay both the employee and employer portions.',
         tip_ltcg: 'Profits from selling assets held longer than 1 year. Taxed at lower federal rates (0%, 15%, or 20%) than ordinary income.',
@@ -660,7 +660,7 @@ const T = {
         tip_sandbox: 'Drag the sliders to shift your total income between ordinary income, short-term gains, and long-term gains. Watch how restructuring changes your total tax in real time.',
         tip_sandbox_total: 'Your total income stays fixed. Only the allocation between income types changes.',
         tip_niit: 'Net Investment Income Tax — a 3.8% surtax on investment income (capital gains, dividends) when your adjusted gross income exceeds $200k (single) or $250k (married).',
-        tip_fica: 'Self-employment tax covering Social Security (12.4% up to $176,100) and Medicare (2.9% uncapped, plus 0.9% on earnings over $200k/$250k).',
+        tip_fica: 'Self-employment tax covering Social Security (12.4% up to $184,500) and Medicare (2.9% uncapped, plus 0.9% on earnings over $200k/$250k).',
         tip_effective: 'Your total tax as a percentage of total income. This is the actual rate you pay overall, not your top marginal bracket.',
     },
     zh: {
@@ -700,13 +700,13 @@ const T = {
         geo_us: '美國', geo_asia: '亞洲與中東', geo_oceania: '大洋洲',
         l_CA: '加州', l_NY: '紐約', l_UT: '猶他', l_TX: '德州',
         l_FL: '佛州', l_WA: '華盛頓（西雅圖）', l_NV: '內華達（拉斯維加斯）',
-        l_PR: '波多黎各', l_SG: '新加坡', l_JP: '日本',
+        l_PR: '波多黎各（Act 60）', l_SG: '新加坡', l_JP: '日本',
         l_AE: '杜拜（阿聯酋）', l_AU: '澳洲', l_NZ: '紐西蘭',
         l_TW: '台灣', l_HK: '香港',
         tip_filing: '報稅身份決定你的稅率級距、標準扣除額和各項門檻。請選擇符合你 IRS 申報的身份。',
-        tip_single: '未婚、離婚或合法分居。使用最窄的稅率級距，2025 年標準扣除額為 $15,000。',
-        tip_mfj: '夫妻共同申報一份稅表。享有最寬的級距（約為單身的兩倍）和 $30,000 標準扣除額。通常是已婚夫妻稅負最低的方式。',
-        tip_hoh: '適用於未婚且負擔超過一半家庭費用、撫養合格被扶養人的納稅人。級距比單身寬，標準扣除額為 $22,500。',
+        tip_single: '未婚、離婚或合法分居。使用最窄的稅率級距，2026 年標準扣除額為 $16,100。',
+        tip_mfj: '夫妻共同申報一份稅表。享有最寬的級距（約為單身的兩倍）和 $32,200 標準扣除額。通常是已婚夫妻稅負最低的方式。',
+        tip_hoh: '適用於未婚且負擔超過一半家庭費用、撫養合格被扶養人的納稅人。級距比單身寬，標準扣除額為 $24,150。',
         tip_compare: '比較不同地區或報稅身份的稅負差異，找出潛在節省空間。',
         tip_se: 'FICA 是聯邦保險貢獻法稅——用於社會安全（12.4%）和醫療保險（2.9%）。自僱者需同時繳納雇主和員工部分。',
         tip_ltcg: '持有超過一年的資產出售獲利。聯邦稅率（0%、15% 或 20%）低於一般所得。',
@@ -719,7 +719,7 @@ const T = {
         tip_sandbox: '拖動滑桿在一般所得、短期利得和長期利得之間重新分配總收入，即時觀察稅額變化。',
         tip_sandbox_total: '總收入保持不變，只改變各類所得的配置比例。',
         tip_niit: '淨投資所得稅——當調整後總所得超過 $200k（單身）或 $250k（已婚）時，對投資所得課徵 3.8% 附加稅。',
-        tip_fica: '自僱稅涵蓋社會安全（12.4%，上限 $176,100）和醫療保險（2.9% 無上限，收入超過 $200k/$250k 再加 0.9%）。',
+        tip_fica: '自僱稅涵蓋社會安全（12.4%，上限 $184,500）和醫療保險（2.9% 無上限，收入超過 $200k/$250k 再加 0.9%）。',
         tip_effective: '你的總稅額佔總收入的百分比。這是你實際繳納的整體稅率，不是最高邊際稅率。',
     },
     ja: {
@@ -759,12 +759,12 @@ const T = {
         geo_us: 'アメリカ', geo_asia: 'アジア・中東', geo_oceania: 'オセアニア',
         l_CA: 'カリフォルニア', l_NY: 'ニューヨーク', l_UT: 'ユタ', l_TX: 'テキサス',
         l_FL: 'フロリダ', l_WA: 'ワシントン（シアトル）', l_NV: 'ネバダ（ラスベガス）',
-        l_PR: 'プエルトリコ', l_SG: 'シンガポール', l_JP: '日本',
+        l_PR: 'プエルトリコ（Act 60）', l_SG: 'シンガポール', l_JP: '日本',
         l_AE: 'ドバイ（UAE）', l_AU: 'オーストラリア', l_NZ: 'ニュージーランド',
         l_TW: '台湾', l_HK: '香港',
         tip_filing: '申告区分は税率区分、標準控除額、各種しきい値を決定します。IRSへの申告に合った区分を選んでください。',
-        tip_single: '未婚、離婚、または法的別居。最も狭い税率区分を使用し、2025年の標準控除は$15,000です。',
-        tip_mfj: '夫婦で一つの確定申告書を提出。最も広い税率区分（独身の約2倍）と$30,000の標準控除。通常、夫婦の税負担が最も軽い方法です。',
+        tip_single: '未婚、離婚、または法的別居。最も狭い税率区分を使用し、2026年の標準控除は$16,100です。',
+        tip_mfj: '夫婦で一つの確定申告書を提出。最も広い税率区分（独身の約2倍）と$32,200の標準控除。通常、夫婦の税負担が最も軽い方法です。',
         tip_hoh: '未婚で、扶養家族のために住居費の半分以上を負担している納税者向け。独身より広い税率区分と$22,500の標準控除。',
         tip_compare: '異なる地域や申告区分の税負担を比較し、節約の可能性を確認。',
         tip_se: 'FICAは連邦保険拠出法の税金で、社会保障（12.4%）とメディケア（2.9%）に充てられます。自営業者は雇用主・従業員の両方の負担分を支払います。',
@@ -778,7 +778,7 @@ const T = {
         tip_sandbox: 'スライダーを動かして総所得を給与所得・短期利益・長期利益の間で再配分し、税額の変化をリアルタイムで確認。',
         tip_sandbox_total: '総収入は固定のまま。所得の種類の配分だけが変わります。',
         tip_niit: '純投資所得税 — 調整後総所得が$200k（独身）/$250k（夫婦）を超える場合、投資所得に3.8%の付加税。',
-        tip_fica: '自営業税。社会保障（12.4%、上限$176,100）とメディケア（2.9%上限なし、$200k/$250k超の所得に追加0.9%）をカバー。',
+        tip_fica: '自営業税。社会保障（12.4%、上限$184,500）とメディケア（2.9%上限なし、$200k/$250k超の所得に追加0.9%）をカバー。',
         tip_effective: '総税額の総所得に対する割合。最高限界税率ではなく、実際に支払う全体の税率です。',
     }
 };

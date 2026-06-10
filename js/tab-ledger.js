@@ -3,7 +3,7 @@
 // performance (% + annualized CAGR), and live tax via the shared engine.
 import { calcForLocation, fmt, fmt2, fmtK } from './calc.js';
 import { LOCATIONS, stdDeduction } from '../data/brackets.js';
-import { load, save, downloadText, pickFileText } from './store.js';
+import { load, save, downloadText } from './store.js';
 
 const KEY = 'ledger.v1';
 const CUR_YEAR = new Date().getFullYear();
@@ -87,14 +87,8 @@ RULES:
 const persist = () => save(KEY, state);
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
-const daysBetween = (a, b) => (a && b) ? (new Date(b) - new Date(a)) / 86400000 : 0;
-
-function cagr(start, end, days) {
-    if (start <= 0 || end <= 0 || days < 2) return null;
-    const years = days / 365.25;
-    if (years < 0.01) return null;
-    return Math.pow(end / start, 1 / years) - 1;
-}
+// User strings go into innerHTML (rows, modals) — escape them. LLM-imported JSON is untrusted.
+const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 // ---- per-trade derived numbers (avgCost & salePrice are PER SHARE; × qty = totals) ----
 function tradeCalc(t) {
@@ -144,7 +138,7 @@ function aggregate(loc = state.homeLoc) {
         status: state.status,
         selfEmployed: state.selfEmployed,
         deduction: stdDeduction[state.status],
-        waMillionaires: true,
+        waMillionaires: false, // SB 6346 starts TY2028 (and is under court challenge)
     };
     const r = calcForLocation(ltGains, stGains, taxableInc, losses, loc, opts);
     const taxableEarned = taxableInc + stGains + ltGains;
@@ -192,7 +186,7 @@ function incomeRows() {
     if (!state.income.length) return `<tr><td colspan="5" class="led-empty">no income yet — add a row below</td></tr>`;
     return pageSlice(state.income, 'income').map(r => `
         <tr data-kind="income" data-id="${r.id}">
-            <td><input class="led-in" data-f="source" value="${r.source || ''}" placeholder="e.g. Google"></td>
+            <td><input class="led-in" data-f="source" value="${esc(r.source)}" placeholder="e.g. Google"></td>
             <td>
                 <select class="led-in" data-f="category">
                     ${INCOME_CATS.map(c => `<option value="${c}"${r.category === c ? ' selected' : ''}>${c}</option>`).join('')}
@@ -208,7 +202,7 @@ function expenseRows() {
     if (!state.expenses.length) return `<tr><td colspan="6" class="led-empty">no expenses yet — add a row below</td></tr>`;
     return pageSlice(state.expenses, 'expense').map(x => `
         <tr data-kind="expense" data-id="${x.id}">
-            <td><input class="led-in" data-f="desc" value="${x.desc || ''}" placeholder="e.g. office rent"></td>
+            <td><input class="led-in" data-f="desc" value="${esc(x.desc)}" placeholder="e.g. office rent"></td>
             <td>
                 <select class="led-in" data-f="category">
                     ${EXPENSE_CATS.map(c => `<option value="${c}"${x.category === c ? ' selected' : ''}>${c}</option>`).join('')}
@@ -242,8 +236,8 @@ function tickerRows() {
     for (const r of list) {
         const open = expandedTickers.has(r.ticker);
         html += `
-        <tr data-ticker="${r.ticker}" class="led-ticker-row">
-            <td><span class="led-caret">${open ? '▾' : '▸'}</span> ${r.ticker}</td>
+        <tr data-ticker="${esc(r.ticker)}" class="led-ticker-row">
+            <td><span class="led-caret">${open ? '▾' : '▸'}</span> ${esc(r.ticker)}</td>
             <td class="led-calc">${r.count}</td>
             <td class="led-calc">${fmt(r.cost)}</td>
             <td class="led-calc">${money(r.gain)}</td>
@@ -304,7 +298,7 @@ function tradeRows() {
             : `<input class="led-in led-num" data-f="salePrice" type="number" value="${t.salePrice ?? ''}" placeholder="$/share">`;
         return `
         <tr data-kind="trade" data-id="${t.id}">
-            <td><input class="led-in" data-f="asset" value="${t.asset || ''}" placeholder="VOO"></td>
+            <td><input class="led-in" data-f="asset" value="${esc(t.asset)}" placeholder="VOO"></td>
             <td><input class="led-in led-num" data-f="qty" type="number" value="${t.qty ?? ''}" placeholder="0"></td>
             <td><input class="led-in led-num" data-f="avgCost" type="number" value="${t.avgCost ?? ''}" placeholder="$/share"></td>
             <td>${typeSel}</td>
@@ -351,7 +345,7 @@ function bdTable(headers, rows) {
 function closedTradeRows(filter) {
     return state.trades.map(t => ({ t, c: tradeCalc(t) }))
         .filter(({ c }) => c.closed && c.ytd && filter(c))
-        .map(({ t, c }) => [t.asset || '—', t.sold || '—', fmt(c.cost), fmt(c.end), money(c.gain)]);
+        .map(({ t, c }) => [esc(t.asset) || '—', t.sold || '—', fmt(c.cost), fmt(c.end), money(c.gain)]);
 }
 
 function statContent(key) {
@@ -360,7 +354,7 @@ function statContent(key) {
     switch (key) {
         case 'income': {
             const byCat = Object.entries(incomeByCategory()).map(([c, v]) => [c, fmt(v)]);
-            const entries = state.income.filter(r => YTD(r.date)).map(r => [r.source || '—', r.category || '—', fmt(num(r.amount)), r.date || '—']);
+            const entries = state.income.filter(r => YTD(r.date)).map(r => [esc(r.source) || '—', esc(r.category) || '—', fmt(num(r.amount)), r.date || '—']);
             return { title: `income · ${CUR_YEAR}`, body: `<p class="led-bd-tot">total <strong>${fmt(a.incomeYTD)}</strong></p><h4>by category</h4>${bdTable(['category', 'amount'], byCat)}<h4>entries</h4>${bdTable(['source', 'category', 'amount', 'date'], entries)}` };
         }
         case 'expenses': {
@@ -376,7 +370,7 @@ function statContent(key) {
         case 'losses':
             return { title: `realized losses · ${CUR_YEAR}`, body: `<p class="led-bd-tot">total <strong>${fmt(a.losses)}</strong></p><p class="led-bd-note">trades sold this year at a loss. these offset your gains first, then up to $3,000 of ordinary income (US).</p>${bdTable(tradeHdr, closedTradeRows(c => c.gain < 0))}` };
         case 'unrealized': {
-            const rows = state.trades.filter(t => (t.type || 'st') === 'open').map(t => { const c = tradeCalc(t); return [t.asset || '—', fmt(c.cost), num(t.price) ? fmt(c.end) : '<span class="led-bd-warn">no price</span>', money(c.gain)]; });
+            const rows = state.trades.filter(t => (t.type || 'st') === 'open').map(t => { const c = tradeCalc(t); return [esc(t.asset) || '—', fmt(c.cost), num(t.price) ? fmt(c.end) : '<span class="led-bd-warn">no price</span>', money(c.gain)]; });
             return { title: 'unrealized P/L', body: `<p class="led-bd-tot">total <strong>${money(a.unrealized)}</strong></p><p class="led-bd-note">your open positions (type set to “open”), valued at the current price you entered. not taxed until you sell. leave a current price blank and it counts as $0.</p>${bdTable(['asset', 'cost', 'current value', 'unrealized'], rows)}` };
         }
         case 'tax': {
@@ -421,7 +415,7 @@ function openSliceModal(chartKey, label) {
         if (/long-term/.test(label)) return openStatModal('lt');
         if (/income tax/.test(label)) return openStatModal('income');
         if (/NIIT/.test(label)) return showModal('NIIT · investment surtax', `<p class="led-bd-note">a 3.8% federal surtax on net investment income (capital gains, dividends, interest) when your adjusted gross income exceeds $200k single / $250k married.</p>`);
-        if (/FICA/.test(label)) return showModal('FICA · self-employment', `<p class="led-bd-note">self-employment tax: 12.4% Social Security on net earnings up to $176,100, plus 2.9% Medicare (uncapped) and an extra 0.9% above $200k single / $250k married. The self-employed pay both the employer and employee halves.</p>`);
+        if (/FICA/.test(label)) return showModal('FICA · self-employment', `<p class="led-bd-note">self-employment tax: 12.4% Social Security on net earnings up to $184,500, plus 2.9% Medicare (uncapped) and an extra 0.9% above $200k single / $250k married. The self-employed pay both the employer and employee halves.</p>`);
         return openStatModal('tax');
     }
     const isIncome = chartKey === 'income';
@@ -431,7 +425,7 @@ function openSliceModal(chartKey, label) {
         if (!YTD(r.date) || (r.category || 'other') !== label) return;
         const amt = num(r.amount); if (amt <= 0) return;
         sum += amt;
-        rows.push(isIncome ? [r.source || '—', fmt(amt), r.date || '—'] : [r.desc || '—', fmt(amt), r.date || '—', r.deductible ? 'yes' : '—']);
+        rows.push(isIncome ? [esc(r.source) || '—', fmt(amt), r.date || '—'] : [esc(r.desc) || '—', fmt(amt), r.date || '—', r.deductible ? 'yes' : '—']);
     });
     const hdr = isIncome ? ['source', 'amount', 'date'] : ['description', 'amount', 'date', 'deductible'];
     showModal(`${isIncome ? 'income' : 'expenses'} · ${label}`, `<p class="led-bd-tot">total <strong>${fmt(sum)}</strong></p>${bdTable(hdr, rows)}`);
@@ -707,7 +701,8 @@ function exportCSV() {
     downloadText(`ledger-trades-${todayStr()}.csv`, trd, 'text/csv');
 }
 function csvCell(v) {
-    const s = (v ?? '').toString();
+    let s = (v ?? '').toString();
+    if (/^[=+@]/.test(s)) s = "'" + s; // spreadsheet formula-injection guard
     return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
 
@@ -737,7 +732,7 @@ export function initLedger() {
                 <button class="status-pill${state.status === 'mfj' ? ' active' : ''}" data-s="mfj">married jointly</button>
                 <button class="status-pill${state.status === 'hoh' ? ' active' : ''}" data-s="hoh">head of household</button>
             </div>
-            <label class="led-check" id="ledSEWrap"><input type="checkbox" id="ledSE"${state.selfEmployed ? ' checked' : ''}> <span class="help" data-tip="Turn on if your income is self-employment / 1099 / business income (freelancing, creator income, sole-prop). You then owe FICA — the self-employment tax: 12.4% Social Security on net earnings up to $176,100, plus 2.9% Medicare (no cap), plus 0.9% extra Medicare above $200k single / $250k married. Self-employed people pay BOTH the employee and employer halves. W-2 employees leave this off (their employer withholds it).">self-employed (include FICA / SE tax)</span></label>
+            <label class="led-check" id="ledSEWrap"><input type="checkbox" id="ledSE"${state.selfEmployed ? ' checked' : ''}> <span class="help" data-tip="Turn on if your income is self-employment / 1099 / business income (freelancing, creator income, sole-prop). You then owe FICA — the self-employment tax: 12.4% Social Security on net earnings up to $184,500, plus 2.9% Medicare (no cap), plus 0.9% extra Medicare above $200k single / $250k married. Self-employed people pay BOTH the employee and employer halves. W-2 employees leave this off (their employer withholds it).">self-employed (include FICA / SE tax)</span></label>
             <p class="led-note" id="ledTaxNote" style="display:none"></p>
         </div>
 

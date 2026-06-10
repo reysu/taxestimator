@@ -2,9 +2,11 @@
 import {
     fedBrackets, fedLTCGBrackets,
     niitThreshold, ficaSSCap, ficaMedicareExtra,
-    ca, ny, utRate, waThreshold, waIncomeThreshold, waIncomeRate,
-    pr, sg, jp, jpSurtaxRate, jpLocalRate, jpCapitalRate,
-    au, auMedicareRate, nz, tw, hk, hkStandardRate
+    ca, caMentalHealth, ny, utRate,
+    waThreshold, waSurchargeStart, waIncomeThreshold, waIncomeRate,
+    pr, prGradual, sg,
+    FX, jpJPY, jpSurtaxRate, jpLocalRate, jpPerCapitaJPY, jpBasicDeductionJPY, jpCapitalRate,
+    au, auMedicareRate, nz, tw, twDeduction, hk, hkAllowance, hkStd
 } from '../data/brackets.js';
 
 // ========== HELPERS ==========
@@ -47,20 +49,36 @@ export function bracketDetail(amount, brackets, startAt) {
     return rows;
 }
 
+// ========== JAPAN HELPERS ==========
+// Employment income deduction (給与所得控除), post-2025-reform: min ¥650k, cap ¥1.95M.
+function jpEmploymentDeductionJPY(salary) {
+    let d;
+    if (salary <= 1800000) d = salary * 0.4 - 100000;
+    else if (salary <= 3600000) d = salary * 0.3 + 80000;
+    else if (salary <= 6600000) d = salary * 0.2 + 440000;
+    else if (salary <= 8500000) d = salary * 0.1 + 1100000;
+    else d = 1950000;
+    return Math.min(1950000, Math.max(650000, d));
+}
+
 // ========== LOCATION TAX ==========
 export function locationTax(amount, loc, type, stackBase, opts) {
     if (amount <= 0) return 0;
     const waMillionaires = opts && opts.waMillionaires;
     switch (loc) {
-        case 'CA': return taxBracketStacked(amount, ca, stackBase);
+        case 'CA':
+            // brackets + 1% Mental Health Services Tax over $1M (top effective 13.3%)
+            return taxBracketStacked(amount, ca, stackBase) + taxBracketStacked(amount, caMentalHealth, stackBase);
         case 'NY': return taxBracketStacked(amount, ny, stackBase);
         case 'UT': return amount * utRate;
         case 'WA': {
             let waTax = 0;
             if (type === 'long' && amount > waThreshold) {
+                // 7% on taxable gains (after the deduction), 9.9% on TAXABLE gains over $1M
                 const taxable = amount - waThreshold;
-                const gainCap = 1000000 - waThreshold;
-                waTax += taxable <= gainCap ? taxable * 0.07 : gainCap * 0.07 + (taxable - gainCap) * 0.099;
+                waTax += taxable <= waSurchargeStart
+                    ? taxable * 0.07
+                    : waSurchargeStart * 0.07 + (taxable - waSurchargeStart) * 0.099;
             }
             if (waMillionaires) {
                 const totalInc = stackBase + amount;
@@ -73,16 +91,22 @@ export function locationTax(amount, loc, type, stackBase, opts) {
         }
         case 'TX': case 'FL': case 'NV': return 0;
         case 'PR':
-            if (type === 'long') return 0;
-            return taxBracketStacked(amount, pr, stackBase);
+            if (type === 'long') return 0; // legacy Act 60 decree assumption
+            return taxBracketStacked(amount, pr, stackBase) + taxBracketStacked(amount, prGradual, stackBase);
         case 'SG':
             if (type === 'long' || type === 'short') return 0;
             return taxBracketStacked(amount, sg, stackBase);
-        case 'JP':
+        case 'JP': {
             if (type === 'long' || type === 'short') return amount * jpCapitalRate;
-            const natTax = taxBracketStacked(amount, jp, stackBase);
-            const surtax = natTax * jpSurtaxRate;
-            return natTax + surtax + amount * jpLocalRate;
+            // Compute in JPY so the 2025-reform deductions apply (salary income assumed).
+            const salary = amount / FX.JPY;
+            const empDed = jpEmploymentDeductionJPY(salary);
+            const natTaxable = Math.max(0, salary - empDed - jpBasicDeductionJPY.national);
+            const inhTaxable = Math.max(0, salary - empDed - jpBasicDeductionJPY.inhabitant);
+            const natTax = taxBracket(natTaxable, jpJPY) * (1 + jpSurtaxRate);
+            const inhTax = inhTaxable > 0 ? inhTaxable * jpLocalRate + jpPerCapitaJPY : 0;
+            return (natTax + inhTax) * FX.JPY;
+        }
         case 'AE': return 0;
         case 'AU': {
             if (type === 'long') {
@@ -99,12 +123,14 @@ export function locationTax(amount, loc, type, stackBase, opts) {
             if (type === 'long' || type === 'short') return 0;
             return taxBracketStacked(amount, nz, stackBase);
         case 'TW':
-            if (type === 'long' || type === 'short') return 0;
-            return taxBracketStacked(amount, tw, stackBase);
+            if (type === 'long' || type === 'short') return 0; // domestic securities exempt
+            // exemption + standard deduction + salary deduction off the top (NT$464k, single)
+            return taxBracket(Math.max(0, amount - twDeduction), tw);
         case 'HK': {
             if (type === 'long' || type === 'short') return 0;
-            const progressiveHK = taxBracketStacked(amount, hk, stackBase);
-            const standardHK = (stackBase + amount) * hkStandardRate - stackBase * hkStandardRate;
+            // progressive (after basic allowance) vs two-tier standard rate — pay the lower
+            const progressiveHK = taxBracket(Math.max(0, amount - hkAllowance), hk);
+            const standardHK = taxBracket(amount, hkStd);
             return Math.min(progressiveHK, standardHK);
         }
         default: return 0;

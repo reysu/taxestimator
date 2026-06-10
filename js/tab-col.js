@@ -102,7 +102,7 @@ function rateColor(pct) {
 
 function incomeNeeded() {
     const annualNet = needMonthly() * 12;
-    const opts = { status: state.status, selfEmployed: state.selfEmployed, deduction: stdDeduction[state.status], waMillionaires: true };
+    const opts = { status: state.status, selfEmployed: state.selfEmployed, deduction: stdDeduction[state.status], waMillionaires: false };
     return LOCATIONS.map(l => {
         const gross = annualNet > 0 ? grossForNet(annualNet, l.code, opts, { inc: 1 }) : 0;
         return { code: l.code, name: l.name, gross, grossMo: gross / 12, rate: gross > 0 ? (gross - annualNet) / gross * 100 : 0 };

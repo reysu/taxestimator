@@ -7,7 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧾</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -40,9 +40,9 @@
 <div class="card">
     <div class="card-label"><span class="help" data-tip-i18n="tip_filing" data-tip="Your tax filing status determines your tax brackets, standard deduction, and thresholds. Choose the one that matches your IRS filing." data-i18n="filing_status">filing status</span></div>
     <div class="status-pills" id="statusPills">
-        <button class="status-pill active" data-status="single"><span class="help" data-tip-i18n="tip_single" data-tip="Unmarried, divorced, or legally separated. Uses the narrowest tax brackets and a $15,000 standard deduction for 2025." data-i18n="single">single</span></button>
-        <button class="status-pill" data-status="mfj"><span class="help" data-tip-i18n="tip_mfj" data-tip="Married couples filing one return together. Gets the widest brackets (roughly 2x single) and a $30,000 standard deduction. Usually the lowest combined tax for married couples." data-i18n="mfj">married filing jointly</span></button>
-        <button class="status-pill" data-status="hoh"><span class="help" data-tip-i18n="tip_hoh" data-tip="For unmarried taxpayers who pay more than half the cost of keeping up a home for a qualifying dependent. Wider brackets than single and a $22,500 standard deduction." data-i18n="hoh">head of household</span></button>
+        <button class="status-pill active" data-status="single"><span class="help" data-tip-i18n="tip_single" data-tip="Unmarried, divorced, or legally separated. Uses the narrowest tax brackets and a $16,100 standard deduction for 2026." data-i18n="single">single</span></button>
+        <button class="status-pill" data-status="mfj"><span class="help" data-tip-i18n="tip_mfj" data-tip="Married couples filing one return together. Gets the widest brackets (roughly 2x single) and a $32,200 standard deduction. Usually the lowest combined tax for married couples." data-i18n="mfj">married filing jointly</span></button>
+        <button class="status-pill" data-status="hoh"><span class="help" data-tip-i18n="tip_hoh" data-tip="For unmarried taxpayers who pay more than half the cost of keeping up a home for a qualifying dependent. Wider brackets than single and a $24,150 standard deduction." data-i18n="hoh">head of household</span></button>
     </div>
     <div class="card-label" style="margin-top: 0.5rem;" data-i18n="location">location</div>
     <div class="select-wrap">
@@ -54,7 +54,7 @@
             <option value="FL" data-i18n="l_FL">florida</option>
             <option value="WA" data-i18n="l_WA">washington (seattle)</option>
             <option value="NV" data-i18n="l_NV">nevada (las vegas)</option>
-            <option value="PR" data-i18n="l_PR">puerto rico</option>
+            <option value="PR" data-i18n="l_PR">puerto rico (act 60)</option>
             <option value="SG" data-i18n="l_SG">singapore resident</option>
             <option value="JP" data-i18n="l_JP">japan resident</option>
             <option value="AE" data-i18n="l_AE">dubai (UAE)</option>
@@ -65,7 +65,7 @@
         </select>
     </div>
     <div class="wa-toggle" id="waToggle">
-        <input type="checkbox" id="waMillionaires" checked>
+        <input type="checkbox" id="waMillionaires">
         <label for="waMillionaires" data-i18n="wa_label">include WA millionaires tax (9.9% on income &gt; $1M)</label>
         <span class="wa-badge">2028</span>
     </div>
@@ -82,7 +82,7 @@
                     <option value="FL" data-i18n="l_FL">florida</option>
                     <option value="WA" data-i18n="l_WA">washington (seattle)</option>
                     <option value="NV" data-i18n="l_NV">nevada (las vegas)</option>
-                    <option value="PR" data-i18n="l_PR">puerto rico</option>
+                    <option value="PR" data-i18n="l_PR">puerto rico (act 60)</option>
                     <option value="SG" data-i18n="l_SG">singapore resident</option>
                     <option value="JP" data-i18n="l_JP">japan resident</option>
                     <option value="AE" data-i18n="l_AE">dubai (UAE)</option>
@@ -181,7 +181,7 @@
     </div>
     <div class="deduction-info">
         <span class="ded-label" id="dedLabel"><span class="help" data-tip="A flat amount subtracted from your income before federal tax is calculated. Reduces your taxable income without needing to itemize expenses.">standard deduction</span></span>
-        <span class="ded-value" id="dedValue">$15,000</span>
+        <span class="ded-value" id="dedValue">$16,100</span>
     </div>
 </div>
 
@@ -209,7 +209,7 @@
     <div class="card-label" data-i18n="tax_breakdown">tax breakdown</div>
     <div id="breakdownRows"></div>
     <div class="tooltip" id="waTooltip">
-        WA millionaires tax (SB 6346): 9.9% on income over $1M — signed into law Mar 2026, effective Jan 2028
+        WA millionaires tax (SB 6346): 9.9% on income over $1M — signed Mar 2026, effective Jan 2028, currently under court challenge
     </div>
 </div>
 

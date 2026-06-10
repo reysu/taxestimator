@@ -1,7 +1,7 @@
 // Entry point — wires up the router and every tab module.
 
 // Visible error box — surfaces any uncaught error/rejection so we can diagnose without the console.
-const BUILD = 'calc-2026-06-09a';
+const BUILD = 'data2026-2026-06-10a';
 console.log('taxestimator build', BUILD);
 function showFatal(msg) {
     let el = document.getElementById('__fatal');
