@@ -13,13 +13,31 @@ const EXPENSE_CATS = ['rent', 'payroll', 'taxes/fees', 'professional services', 
 const DEFAULT = { homeLoc: 'CA', compareLoc: '', status: 'single', selfEmployed: false, income: [], expenses: [], trades: [] };
 let state = load(KEY, DEFAULT);
 state.expenses ||= []; // migrate older saved ledgers
-// migrate trades to an explicit `type` (older rows derived it from acquired→sold dates)
-(state.trades || []).forEach(t => {
-    if (t.type) return;
-    if (!t.sold) { t.type = 'open'; return; }
-    const d = t.acquired ? (new Date(t.sold) - new Date(t.acquired)) / 86400000 : 0;
-    t.type = d > 365 ? 'lt' : 'st';
-});
+// migrate trades: derive `type` from old acquired→sold dates, and convert old TOTAL
+// cost/proceeds into per-share avgCost/salePrice (using qty; qty-less rows fall back to qty 1).
+function migrateTrade(t) {
+    if (!t.type) {
+        if (!t.sold) t.type = 'open';
+        else { const d = t.acquired ? (new Date(t.sold) - new Date(t.acquired)) / 86400000 : 0; t.type = d > 365 ? 'lt' : 'st'; }
+    }
+    if (t.avgCost == null && (t.cost != null || t.proceeds != null)) {
+        const q = parseFloat(t.qty) || 0;
+        const cost = parseFloat(t.cost) || 0;
+        const hasP = t.proceeds != null && t.proceeds !== '';
+        const proceeds = parseFloat(t.proceeds) || 0;
+        if (q > 0) {
+            t.avgCost = cost / q;                       // full precision so qty×avgCost == original total
+            if (hasP) t.salePrice = proceeds / q;
+        } else {
+            t.qty = 1;
+            t.avgCost = cost;
+            if (hasP) t.salePrice = proceeds;
+        }
+        delete t.cost; delete t.proceeds;
+    }
+    return t;
+}
+(state.trades || []).forEach(migrateTrade);
 let wired = false;     // panel-level delegated listeners are attached only once
 let tradeSort = { key: null, dir: 1 }; // trades table sort: dir 1 = asc, -1 = desc
 const expandedTickers = new Set();     // which by-ticker rows are expanded to show their trades
@@ -52,7 +70,7 @@ STEP 2 — Produce the JSON. Schema:
     { "desc": "office rent", "category": "rent", "amount": 2000, "date": "${CUR_YEAR}-01-05", "deductible": true }
   ],
   "trades": [
-    { "asset": "VOO", "qty": 100, "cost": 38000, "type": "lt", "sold": "${CUR_YEAR}-04-01", "proceeds": 52000 }
+    { "asset": "VOO", "qty": 100, "avgCost": 380, "type": "lt", "sold": "${CUR_YEAR}-04-01", "salePrice": 520 }
   ]
 }
 
@@ -62,7 +80,7 @@ RULES:
 - expenses.category must be one of: ${EXPENSE_CATS.join(', ')}.
 - expenses.deductible = true for business write-offs (these reduce my taxable income), false for personal spending.
 - trades: "type" is "st" (short-term, held ≤ 1 year), "lt" (long-term, held > 1 year), or "open" (still holding).
-  "cost" is the TOTAL amount paid (not per share). For "st"/"lt": include "sold" (the sale date — sets the tax year) and "proceeds" (total received). For "open": omit "sold"/"proceeds" and include "price" (current price per share) for unrealized P/L.
+  "qty" is the number of shares/units; "avgCost" is your average cost PER SHARE. For "st"/"lt": include "sold" (the sale date — sets the tax year) and "salePrice" (the sale price PER SHARE). For "open": omit "sold"/"salePrice" and include "price" (current price per share) for unrealized P/L. (totals = qty × per-share.)
 - Do NOT include any "id" fields — the app generates them.
 - Your final message must be ONLY the JSON object, nothing else.`;
 }
@@ -78,13 +96,15 @@ function cagr(start, end, days) {
     return Math.pow(end / start, 1 / years) - 1;
 }
 
-// ---- per-trade derived numbers ----
+// ---- per-trade derived numbers (avgCost & salePrice are PER SHARE; × qty = totals) ----
 function tradeCalc(t) {
-    const cost = num(t.cost);
-    const type = t.type || 'st';        // 'st' | 'lt' | 'open'
+    const qty = num(t.qty);
+    const cost = qty * num(t.avgCost);                 // total cost basis
+    const type = t.type || 'st';                       // 'st' | 'lt' | 'open'
     const open = type === 'open';
     const closed = !open;
-    const end = open ? num(t.qty) * num(t.price) : num(t.proceeds);
+    const exitPx = open ? num(t.price) : num(t.salePrice); // per share
+    const end = qty * exitPx;                           // total proceeds / current value
     const gain = end - cost;
     const pct = cost > 0 ? gain / cost : 0;
     const isLT = type === 'lt';
@@ -254,9 +274,9 @@ function sortedTrades() {
         switch (tradeSort.key) {
             case 'asset': return (t.asset || '').toLowerCase();
             case 'qty': return num(t.qty);
-            case 'cost': return num(t.cost);
+            case 'cost': return num(t.qty) * num(t.avgCost);
             case 'sold': return t.sold ? new Date(t.sold).getTime() : 0;
-            case 'proceeds': return num(t.proceeds);
+            case 'proceeds': return tradeCalc(t).end;
             case 'gain': return tradeCalc(t).gain;
             default: return 0;
         }
@@ -278,15 +298,15 @@ function tradeRows() {
             <option value="lt"${c.type === 'lt' ? ' selected' : ''}>long-term</option>
             <option value="open"${c.type === 'open' ? ' selected' : ''}>open</option>
         </select>`;
-        // exit column: proceeds when realized, current price when open
+        // exit column (per share): sale price when realized, current price when open
         const exitCell = c.open
             ? `<input class="led-in led-num" data-f="price" type="number" value="${t.price ?? ''}" placeholder="cur. px">`
-            : `<input class="led-in led-num" data-f="proceeds" type="number" value="${t.proceeds ?? ''}" placeholder="$ sold">`;
+            : `<input class="led-in led-num" data-f="salePrice" type="number" value="${t.salePrice ?? ''}" placeholder="$/share">`;
         return `
         <tr data-kind="trade" data-id="${t.id}">
             <td><input class="led-in" data-f="asset" value="${t.asset || ''}" placeholder="VOO"></td>
             <td><input class="led-in led-num" data-f="qty" type="number" value="${t.qty ?? ''}" placeholder="0"></td>
-            <td><input class="led-in led-num" data-f="cost" type="number" value="${t.cost ?? ''}" placeholder="$ paid"></td>
+            <td><input class="led-in led-num" data-f="avgCost" type="number" value="${t.avgCost ?? ''}" placeholder="$/share"></td>
             <td>${typeSel}</td>
             <td><input class="led-in" data-f="sold" type="date" value="${t.sold || ''}" ${c.open ? 'disabled' : ''}></td>
             <td>${exitCell}</td>
@@ -425,7 +445,9 @@ function closeModal() {
 export function ledgerSummary() {
     const a = aggregate();
     return {
-        inc: Math.round(a.incomeYTD),
+        // income net of deductible business expenses — the same taxable income the ledger uses,
+        // so the estimator reproduces the ledger's tax (the estimator has no business-expense field).
+        inc: Math.round(Math.max(0, a.incomeYTD - a.deductibleYTD)),
         st: Math.round(a.stGains),
         lt: Math.round(a.ltGains),
         loss: Math.round(a.losses),
@@ -678,8 +700,8 @@ function exportCSV() {
         [r.source, r.category, r.amount, r.date].map(csvCell).join(','))].join('\n');
     const exp = ['description,category,amount,date,deductible', ...state.expenses.map(x =>
         [x.desc, x.category, x.amount, x.date, x.deductible ? 'yes' : 'no'].map(csvCell).join(','))].join('\n');
-    const trd = ['asset,qty,cost,type,sold,proceeds,price', ...state.trades.map(t =>
-        [t.asset, t.qty, t.cost, t.type, t.sold, t.proceeds, t.price].map(csvCell).join(','))].join('\n');
+    const trd = ['asset,qty,avgCost,type,sold,salePrice,price', ...state.trades.map(t =>
+        [t.asset, t.qty, t.avgCost, t.type, t.sold, t.salePrice, t.price].map(csvCell).join(','))].join('\n');
     downloadText(`ledger-income-${todayStr()}.csv`, inc, 'text/csv');
     downloadText(`ledger-expenses-${todayStr()}.csv`, exp, 'text/csv');
     downloadText(`ledger-trades-${todayStr()}.csv`, trd, 'text/csv');
@@ -744,7 +766,7 @@ export function initLedger() {
             <div class="led-head"><div class="card-label" style="margin:0">income</div><span class="led-total" id="ledIncomeTotal"></span></div>
             <div class="led-table-wrap">
                 <table class="led-table">
-                    <thead><tr><th style="width:36%">source</th><th style="width:22%">category</th><th class="r" style="width:18%">amount</th><th style="width:18%">date</th><th style="width:6%"></th></tr></thead>
+                    <thead><tr><th style="width:32%">source</th><th style="width:22%">category</th><th class="r" style="width:18%">amount</th><th style="width:22%">date</th><th style="width:6%"></th></tr></thead>
                     <tbody id="ledIncomeBody"></tbody>
                 </table>
             </div>
@@ -755,8 +777,8 @@ export function initLedger() {
         <div class="card">
             <div class="led-head"><div class="card-label" style="margin:0">expenses</div><span class="led-total" id="ledExpenseTotal"></span></div>
             <div class="led-table-wrap">
-                <table class="led-table">
-                    <thead><tr><th style="width:30%">description</th><th style="width:18%">category</th><th class="r" style="width:16%">amount</th><th style="width:18%">date</th><th class="led-center" style="width:12%">deductible</th><th style="width:6%"></th></tr></thead>
+                <table class="led-table led-expense">
+                    <thead><tr><th style="width:28%">description</th><th style="width:18%">category</th><th class="r" style="width:16%">amount</th><th style="width:20%">date</th><th class="led-center" style="width:12%">deductible</th><th style="width:6%"></th></tr></thead>
                     <tbody id="ledExpenseBody"></tbody>
                 </table>
             </div>
@@ -772,10 +794,10 @@ export function initLedger() {
                     <thead><tr>
                         <th class="led-sortable" data-sort="asset" style="width:10%">asset<span class="led-sort-ind"></span></th>
                         <th class="r led-sortable" data-sort="qty" style="width:9%">qty<span class="led-sort-ind"></span></th>
-                        <th class="r led-sortable" data-sort="cost" style="width:14%">cost basis<span class="led-sort-ind"></span></th>
+                        <th class="r led-sortable" data-sort="cost" style="width:14%">avg cost<span class="led-sort-ind"></span></th>
                         <th style="width:14%">type</th>
                         <th class="led-sortable" data-sort="sold" style="width:19%">sold<span class="led-sort-ind"></span></th>
-                        <th class="r led-sortable" data-sort="proceeds" style="width:14%">proceeds / px<span class="led-sort-ind"></span></th>
+                        <th class="r led-sortable" data-sort="proceeds" style="width:14%">sale price<span class="led-sort-ind"></span></th>
                         <th class="r led-sortable" data-sort="gain" style="width:14%">gain<span class="led-sort-ind"></span></th>
                         <th style="width:6%"></th>
                     </tr></thead>
@@ -862,7 +884,7 @@ export function initLedger() {
         lastPage(state.expenses, 'expense'); persist(); render();
     });
     document.getElementById('ledAddTrade').addEventListener('click', () => {
-        state.trades.push({ id: uid(), asset: '', qty: '', cost: '', type: 'st', sold: todayStr(), proceeds: '', price: '' });
+        state.trades.push({ id: uid(), asset: '', qty: '', avgCost: '', type: 'st', sold: todayStr(), salePrice: '', price: '' });
         tradeSort = { key: null, dir: 1 };   // clear sort so the new row lands on the last page (insertion order)
         lastPage(state.trades, 'trade'); persist(); render();
     });
@@ -991,7 +1013,7 @@ export function initLedger() {
             selfEmployed: !!data.selfEmployed,
             income: withIds(data.income),
             expenses: withIds(data.expenses),
-            trades: withIds(data.trades),
+            trades: withIds(data.trades).map(migrateTrade),
         };
         persist();
         syncSettingsControls();   // reflect imported settings without a full rebuild

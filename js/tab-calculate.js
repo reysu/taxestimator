@@ -49,6 +49,18 @@ function project() {
     return { start, monthly, years, target, labels, data, contribLine, finalBal, totalContrib, growth: finalBal - totalContrib, yearsToTarget: hit ? hit / 12 : null };
 }
 
+function calcSlider(k, label, max, step) {
+    const v = +state[k] || 0;
+    return `
+    <div class="col-row">
+        <div class="col-row-top">
+            <span class="col-label">${label}</span>
+            <span class="col-amt">$ <input type="text" inputmode="numeric" class="col-num num-comma" data-k="${k}" value="${v.toLocaleString('en-US')}"></span>
+        </div>
+        <input type="range" class="col-range" data-k="${k}" min="0" max="${max}" step="${step}" value="${Math.min(v, max)}">
+    </div>`;
+}
+
 function render() {
     const p = project();
     document.getElementById('calcFinal').textContent = fmt(p.finalBal);
@@ -122,19 +134,18 @@ export function initCalculate() {
 
         <div class="card">
             <div class="card-label">inputs</div>
-            <div class="col-grid">
-                <label class="col-field"><span>starting amount</span>
-                    <span class="col-amt">$ <input type="text" inputmode="numeric" class="col-num num-comma" data-k="start" value="${(+state.start).toLocaleString('en-US')}"></span></label>
-                <label class="col-field"><span>monthly contribution</span>
-                    <span class="col-amt">$ <input type="text" inputmode="numeric" class="col-num num-comma" data-k="monthly" value="${(+state.monthly).toLocaleString('en-US')}"></span></label>
+            <div class="col-sliders">
+                ${calcSlider('start', 'starting amount', 1000000, 5000)}
+                ${calcSlider('monthly', 'monthly contribution', 20000, 100)}
+                ${calcSlider('target', 'net-worth goal', 10000000, 50000)}
+            </div>
+            <div class="col-grid" style="margin-top:1rem">
                 <label class="col-field"><span>expected return</span>
                     <span class="col-amt"><input type="number" class="col-num col-num-sm" data-k="returnRate" value="${state.returnRate}" min="0" step="0.5"> %</span></label>
                 <label class="col-field"><span>or pick an asset</span>
                     <span class="select-wrap col-select"><select id="calcAsset">${ASSETS.map(a => `<option value="${a.id}"${state.asset === a.id ? ' selected' : ''}>${a.name}${a.rate != null ? ` (~${a.rate}%)` : ''}</option>`).join('')}</select></span></label>
                 <label class="col-field"><span>time horizon (years)</span>
                     <span class="col-amt"><input type="number" class="col-num col-num-sm" data-k="years" value="${state.years}" min="1" max="60" step="1"></span></label>
-                <label class="col-field"><span>net-worth goal</span>
-                    <span class="col-amt">$ <input type="text" inputmode="numeric" class="col-num num-comma" data-k="target" value="${(+state.target).toLocaleString('en-US')}"></span></label>
             </div>
             <div class="col-chart-box" style="height:360px"><canvas id="calcChart"></canvas></div>
             <p class="led-note">monthly contributions compound at the expected return. asset returns are rough historical averages —
@@ -149,11 +160,17 @@ export function initCalculate() {
     });
     panel.addEventListener('input', e => {
         const el = e.target.closest('[data-k]'); if (!el) return;
+        const k = el.dataset.k;
         const comma = el.classList.contains('num-comma');
         const raw = comma ? el.value.replace(/[^\d]/g, '') : el.value;
-        state[el.dataset.k] = Math.max(0, +raw || 0);
+        state[k] = Math.max(0, +raw || 0);
         if (comma) el.value = raw ? Number(raw).toLocaleString('en-US') : '';
-        if (el.dataset.k === 'returnRate') { state.asset = 'custom'; document.getElementById('calcAsset').value = 'custom'; }
+        // sync paired control: range gets the raw number, comma input gets the formatted string
+        panel.querySelectorAll(`[data-k="${k}"]`).forEach(o => {
+            if (o === el) return;
+            o.value = o.classList.contains('num-comma') ? Number(state[k]).toLocaleString('en-US') : state[k];
+        });
+        if (k === 'returnRate') { state.asset = 'custom'; document.getElementById('calcAsset').value = 'custom'; }
         persist(); render();
     });
 
