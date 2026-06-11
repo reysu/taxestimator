@@ -12,7 +12,11 @@ export const SKINS = [
 export const currentSkin = () => localStorage.getItem('skin') || 'hacker';
 export function setSkin(id) {
     localStorage.setItem('skin', id);
-    location.reload();
+    // strip any ?skin= override so it can't force the old skin back on reload
+    const url = new URL(location.href);
+    url.searchParams.delete('skin');
+    if (url.href !== location.href) location.assign(url.href);
+    else location.reload();
 }
 
 const TAB_NAMES = { estimator: 'estimator', ledger: 'ledger', calculate: 'calculate', col: 'cost of living' };
@@ -40,25 +44,7 @@ function tone(freq, dur, { type = 'sine', vol = 0.08, to = null, delay = 0 } = {
         o.start(t); o.stop(t + dur + 0.02);
     } catch {}
 }
-function whoosh(dur = 0.35) {
-    if (muted()) return;
-    try {
-        const c = ac(), t = c.currentTime;
-        const len = c.sampleRate * dur;
-        const buf = c.createBuffer(1, len, c.sampleRate);
-        const d = buf.getChannelData(0);
-        for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
-        const src = c.createBufferSource(); src.buffer = buf;
-        const f = c.createBiquadFilter(); f.type = 'lowpass';
-        f.frequency.setValueAtTime(900, t);
-        f.frequency.exponentialRampToValueAtTime(150, t + dur);
-        const g = c.createGain(); g.gain.value = 0.12;
-        src.connect(f).connect(g).connect(c.destination);
-        src.start(t);
-    } catch {}
-}
 const sndClick = () => tone(1400, 0.035, { type: 'sine', vol: 0.05 });
-const sndPop = () => tone(320, 0.12, { to: 920, vol: 0.09 });
 const sndBounce = () => tone(190, 0.08, { type: 'triangle', vol: 0.07 });
 function sndChime() { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, 0.9, { vol: 0.05, delay: i * 0.04 })); }
 
@@ -138,16 +124,13 @@ function wireWindow(win) {
     const restore = () => {
         win.classList.remove('aqua-min');
         win.classList.add('aqua-restoring');
-        sndPop();
         setTimeout(() => win.classList.remove('aqua-restoring'), 450);
     };
     document.getElementById('aqYellow').addEventListener('click', () => {
-        whoosh();
         win.classList.add('aqua-min');
         hint('window minimized — click an icon in the Dock to bring it back');
     });
     document.getElementById('aqGreen').addEventListener('click', () => {
-        sndClick();
         win.classList.toggle('aqua-zoomed');
     });
     document.getElementById('aqRed').addEventListener('click', () => {
@@ -155,7 +138,7 @@ function wireWindow(win) {
         dialog('Are you sure you want to quit doing your taxes?',
             'Your data is saved locally. The IRS, however, remembers everything.',
             [
-                { label: 'Quit', primary: false, fn: () => { whoosh(); win.classList.add('aqua-min'); hint('💀 you can run, but April always comes. click the Dock to resume.'); } },
+                { label: 'Quit', primary: false, fn: () => { win.classList.add('aqua-min'); hint('💀 you can run, but April always comes. click the Dock to resume.'); } },
                 { label: 'Keep Grinding', primary: true, fn: () => {} },
             ]);
     });
@@ -191,7 +174,7 @@ function proxyLang(lang) {
 function toggleMute() {
     localStorage.setItem('aquaMute', muted() ? '0' : '1');
     document.getElementById('aqSound').textContent = muted() ? '🔇' : '🔊';
-    if (!muted()) sndPop();
+    if (!muted()) sndClick();
 }
 function wireMenus(bar) {
     let open = null;

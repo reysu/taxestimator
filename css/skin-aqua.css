@@ -243,28 +243,21 @@
 
 /* selects: white gel capsule with the classic blue arrow cap */
 [data-skin="aqua"] .select-wrap { position: relative; }
+[data-skin="aqua"] .select-wrap::after { content: none; } /* hacker's ▾ glyph — replaced by the painted cap below */
+/* the blue arrow cap is painted ON the select itself (background layers), so it can never misalign */
 [data-skin="aqua"] .select-wrap select {
     appearance: none; -webkit-appearance: none;
-    width: 100%;
+    display: block; width: 100%;
     border: 1px solid #8a8f99; border-radius: 6px;
-    padding: 0.4rem 2.2rem 0.4rem 0.7rem;
+    padding: 0.4rem 2.4rem 0.4rem 0.7rem;
     color: #111; font-family: inherit;
     background:
-        linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.3) 48%, rgba(255,255,255,0) 52%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 16'%3E%3Cpath d='M5 1 9 6H1Z' fill='white'/%3E%3Cpath d='M5 15 1 10h8Z' fill='white'/%3E%3C/svg%3E") right 6px center / 9px 14px no-repeat,
+        linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.3) 48%, rgba(255,255,255,0) 52%) left / calc(100% - 21px) 100% no-repeat,
+        linear-gradient(180deg, #a9cdf8 0%, #5b9af0 49%, #2268d8 51%, #5ea2f5 100%) right / 21px 100% no-repeat,
         linear-gradient(180deg, #fafafa 0%, #e2e5e9 49%, #ccd0d6 51%, #e8ebef 100%);
     box-shadow: 0 1px 2px rgba(0,0,0,0.22);
     cursor: pointer;
-}
-[data-skin="aqua"] .select-wrap::after {
-    content: '▴\A▾';
-    white-space: pre;
-    position: absolute; top: 1px; bottom: 1px; right: 1px; width: 19px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 7px; line-height: 0.6; color: #fff;
-    border-radius: 0 5px 5px 0;
-    background: linear-gradient(180deg, #a9cdf8 0%, #5b9af0 49%, #2268d8 51%, #5ea2f5 100%);
-    border-left: 1px solid #2a59a8;
-    pointer-events: none;
 }
 
 /* sliders: inset track + glossy blue orb */
