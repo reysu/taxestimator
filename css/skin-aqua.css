@@ -1,0 +1,451 @@
+/* ============================================================
+   AQUA 2007 — Mac OS X skin. Everything scoped to [data-skin="aqua"].
+   Menu bar · Aqua window + traffic lights · Dock with magnification ·
+   gel buttons · pinstripes · aurora desktop.
+   ============================================================ */
+
+[data-skin="aqua"] {
+    /* repaint the app's own variables in Aqua tones (charts read these too) */
+    --bg: transparent;
+    --surface: #ffffff;
+    --surface2: #eef1f5;
+    --border: #b9bec7;
+    --text: #1d1d1f;
+    --text-muted: #6e6e73;
+    --accent: #2f6fe4;
+    --accent-light: #2f6fe4;
+    --red: #c0392b;
+    --red-dim: rgba(192,57,43,0.08);
+    --green: #2e8b57;
+    --green-dim: rgba(46,139,87,0.08);
+    --blue: #3875d7;
+    --blue-dim: rgba(56,117,215,0.10);
+    --yellow: #8b7a2a;
+    --yellow-dim: rgba(139,122,42,0.08);
+    --chart-grid: rgba(0,0,0,0.08);
+    --chart-text: #555;
+    --chart-fed: rgba(56,117,215,0.75);
+    --chart-loc: rgba(126,134,148,0.6);
+    --chart-loc-all: rgba(56,117,215,0.4);
+    --chart-highlight: rgba(47,111,228,0.9);
+}
+
+[data-skin="aqua"] body {
+    font-family: 'Lucida Grande', 'Lucida Sans Unicode', 'Helvetica Neue', Helvetica, sans-serif;
+    max-width: none;
+    padding: 0;
+    background: #3a4a6b;
+    font-size: 0.82rem;
+    line-height: 1.55;
+}
+[data-skin="aqua"] ::selection { background: #b5d5ff; color: #000; }
+
+/* the original chrome is replaced by the OS chrome */
+[data-skin="aqua"] .header, [data-skin="aqua"] .tab-bar { display: none; }
+
+/* ---------- desktop wallpaper: leopard-ish aurora ---------- */
+.aqua-desktop {
+    position: fixed; inset: 0; z-index: -1;
+    background:
+        radial-gradient(ellipse 80% 60% at 70% 10%, rgba(120,80,200,0.55), transparent 60%),
+        radial-gradient(ellipse 70% 55% at 20% 30%, rgba(40,110,220,0.5), transparent 65%),
+        radial-gradient(ellipse 90% 70% at 50% 90%, rgba(20,40,90,0.9), transparent 70%),
+        radial-gradient(ellipse 50% 40% at 85% 70%, rgba(90,180,230,0.25), transparent 60%),
+        linear-gradient(180deg, #1b2a52 0%, #2c3f73 45%, #0f1830 100%);
+}
+
+/* ---------- menu bar ---------- */
+.aqua-menubar {
+    position: fixed; top: 0; left: 0; right: 0; height: 23px; z-index: 1000;
+    display: flex; justify-content: space-between; align-items: stretch;
+    background: linear-gradient(180deg, #fdfdfd 0%, #e8e8e8 50%, #d2d2d2 51%, #c8c8c8 100%);
+    border-bottom: 1px solid #777;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+    font-size: 13px; color: #111;
+    user-select: none;
+}
+.aq-menus, .aq-status { display: flex; align-items: stretch; }
+.aq-menu {
+    display: flex; align-items: center; padding: 0 11px; cursor: default; position: relative;
+}
+.aq-appname { font-weight: bold; }
+.aq-apple { padding: 0 14px; }
+.aq-apple-logo { font-size: 14px; filter: grayscale(1) brightness(0.3) contrast(1.6); }
+.aq-apple.open .aq-apple-logo, .aq-apple:active .aq-apple-logo { filter: grayscale(1) brightness(2.2); }
+.aq-menu.open, .aq-menu:active {
+    background: linear-gradient(180deg, #5e9bf5 0%, #2f6fe4 100%);
+    color: #fff;
+}
+.aq-status { padding-right: 10px; gap: 2px; align-items: center; }
+.aq-status .aq-menu { padding: 0 8px; cursor: pointer; }
+.aq-clock { font-size: 12.5px; padding: 0 6px; }
+
+/* dropdowns */
+.aq-dropdown {
+    position: absolute; top: 100%; left: 0; min-width: 220px; z-index: 1001;
+    background: rgba(248,248,248,0.97);
+    border: 1px solid #9a9a9a; border-top: none;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    padding: 4px 0; color: #111;
+    font-size: 13px;
+}
+.aq-item { padding: 3px 22px 3px 22px; white-space: nowrap; position: relative; cursor: default; }
+.aq-item:hover {
+    background: linear-gradient(180deg, #5e9bf5 0%, #2f6fe4 100%);
+    color: #fff;
+}
+.aq-item.has-sub::after { content: '▸'; position: absolute; right: 10px; }
+.aq-subdropdown {
+    display: none; position: absolute; left: 100%; top: -5px; min-width: 160px;
+    background: rgba(248,248,248,0.97); border: 1px solid #9a9a9a; border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45); padding: 4px 0; color: #111;
+}
+.aq-item.has-sub:hover > .aq-subdropdown { display: block; }
+.aq-sep { height: 1px; background: #ccc; margin: 4px 1px; }
+
+/* ---------- the window ---------- */
+.aqua-window {
+    width: min(1020px, 94vw);
+    margin: 48px auto 120px;
+    border-radius: 8px;
+    background: #e9ecf1;
+    box-shadow: 0 22px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.35);
+    opacity: 0; transform: scale(0.94) translateY(12px);
+    transition: opacity 0.3s ease-out, transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2), width 0.25s ease;
+    transform-origin: 50% 30%;
+    overflow: hidden;
+}
+.aqua-window.aqua-open { opacity: 1; transform: none; }
+.aqua-window.aqua-zoomed { width: 97vw; }
+.aqua-window.aqua-min {
+    transition: transform 0.5s cubic-bezier(0.5, -0.1, 0.8, 0.4), opacity 0.45s ease-in;
+    transform: translateY(58vh) scale(0.03) rotate(2deg);
+    opacity: 0;
+    pointer-events: none;
+}
+.aqua-window.aqua-restoring {
+    transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.15), opacity 0.3s ease-out;
+}
+
+.aqua-titlebar {
+    position: relative; height: 24px;
+    background: linear-gradient(180deg, #f6f6f6 0%, #dcdcdc 45%, #c8c8c8 100%);
+    border-bottom: 1px solid #9a9a9a;
+    display: flex; align-items: center;
+    user-select: none;
+}
+.aqua-title {
+    position: absolute; left: 0; right: 0; text-align: center;
+    font-size: 13px; font-weight: bold; color: #3a3a3a;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+    pointer-events: none;
+}
+.aqua-lights { display: flex; gap: 8px; padding-left: 10px; z-index: 1; }
+.aq-light {
+    width: 13px; height: 13px; border-radius: 50%; border: none; cursor: pointer;
+    position: relative; padding: 0;
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.7), 0 1px 1px rgba(0,0,0,0.3);
+}
+.aq-light span {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font: bold 10px/1 'Lucida Grande', sans-serif; color: rgba(0,0,0,0.55);
+    opacity: 0; transition: opacity 0.12s;
+}
+.aqua-lights:hover .aq-light span { opacity: 1; }
+.aq-red { background: radial-gradient(circle at 35% 30%, #ff9d96, #ee5147 55%, #c2362c); }
+.aq-yellow { background: radial-gradient(circle at 35% 30%, #ffe9a8, #f6b32f 55%, #d08e1c); }
+.aq-green { background: radial-gradient(circle at 35% 30%, #b8f3b0, #39c93f 55%, #1f9a2a); }
+
+/* pinstripe content area */
+.aqua-content {
+    padding: 1.4rem 1.4rem 2rem;
+    background: repeating-linear-gradient(180deg, #f4f5f7 0px, #f4f5f7 2px, #eceef2 2px, #eceef2 4px);
+}
+
+/* ---------- app surfaces inside the window ---------- */
+[data-skin="aqua"] .card,
+[data-skin="aqua"] .sandbox-card,
+[data-skin="aqua"] .summary-box,
+[data-skin="aqua"] .result-item,
+[data-skin="aqua"] .led-stat,
+[data-skin="aqua"] .compare-card,
+[data-skin="aqua"] .led-notice {
+    background: #fff;
+    border: 1px solid #b9bec7;
+    border-radius: 7px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.14);
+}
+[data-skin="aqua"] h2 { color: #555; text-shadow: 0 1px 0 rgba(255,255,255,0.9); }
+[data-skin="aqua"] .card-label { color: #555; }
+
+/* inputs */
+[data-skin="aqua"] input[type="number"],
+[data-skin="aqua"] input[type="text"],
+[data-skin="aqua"] input[type="date"],
+[data-skin="aqua"] textarea {
+    background: #fff; color: #111;
+    border: 1px solid #9aa0aa; border-radius: 4px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.18);
+    font-family: inherit;
+}
+[data-skin="aqua"] input:focus, [data-skin="aqua"] select:focus, [data-skin="aqua"] textarea:focus {
+    outline: none;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.18), 0 0 0 3px rgba(120,170,255,0.65);
+}
+
+/* ---------- gel buttons ---------- */
+.aq-gel,
+[data-skin="aqua"] .copy-btn,
+[data-skin="aqua"] .led-add,
+[data-skin="aqua"] .led-page-btn,
+[data-skin="aqua"] .bracket-toggle-btn,
+[data-skin="aqua"] .btn-adj,
+[data-skin="aqua"] .status-pill,
+[data-skin="aqua"] .lang-pill {
+    font-family: 'Lucida Grande', sans-serif;
+    border: 1px solid #8a8f99;
+    border-radius: 999px;
+    color: #222;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.35) 48%, rgba(255,255,255,0) 52%),
+        linear-gradient(180deg, #fafafa 0%, #dfe2e6 49%, #c8ccd2 51%, #e6e9ed 100%);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+    cursor: pointer;
+    transition: filter 0.08s;
+}
+.aq-gel:active,
+[data-skin="aqua"] .copy-btn:active,
+[data-skin="aqua"] .led-add:active,
+[data-skin="aqua"] .btn-adj:active { filter: brightness(0.82); }
+
+.aq-gel-blue,
+[data-skin="aqua"] .status-pill.active,
+[data-skin="aqua"] .lang-pill.active,
+[data-skin="aqua"] #copyBtn,
+[data-skin="aqua"] #importLedgerBtn,
+[data-skin="aqua"] #ledImportLoad {
+    color: #fff;
+    border-color: #2a59a8;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.3) 48%, rgba(255,255,255,0) 52%),
+        linear-gradient(180deg, #a9cdf8 0%, #5b9af0 49%, #2268d8 51%, #5ea2f5 100%);
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.35);
+}
+[data-skin="aqua"] .led-danger {
+    color: #fff; border-color: #93271c;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.28) 48%, rgba(255,255,255,0) 52%),
+        linear-gradient(180deg, #f3a195 0%, #e0584a 49%, #bb3526 51%, #df6c5d 100%);
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.3);
+}
+
+/* selects: white gel capsule with the classic blue arrow cap */
+[data-skin="aqua"] .select-wrap { position: relative; }
+[data-skin="aqua"] .select-wrap select {
+    appearance: none; -webkit-appearance: none;
+    width: 100%;
+    border: 1px solid #8a8f99; border-radius: 6px;
+    padding: 0.4rem 2.2rem 0.4rem 0.7rem;
+    color: #111; font-family: inherit;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.3) 48%, rgba(255,255,255,0) 52%),
+        linear-gradient(180deg, #fafafa 0%, #e2e5e9 49%, #ccd0d6 51%, #e8ebef 100%);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.22);
+    cursor: pointer;
+}
+[data-skin="aqua"] .select-wrap::after {
+    content: '▴\A▾';
+    white-space: pre;
+    position: absolute; top: 1px; bottom: 1px; right: 1px; width: 19px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 7px; line-height: 0.6; color: #fff;
+    border-radius: 0 5px 5px 0;
+    background: linear-gradient(180deg, #a9cdf8 0%, #5b9af0 49%, #2268d8 51%, #5ea2f5 100%);
+    border-left: 1px solid #2a59a8;
+    pointer-events: none;
+}
+
+/* sliders: inset track + glossy blue orb */
+[data-skin="aqua"] input[type="range"] { -webkit-appearance: none; appearance: none; background: transparent; height: 20px; }
+[data-skin="aqua"] input[type="range"]::-webkit-slider-runnable-track {
+    height: 5px; border-radius: 3px; border: 1px solid #8a93a0;
+    background: linear-gradient(180deg, #aeb6c2, #d7dde5);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.35);
+}
+[data-skin="aqua"] input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 17px; height: 17px; margin-top: -7px;
+    border-radius: 50%; border: 1px solid #2a59a8;
+    background: radial-gradient(circle at 50% 28%, #eaf4ff 0%, #8fc0f5 38%, #2f7ae0 72%, #74b2f5 100%);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    cursor: pointer;
+}
+[data-skin="aqua"] input[type="range"]::-moz-range-track {
+    height: 5px; border-radius: 3px; border: 1px solid #8a93a0;
+    background: linear-gradient(180deg, #aeb6c2, #d7dde5);
+}
+[data-skin="aqua"] input[type="range"]::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; border: 1px solid #2a59a8;
+    background: radial-gradient(circle at 50% 28%, #eaf4ff 0%, #8fc0f5 38%, #2f7ae0 72%, #74b2f5 100%);
+}
+
+/* checkboxes: little gel squares */
+[data-skin="aqua"] input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none;
+    width: 15px; height: 15px; border-radius: 3.5px;
+    border: 1px solid #8a8f99;
+    background: linear-gradient(180deg, #fff, #d9dce1);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.9), 0 1px 1px rgba(0,0,0,0.18);
+    position: relative; cursor: pointer; vertical-align: -3px;
+}
+[data-skin="aqua"] input[type="checkbox"]:checked {
+    border-color: #2a59a8;
+    background: linear-gradient(180deg, #a9cdf8 0%, #5b9af0 49%, #2268d8 51%, #5ea2f5 100%);
+}
+[data-skin="aqua"] input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 11px; font-weight: bold;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.4);
+}
+
+/* tables */
+[data-skin="aqua"] .led-table th {
+    background: linear-gradient(180deg, #fbfbfb, #e4e6ea);
+    border-bottom: 1px solid #b9bec7;
+    color: #444;
+}
+[data-skin="aqua"] .led-table tr:nth-child(even) td { background: #f2f6fc; } /* classic aqua list stripes */
+
+/* aqua page scrollbar */
+[data-skin="aqua"] ::-webkit-scrollbar { width: 15px; }
+[data-skin="aqua"] ::-webkit-scrollbar-track { background: linear-gradient(90deg, #e8e8e8, #f8f8f8); }
+[data-skin="aqua"] ::-webkit-scrollbar-thumb {
+    border-radius: 8px; border: 2px solid #ececec;
+    background: linear-gradient(90deg, #a9cdf8 0%, #5b9af0 49%, #2268d8 51%, #5ea2f5 100%);
+}
+
+/* ---------- the dock ---------- */
+.aqua-dock-wrap {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 999;
+    display: flex; justify-content: center;
+    pointer-events: none;
+}
+.aqua-dock {
+    pointer-events: auto;
+    display: flex; align-items: flex-end; gap: 6px;
+    padding: 8px 18px 10px;
+    border-radius: 18px 18px 0 0;
+    background: linear-gradient(180deg, rgba(40,50,80,0.38), rgba(20,25,45,0.55));
+    border: 1px solid rgba(255,255,255,0.45); border-bottom: none;
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    box-shadow: 0 -2px 22px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.35);
+}
+.aq-dock-icon {
+    position: relative;
+    border: none; background: transparent; cursor: pointer;
+    transform-origin: 50% 100%;
+    transition: transform 0.08s ease-out;
+    padding: 0 2px;
+}
+.aq-icon-art {
+    display: block;
+    font-size: 44px; line-height: 1;
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.4));
+    -webkit-box-reflect: below 1px linear-gradient(transparent 62%, rgba(255,255,255,0.28));
+}
+.aq-dock-icon::after { /* running indicator */
+    content: ''; position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%);
+    width: 5px; height: 5px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #fff, #9adfff 60%, #44a3e8);
+    opacity: 0; transition: opacity 0.2s;
+}
+.aq-dock-icon.active::after { opacity: 1; }
+.aq-dock-label {
+    position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+    padding: 2px 10px; border-radius: 6px;
+    background: rgba(20,20,20,0.8); color: #fff;
+    font: 12px 'Lucida Grande', sans-serif; white-space: nowrap;
+    opacity: 0; pointer-events: none; transition: opacity 0.15s;
+}
+.aq-dock-icon:hover .aq-dock-label { opacity: 1; }
+@keyframes aqBounce {
+    0%, 100% { translate: 0 0; }
+    22% { translate: 0 -30px; }
+    44% { translate: 0 0; }
+    62% { translate: 0 -14px; }
+    78% { translate: 0 0; }
+    90% { translate: 0 -4px; }
+}
+.aq-dock-icon.bouncing { animation: aqBounce 0.75s ease-out; }
+
+/* ---------- dialogs & hints ---------- */
+.aqua-dialog-overlay {
+    position: fixed; inset: 0; z-index: 2000;
+    background: rgba(0,0,0,0.22);
+    display: flex; align-items: flex-start; justify-content: center;
+    opacity: 0; transition: opacity 0.18s;
+}
+.aqua-dialog-overlay.show { opacity: 1; }
+.aqua-dialog {
+    margin-top: 14vh;
+    width: min(440px, 92vw);
+    background: linear-gradient(180deg, #fcfcfc, #ececec);
+    border-radius: 10px;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.3);
+    padding: 20px 20px 16px;
+    display: grid; grid-template-columns: 64px 1fr; gap: 4px 16px;
+    transform: scale(0.92);
+    transition: transform 0.18s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    font-family: 'Lucida Grande', sans-serif;
+}
+.aqua-dialog-overlay.show .aqua-dialog { transform: scale(1); }
+.aq-dialog-icon { font-size: 52px; line-height: 1; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3)); }
+.aq-dialog-text strong { font-size: 14px; color: #111; }
+.aq-dialog-text p { font-size: 12px; color: #444; margin-top: 6px; }
+.aq-dialog-btns {
+    grid-column: 1 / -1;
+    display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;
+}
+.aq-dialog-btns .aq-gel { padding: 4px 18px; font-size: 13px; min-width: 84px; }
+
+.aqua-hint {
+    position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%);
+    z-index: 998;
+    padding: 7px 16px; border-radius: 999px;
+    background: rgba(252,252,252,0.92); color: #333;
+    font: 12px 'Lucida Grande', sans-serif;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+    animation: aqHintIn 0.3s ease-out;
+}
+@keyframes aqHintIn { from { opacity: 0; translate: 0 8px; } to { opacity: 1; translate: 0 0; } }
+
+/* ---------- small layout fit-and-finish inside the window ---------- */
+[data-skin="aqua"] .tab-panel[data-tab="estimator"],
+[data-skin="aqua"] .tab-panel[data-tab="calculate"] { max-width: 880px; }
+[data-skin="aqua"] .led-modal { z-index: 1500; }
+[data-skin="aqua"] .map-tooltip { font-family: 'Lucida Grande', sans-serif; }
+
+@media (max-width: 720px) {
+    .aqua-window { margin-top: 34px; }
+    .aq-menu[data-menu="view"], .aq-menu[data-menu="lang"] { display: none; }
+    .aq-icon-art { font-size: 36px; }
+}
+
+/* ---------- hacker-skin theme selector in the header ---------- */
+.skin-pick {
+    position: absolute; right: 0; top: 34px;
+}
+.skin-pick select {
+    background: var(--surface); color: var(--text-muted);
+    border: 1px solid var(--border); font-family: inherit;
+    font-size: 0.62rem; padding: 0.15rem 0.3rem; cursor: pointer;
+}
+[data-skin="aqua"] .skin-pick { display: none; }
+@media (max-width: 640px) {
+    .skin-pick { position: static; text-align: center; margin-top: 0.25rem; }
+}

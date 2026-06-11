@@ -9,6 +9,14 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/skin-aqua.css">
+<script>
+(function(){
+    const q = new URLSearchParams(location.search).get('skin');
+    if (q) localStorage.setItem('skin', q);
+    document.documentElement.dataset.skin = localStorage.getItem('skin') || 'hacker';
+})();
+</script>
 </head>
 <body>
 
@@ -24,6 +32,12 @@
             <span>&#9790;</span><span>&#9788;</span>
         </span>
     </button>
+    <div class="skin-pick">
+        <select id="skinSelect" aria-label="Theme">
+            <option value="hacker">theme: hacker</option>
+            <option value="aqua">theme: aqua 2007</option>
+        </select>
+    </div>
 </div>
 
 <!-- Tab bar -->
