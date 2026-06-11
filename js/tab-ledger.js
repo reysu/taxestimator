@@ -329,6 +329,7 @@ function summaryHTML() {
         ${cell('st', 'realized short-term', fmt(a.stGains))}
         ${cell('lt', 'realized long-term', fmt(a.ltGains))}
         ${cell('losses', 'realized losses', fmt(a.losses))}
+        ${cell('netpl', 'net realized P/L', money(a.stGains + a.ltGains - a.losses))}
         ${cell('tax', 'est. tax', fmt(a.tax) + cmp(fmt(c?.tax)), 'owed')}
         ${cell('effrate', 'effective rate', a.effRate.toFixed(1) + '%' + cmp(c ? c.effRate.toFixed(1) + '%' : ''))}
         ${cell('savings', 'net savings', fmt(a.savings) + cmp(fmt(c?.savings)), 'profit')}`;
@@ -369,6 +370,14 @@ function statContent(key) {
             return { title: `realized long-term gains · ${CUR_YEAR}`, body: `<p class="led-bd-tot">total <strong>${fmt(a.ltGains)}</strong></p><p class="led-bd-note">trades sold this year that you held > 365 days, with a gain. taxed at lower long-term rates.</p>${bdTable(tradeHdr, closedTradeRows(c => c.isLT && c.gain >= 0))}` };
         case 'losses':
             return { title: `realized losses · ${CUR_YEAR}`, body: `<p class="led-bd-tot">total <strong>${fmt(a.losses)}</strong></p><p class="led-bd-note">trades sold this year at a loss. these offset your gains first, then up to $3,000 of ordinary income (US).</p>${bdTable(tradeHdr, closedTradeRows(c => c.gain < 0))}` };
+        case 'netpl': {
+            const net = a.stGains + a.ltGains - a.losses;
+            const excess = a.losses - a.stGains - a.ltGains;
+            const carry = excess > 3000
+                ? `<p class="led-bd-note">your losses exceed your gains, so they wipe out all capital-gains tax this year, and $3,000 of the excess deducts against ordinary income (US). the remaining <strong>${fmt(excess - 3000)}</strong> carries forward to offset future years' gains — this app doesn't track carryforwards.</p>`
+                : `<p class="led-bd-note">your winning trades minus your losing trades, for everything sold this year.</p>`;
+            return { title: `net realized P/L · ${CUR_YEAR}`, body: `<p class="led-bd-formula">ST gains ${fmt(a.stGains)}<br>+ LT gains ${fmt(a.ltGains)}<br>− losses ${fmt(a.losses)}<br>= <strong>${money(net)}</strong></p>${carry}` };
+        }
         case 'unrealized': {
             const rows = state.trades.filter(t => (t.type || 'st') === 'open').map(t => { const c = tradeCalc(t); return [esc(t.asset) || '—', fmt(c.cost), num(t.price) ? fmt(c.end) : '<span class="led-bd-warn">no price</span>', money(c.gain)]; });
             return { title: 'unrealized P/L', body: `<p class="led-bd-tot">total <strong>${money(a.unrealized)}</strong></p><p class="led-bd-note">your open positions (type set to “open”), valued at the current price you entered. not taxed until you sell. leave a current price blank and it counts as $0.</p>${bdTable(['asset', 'cost', 'current value', 'unrealized'], rows)}` };
